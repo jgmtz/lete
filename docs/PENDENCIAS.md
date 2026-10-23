@@ -20,6 +20,10 @@
 | 9 | **Stat por tipo de Lembrança** | A tabela de stats por tipo (Fôlego, Força, Defesa, Lucidez, Precisão) é proposta antiga; também foi decidido que **todos começam com os mesmos números**. Revisar na fase de números | — |
 | 10 | **Barca de Caronte** como segunda rede de viagem | Opcional; fica para depois | — |
 | 11 | **Fim do Diário e da Tabuinha** | O destino de cada um por desfecho ainda precisa ser escrito | — |
+| 12 | **Modo de render** (M0) | Os dois modos estão prontos na cena de teste (painel de debug). Ver `ARTE.md` 2.1 e `art/testes_m0/` | Baixa resolução unifica a grade de pixels (mais "HD-2D"); direto deixa o 3D liso |
+| 13 | **Enquadramento e câmera** (M0) | Valores de teste: personagem de 1,75 m com 192 px de altura a 1080p (~9,8 m visíveis na vertical); câmera com inclinação de 35° e giro de 45° | Ajustáveis no Inspector (`Main` e `CameraRig`) |
+| 14 | **Billboard dos sprites** | Hoje o sprite encara a câmera por inteiro (pixels sem distorção) e a sombra é uma elipse no chão, não projetada | A elipse combina com a Marca alta (some a sombra) |
+| 15 | **Exportar para Windows** | Os modelos de exportação do Godot 4.7.2 .NET ainda não foram baixados (download grande) | Baixar quando for gerar o primeiro executável |
 
 ## 2. Números e balanceamento (por último, como o João pediu)
 

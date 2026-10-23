@@ -8,14 +8,14 @@
 
 **Objetivo:** validar o visual e a base do projeto. **Pronto quando** existe uma cena parecida com o visual desejado e o tamanho do sprite foi escolhido.
 
-- [ ] Criar o projeto **Godot 4 .NET** com a estrutura de `ARQUITETURA.md` (solução com `Lete.Core`, `Lete.Core.Tests`, `Lete.Game`); `.gitignore`; repositório Git.
-- [ ] Câmera **ortográfica diagonal** fixa; cenário 3D low-poly simples (chão, paredes, uma estrutura) com **texturas em pixel art**.
-- [ ] Sprite em pé (billboard) do protagonista placeholder; andar nas 4 direções (2 desenhadas + espelho).
-- [ ] **Teste de tamanho: 32 / 48 / 64 px** com os sprites de teste (Aulo e Ismena, a partir de `tools/pixelizar.py`), lado a lado no cenário e com a densidade de pixel do chão. Registrar a decisão em `docs/ARTE.md`.
-- [ ] Teste de **densidade de pixel**: render direto vs. viewport de baixa resolução ampliado (vizinho mais próximo). Escolher e registrar.
-- [ ] Luz e **névoa** básicas (a névoa do Lete é parte do tema).
-- [ ] Andar e **interagir** (um objeto examinável que escreve uma frase num Diário placeholder) com **teclado e controle** (Input Map com ações).
-- [ ] **Painel de debug** inicial (teleporte, flags).
+- [x] Criar o projeto **Godot 4 .NET** com a estrutura de `ARQUITETURA.md` (solução com `Lete.Core`, `Lete.Core.Tests`, `Lete.Game`); `.gitignore`; repositório Git. *(Godot 4.7.2 .NET, net8.0)*
+- [x] Câmera **ortográfica diagonal** fixa; cenário 3D low-poly simples (chão, paredes, uma estrutura) com **texturas em pixel art**. *(ângulo a aprovar)*
+- [x] Sprite em pé (billboard) do protagonista placeholder; andar nas 4 direções (2 desenhadas + espelho).
+- [ ] **Teste de tamanho: 32 / 48 / 64 px** com os sprites de teste (Aulo e Ismena, a partir de `tools/pixelizar.py`), lado a lado no cenário e com a densidade de pixel do chão. Registrar a decisão em `docs/ARTE.md`. *(cena e fileira prontas com placeholders; faltam as imagens do Aulo e da Ismena e a decisão)*
+- [ ] Teste de **densidade de pixel**: render direto vs. viewport de baixa resolução ampliado (vizinho mais próximo). Escolher e registrar. *(os dois modos funcionam, alternáveis no debug; falta a decisão)*
+- [x] Luz e **névoa** básicas (a névoa do Lete é parte do tema).
+- [x] Andar e **interagir** (um objeto examinável que escreve uma frase num Diário placeholder) com **teclado e controle** (Input Map com ações). *(controle mapeado, ainda não testado num controle físico)*
+- [x] **Painel de debug** inicial (teleporte, flags).
 
 ## M1 — Combate
 

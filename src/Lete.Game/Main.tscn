@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/Lete.Game/Main.cs" id="1_main"]
+[ext_resource type="PackedScene" path="res://src/Lete.Game/World/TestRoom.tscn" id="2_sala"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="."]
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="ViewportContainer"]
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="TestRoom" parent="ViewportContainer/SubViewport" instance=ExtResource("2_sala")]

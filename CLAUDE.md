@@ -44,7 +44,7 @@ João Guilherme Matzenbacher, estudante de Engenharia de Software (PUCPR, 6º pe
 
 ## Estado atual do projeto
 
-Fase de **ideação e direção de arte** concluída parcialmente. **Ainda não há código.** O próximo passo é o **M0 (protótipo técnico)** descrito em `docs/BACKLOG.md`. Antes de escrever código, **confirme o plano do M0 com o João** e pergunte o que precisar (por exemplo, versão do Godot instalada, se o Python e o Aseprite estão disponíveis, onde o repositório ficará).
+**M0 (protótipo técnico) quase pronto** (ver `docs/BACKLOG.md`): solução montada, sala de teste com câmera diagonal, névoa, jogador, objetos examináveis, Diário placeholder, painel de debug e o teste de tamanho/densidade. **Falta o João decidir** o tamanho do sprite e o modo de render (`docs/ARTE.md` 2.1, `docs/PENDENCIAS.md` 12–15) e gerar as imagens do Aulo e da Ismena. Aseprite/LibreSprite/Pixelorama ainda não estão instalados.
 
 ## Pipeline de sprites
 
@@ -58,5 +58,11 @@ Estrutura: `project.godot` e `Lete.Game.csproj` na raiz (o csproj exclui `src/Le
 - Build: `dotnet build Lete.sln`
 - Testes: `dotnet test src/Lete.Core.Tests`
 - Abrir no editor: `Godot_v4.7.2-stable_mono_win64.exe --path . --editor`
-- Exportar Windows: _a definir no M0_
+- Rodar o jogo: `Godot_v4.7.2-stable_mono_win64.exe --path .` (compilar antes com `dotnet build Lete.Game.csproj`)
+- Conferir sem jogar à mão (argumentos depois de `--`, ver `Main.cs`): `--size=32|48|64 --render=low|direct --gender=m|f --teleport=<Marker> --examine --ui=journal|debug --shot=<arquivo.png> --frames=N`. Ex.: `... --path . -- --teleport=Poca --examine --shot=C:/tmp/a.png` (precisa de janela; não funciona com `--headless`)
+- Importar recursos novos sem abrir o editor: `Godot_..._console.exe --headless --path . --import`
+- Exportar Windows: _modelos de exportação ainda não baixados (`PENDENCIAS.md` 15)_
+- Arte placeholder: `python tools/placeholders.py` e depois o `pixelizar.py` nos conceitos de `art/concept/placeholder/`
+
+Controles (Input Map): mover WASD/setas/analógico/direcional; `interact` E/Espaço/Enter/A; `journal` J/Tab/Y; `cancel` Esc/B; `debug_toggle` F1/Back.
 - Sprites: `python tools/pixelizar.py <imagem.png> [--alturas 32 48 64] [--paleta "#..."]`

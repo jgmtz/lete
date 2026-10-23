@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/Lete.Game/World/Player.cs" id="1_player"]
+[ext_resource type="Texture2D" path="res://art/sprites/placeholder/sombra_chao.png" id="2_sombra"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_corpo"]
+radius = 0.3
+height = 1.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sombra"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("2_sombra")
+texture_filter = 0
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_sombra"]
+material = SubResource("StandardMaterial3D_sombra")
+size = Vector2(0.9, 0.45)
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_player")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("CapsuleShape3D_corpo")
+
+[node name="Sprite" type="Sprite3D" parent="."]
+cast_shadow = 0
+billboard = 1
+shaded = true
+alpha_cut = 1
+texture_filter = 0
+
+[node name="GroundShadow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_sombra")

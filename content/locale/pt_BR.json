@@ -1,0 +1,24 @@
+{
+  "ui.prompt.examinar": "Examinar",
+  "ui.diario.titulo": "Diário",
+  "ui.diario.vazio": "Nada anotado ainda.",
+  "ui.diario.nova_entrada": "Anotado no Diário.",
+
+  "obj.anfora.examinar": "Uma ânfora de barro, rachada. Ainda cheira a mel antigo.",
+  "obj.poca.examinar": "Na água escura, um rosto borrado olha de volta, cansad{o|a} e sem nome.",
+  "obj.trivia.examinar": "Três caminhos se cruzam ao pé de uma tocha apagada.",
+
+  "debug.titulo": "Debug (F1)",
+  "debug.render": "Render",
+  "debug.render.baixa": "Viewport em baixa resolução",
+  "debug.render.direto": "Render direto",
+  "debug.sprite": "Tamanho do sprite",
+  "debug.genero": "Gênero",
+  "debug.genero.m": "Masculino",
+  "debug.genero.f": "Feminino",
+  "debug.teleporte": "Teleporte",
+  "debug.flags": "Flags",
+  "debug.flags.adicionar": "Adicionar",
+  "debug.flags.nenhuma": "Nenhuma flag.",
+  "debug.diario.limpar": "Limpar Diário"
+}

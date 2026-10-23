@@ -11,8 +11,69 @@ config_version=5
 [application]
 
 config/name="Lete"
+run/main_scene="res://src/Lete.Game/Main.tscn"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
+
+[autoload]
+
+GameRoot="*res://src/Lete.Game/GameRoot.cs"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 
 [dotnet]
 
 project/assembly_name="Lete.Game"
+
+[importer_defaults]
+
+texture={
+"compress/mode": 0,
+"detect_3d/compress_to": 0,
+"mipmaps/generate": false
+}
+
+[input]
+
+move_up={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":87), Object(InputEventKey,"physical_keycode":4194320), Object(InputEventJoypadButton,"device":-1,"button_index":11), Object(InputEventJoypadMotion,"device":-1,"axis":1,"axis_value":-1.0)]
+}
+move_down={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":83), Object(InputEventKey,"physical_keycode":4194322), Object(InputEventJoypadButton,"device":-1,"button_index":12), Object(InputEventJoypadMotion,"device":-1,"axis":1,"axis_value":1.0)]
+}
+move_left={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":65), Object(InputEventKey,"physical_keycode":4194319), Object(InputEventJoypadButton,"device":-1,"button_index":13), Object(InputEventJoypadMotion,"device":-1,"axis":0,"axis_value":-1.0)]
+}
+move_right={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":68), Object(InputEventKey,"physical_keycode":4194321), Object(InputEventJoypadButton,"device":-1,"button_index":14), Object(InputEventJoypadMotion,"device":-1,"axis":0,"axis_value":1.0)]
+}
+interact={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":69), Object(InputEventKey,"physical_keycode":32), Object(InputEventKey,"physical_keycode":4194309), Object(InputEventJoypadButton,"device":-1,"button_index":0)]
+}
+cancel={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":4194305), Object(InputEventJoypadButton,"device":-1,"button_index":1)]
+}
+journal={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":74), Object(InputEventKey,"physical_keycode":4194306), Object(InputEventJoypadButton,"device":-1,"button_index":3)]
+}
+debug_toggle={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":4194332), Object(InputEventJoypadButton,"device":-1,"button_index":4)]
+}
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0

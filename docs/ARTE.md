@@ -19,6 +19,22 @@
 5. **Retratos de diálogo 64×64** (companheiros, com 3 a 4 expressões). O retrato do protagonista é um **mosaico** (efeito de shader sobre o mesmo retrato).
 6. **Escala de trabalho:** ordem de grandeza de **1.500 a 2.000 quadros** no total (protagonista com 5 roupas, 5 companheiros, ~15 a 20 sombras nomeadas, 6 chefes maiores, 6 corpos-base de sombras comuns, ícones dos ~65 itens).
 
+### 2.1 Teste de tamanho e densidade (M0) — **montado, decisão pendente**
+
+A cena de teste (`src/Lete.Game/World/TestRoom.tscn`) aplica **uma só densidade de pixel** a sprites e texturas do cenário (`Lete.Core/Presentation/PixelDensity.cs`):
+
+- **Enquadramento fixo:** personagem de **1,75 m** ocupa **192 px de altura numa tela 1080p** (câmera ortográfica com ~9,8 m de altura visível). Nos três tamanhos o personagem tem a mesma altura na tela; muda só quantos pixels ele tem. 192 é múltiplo de 32, 48 e 64, o que permite o viewport de baixa resolução com fator inteiro (6, 4 e 3).
+- **Texturas do cenário** usam mapeamento triplanar no espaço do mundo, com a mesma quantidade de texels por metro dos sprites.
+- **Fileira 32/48/64** ao lado do ponto de teleporte "Fileira"; o protagonista usa o tamanho escolhido no painel de debug (F1).
+- **Dois modos de render** (painel de debug): *viewport em baixa resolução* (a cena 3D é renderizada pequena e ampliada com vizinho mais próximo; tudo fica na mesma grade de pixels) e *render direto* (resolução cheia; bordas 3D lisas, sprites pixelizados à parte).
+- Comparação pronta em `art/testes_m0/m0_comparacao.png` (e os seis prints soltos na mesma pasta). Ainda com **sprites placeholder**, não com Aulo e Ismena.
+
+Observação do teste: no modo de baixa resolução, qualquer sprite com densidade diferente da escolhida fica reamostrado (ver a fileira). Isso é a regra 1 acima na prática: escolher o tamanho também fixa a densidade de todo o cenário.
+
+**Falta decidir (João):** tamanho do sprite, modo de render, e se o enquadramento (192 px a 1080p) e o ângulo da câmera (inclinação 35°, giro 45°) estão bons. Ver `PENDENCIAS.md`.
+
+**Sprites e texturas placeholder:** gerados por `tools/placeholders.py` (o "conceito" do protagonista passa pelo `pixelizar.py`, como uma imagem do Gemini). Ficam em `art/sprites/placeholder/` e `art/tiles/`; substituir quando houver arte real.
+
 ## 3. Paleta "cerâmica dos mortos"
 
 Paleta curta e terrosa, com um acento por região, que lembra as figuras em vasos usadas no Damnatio. **É uma paleta de partida, não a final.**
