@@ -1,0 +1,214 @@
+# DADOS — esquema dos arquivos de conteúdo
+
+> Rascunho de esquema (versão 0.1). Os campos podem mudar na implementação; a **ideia** é fixa: conteúdo em JSON tipado, validado no carregamento, com condições declarativas. Todos os **números** abaixo são **placeholders** (`"_tbd": true` quando relevantes) e não representam balanceamento.
+> Os comentários `//` nos exemplos são só ilustrativos: **JSON real não aceita comentários**, então não os inclua nos arquivos.
+> Convenções: IDs em `snake_case` ASCII em português; textos sempre por **chave de localização** (`"text_key"`), nunca texto direto.
+
+---
+
+## 1. Condições (DSL)
+
+Usadas em diálogos, revelação de névoa, estoque de mercadores, missões, eventos e finais.
+
+```json
+{
+  "all": [
+    { "origin": "pescador" },
+    { "recollection": { "id": "a_agua_parada", "min_stage": "recalled" } },
+    { "mark_band": { "min": "mid" } },
+    { "flag": "conheceu_aulo" }
+  ]
+}
+```
+
+- **Combinadores:** `all`, `any`, `not`.
+- **Predicados previstos:** `origin`, `gender` (só para texto), `recollection` (`id`, `min_stage`, `state`: certain/uncertain/false), `recollection_kind_full_count` (nº de tipos com Memória plena), `heavy_memory` (`id`, `state`: face/leave/pending), `mark_band`, `tide_min`, `flag`, `path_key`, `oath_active`, `oath_broken`, `offering_shared` (`shade`, `kind`), `shade_state` (freed/destroyed/spared/seen), `companion`, `bond_min`, `difficulty`, `profile` (via mais usada, tipo predominante), `item_owned`, `trivia_lit`, `region_visited`, `quest_stage`.
+- O avaliador devolve `Pass`, `Fail` ou `NearMiss` (falha em exatamente um predicado marcado `soft`). **Opções de diálogo bloqueadas** ficam visíveis em cinza com `hint_if_blocked` (chave de texto com dica vaga).
+
+---
+
+## 2. Sombra (`content/shades/<id>.json`)
+
+```json
+{
+  "id": "tecela_do_luto",
+  "kind": "named",                       // named | common | personification | guardian | boss
+  "region": "campos_do_luto",
+  "gesture_cycle": {                     // o que ela repete em vida, também usado na Esquiva
+    "text_key": "shade.tecela.gesture",
+    "pattern_id": "fios_cruzados",
+    "cycle_length": 3
+  },
+  "fixation": { "id": "espera", "clue_keys": ["shade.tecela.clue1", "shade.tecela.clue2"] },
+  "true_name": { "id": "nome_tecela", "revealed_by": ["escutar_ciclo2", "oferenda_agua"] },
+  "ways_open": { "fight": true, "free": true, "absorb": true, "witness": true, "spare": true, "flee": true },
+  "ways_immune": [],
+  "resolve": { "_tbd": true, "value": 100 },
+  "phases": [
+    { "at_resolve_pct": 100, "gesture": "fios_cruzados" },
+    { "at_resolve_pct": 50,  "gesture": "fios_tensos", "reveals": "fixation" }
+  ],
+  "voices": [
+    { "when": { "resolve_pct_below": 40 }, "text_key": "shade.tecela.voice1" }
+  ],
+  "echo": { "id": "eco_fio_que_prende", "gesture": "fios_cruzados" },
+  "rewards": {
+    "free": { "recollection_fragment": "o_fio_da_espera", "hospitality": true },
+    "fight": { "obols": 0, "items": [] }
+  },
+  "knows_player": false,
+  "dialogue_id": "dlg_tecela",
+  "sprite": "shades/tecela",
+  "tide_scaling": { "per_step": "table:tecela" }
+}
+```
+
+Sombras **comuns** referenciam um `base_body` (um dos 6 corpos-base) e um conjunto reciclado de 4 a 5 gestos genéricos.
+
+---
+
+## 3. Lembrança (`content/recollections/<id>.json`)
+
+```json
+{
+  "id": "a_agua_parada",
+  "kind": "mourning",                  // childhood | feast | family | mourning | craft
+  "scope": "origin:pescador",          // common | origin:<id> | heavy
+  "title_key": "rec.a_agua_parada.title",
+  "stages": {
+    "fragment":  { "text_key": "rec.a_agua_parada.s1", "skill": "mem_agua_parada_1" },
+    "recalled":  { "text_key": "rec.a_agua_parada.s2", "skill": "mem_agua_parada_2" },
+    "full":      { "text_key": "rec.a_agua_parada.s3", "skill": "mem_agua_parada_3" }
+  },
+  "sources": [
+    { "id": "sombra_afogado", "type": "free_shade", "shade": "afogado_do_cais" },
+    { "id": "ancora_cais",    "type": "anchor", "where": "aqueronte_margem", "needs": { "item_or_offering": "agua" } }
+  ],
+  "upgrade_rules": {
+    "fragment_to_recalled": { "needs_distinct_sources": 2 },
+    "recalled_to_full": { "needs": "anchor_act" }
+  },
+  "uncertain_if_single_source": true,
+  "contradicted_by": ["fonte_x"],      // se confirmada por esta, vira false
+  "mosaic_position": { "x": 0, "y": 0 }
+}
+```
+
+**Memória pesada:** `scope: "heavy"`, ordem fixa (`order`), `gate`: condição para aflorar, `choice`: `{ "face": { "skill": "culpa_x", "profile_effect": {...} }, "leave": { "lightness": {...} } }`. Decisão **definitiva** (sem campo de reversão).
+
+**Memória (habilidade) `MemorySkill`:** `kind` herdado do tipo, `stroke_pattern` (conjunto de direções), `lucidity_cost` (`_tbd`), `effect`.
+
+---
+
+## 4. Item (`content/items/<id>.json`)
+
+```json
+{
+  "id": "remo_do_afogado",
+  "category": "instrument",             // instrument | garment | amulet | votive | utensil | relic
+  "owner_story_key": "item.remo.story",
+  "affinity": "craft",
+  "set_id": "conjunto_do_afogado",
+  "stages": [
+    { "id": "worn",       "modifiers": [{ "attack_ring": "double_slow" }] },
+    { "id": "recognized", "modifiers": [{ "attack_ring": "double_slow", "ring_forgiveness": "+_tbd" }],
+      "requires": { "recollection_kind_full": "craft", "quest": "remo_reconhecido" } },
+    { "id": "awakened",   "modifiers": [{ "effect": "evoca_agua" }],
+      "requires": { "quest": "remo_desperto" } }
+  ],
+  "merchant_tags": ["combater", "oficio"],
+  "icon": "items/remo"
+}
+```
+
+**Relíquia:** `category: "relic"`, `path_key` (a chave que abre), `hint_key`, `lesson` (`blessing` + `burden`); não equipável; no alforje.
+**Modificadores** são declarativos (ex.: `dodge_frame_size`, `parry_window`, `mist_resistance`, `rule_passive`) e aplicados pelo sistema de equipamento, nunca por código específico do item.
+
+---
+
+## 5. Diálogo (`content/dialogue/<id>.json`)
+
+```json
+{
+  "id": "dlg_padeiro",
+  "lucidity_states": ["apagada", "vaga", "desperta"],
+  "nodes": [
+    {
+      "id": "vago_inicio",
+      "when": { "shade_lucidity": "vaga" },
+      "line_key": "dlg.padeiro.vago.linha1",
+      "options": [
+        { "posture": "escutar",  "text_key": "dlg.padeiro.vago.escutar",  "next": "vago_escutar" },
+        { "posture": "perguntar","text_key": "dlg.padeiro.vago.perguntar","next": "vago_nao_entende" },
+        { "posture": "calar",    "text_key": "dlg.padeiro.vago.calar",    "next": "fim" },
+        { "posture": "escutar",  "text_key": "dlg.padeiro.vago.cheiro_forno",
+          "requires": { "recollection": { "id": "as_maos_de_barro", "min_stage": "fragment" } },
+          "hint_if_blocked": "dlg.padeiro.hint.cheiro_forno", "show_blocked": true, "next": "vago_reconhece" }
+      ]
+    }
+  ]
+}
+```
+
+Posturas: `escutar`, `perguntar`, `pressionar`, `consolar`, `calar` (`calar` sempre disponível). Rótulos entre colchetes (`[Artesão]`, `[Memória de Ofício]`) vêm de `requires`. Efeitos de nó: `effects` (lista de eventos/alterações: ajustar vínculo, adicionar Diário, conceder Fragmento). **Estados de lucidez** (apagada/vaga/desperta) dependem de oferendas e do Mosaico.
+
+---
+
+## 6. Região (`content/regions/<id>.json`)
+
+```json
+{
+  "id": "campos_do_luto",
+  "act": 2,
+  "areas": ["entrada", "jardim_de_mirto", "campo_aberto"],
+  "connections": [{ "to": "asfodelos", "via": "trivia_luto" }],
+  "combat_rule": { "id": "lagrimas", "text_key": "rule.lagrimas", "effect": "slow_all" },
+  "tide_table": [
+    { "step": 1, "effects": [] },
+    { "step": 3, "effects": [{ "unresolved_shades_difficulty": "_tbd" }, { "spawn_new": ["sombra_x"] }] }
+  ],
+  "mist_default": "dense",
+  "trivia": "trivia_luto",
+  "merchant": "viuva_do_cocito",
+  "mood": { "accent_color": "#8FB3C9", "music": "mus_luto" }
+}
+```
+
+---
+
+## 7. Modo de dificuldade (`content/difficulty/<modo>.json`)
+
+```json
+{
+  "id": "estige",
+  "gesture_windows": { "perfect": "_tbd", "good": "_tbd" },
+  "defeat": { "lose_offerings_pct": 100, "lose_obols_pct": 100, "tide_steps": 1 },
+  "boss_extra_phase": false,
+  "extra_immunities": false,
+  "resource_scarcity": { "offerings_multiplier": "_tbd", "trivia_spacing": "normal" },
+  "hecate_hints": "qualitative"
+}
+```
+Modos: `asfodelo` (janelas largas; derrota perde parte das oferendas, Maré +0; dicas claras), `estige` (padrão), `tartaro` (janelas estreitas; Maré +2; fases extras e mais imunidades; recursos escassos; dicas quase nenhuma). A **assistência de gestos** fica em `settings`, fora do modo.
+
+---
+
+## 8. Origem, companheiro, juramento, julgamento, missão
+
+- **Origem** (`origins/`): `id`, `ambition_key`, `betrayed_key`, `alternative` (efeito mecânico poupado), `friction` (efeito mecânico cobrado), `outfit`, `exclusive_recollections` (3 ids), `chain` (4 capítulos com `act`, `quest_id`).
+- **Companheiro** (`companions/`): `id`, `meet_region`, `support` (`id`, `effect`, `interval_turns`), `approval` (mapa via→ aprova/tolera/reprova), `chapters` (0 a 4 com `quest_id`), `gate_offer` (`id`, `scene_id`), `portrait` (3 a 4 expressões).
+- **Juramento** (`oaths/`): `id`, `blessing`, `heel`, `condition` (como condição DSL avaliável ao longo do tempo), `giver`, `conflicts_with`. Perjúrio publica `OathBroken` (Marca sobe, bênção some).
+- **Julgamento** (`trials/`): `id`, `judge`, `shade`, `evidence_slots`, `verdicts` (destinos e consequências), `perjury_if` (Lembrança incerta/falsa como prova).
+- **Missão** (`missions/`): `id`, `type` (region | offering | origin | companion), `hook` (condição de aparecer), `stages` (lista com condição de avanço), `consequences`, `closed_by_fight` (bool). Sem campo de marcador de mapa.
+
+---
+
+## 9. Validação no carregamento
+
+O carregador deve falhar de forma clara (arquivo, campo, mensagem) quando:
+- um ID referenciado não existe (sombra → Lembrança, item → missão, etc.);
+- uma chave de localização não existe no idioma padrão;
+- uma condição usa predicado desconhecido;
+- um chefe não tem pelo menos uma saída sem dano total;
+- uma sombra comum não tem `base_body`;
+- um valor `_tbd` é usado em build de release (apenas aviso em desenvolvimento).
