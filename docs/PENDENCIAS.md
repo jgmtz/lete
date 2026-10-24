@@ -23,7 +23,7 @@
 | 12 | **Modo de render** (M0) | Os dois modos estão prontos na cena de teste (painel de debug). Ver `ARTE.md` 2.1 e `art/testes_m0/` | Baixa resolução unifica a grade de pixels (mais "HD-2D"); direto deixa o 3D liso |
 | 13 | **Enquadramento e câmera** (M0) | Valores de teste: personagem de 1,75 m com 192 px de altura a 1080p (~9,8 m visíveis na vertical); câmera com inclinação de 35° e giro de 45° | Ajustáveis no Inspector (`Main` e `CameraRig`) |
 | 14 | **Billboard dos sprites** | Hoje o sprite encara a câmera por inteiro (pixels sem distorção) e a sombra é uma elipse no chão, não projetada | A elipse combina com a Marca alta (some a sombra) |
-| 15 | **Exportar para Windows** | Os modelos de exportação do Godot 4.7.2 .NET ainda não foram baixados (download grande) | Baixar quando for gerar o primeiro executável |
+| 15 | **Exportar para Windows** | ~~Modelos não baixados~~ **Resolvido:** modelos 4.7.2 .NET (só Windows) instalados e preset `Windows Desktop` versionado; o `.exe` exportado roda | Falta ícone do jogo (`application/icon`) |
 
 ## 2. Números e balanceamento (por último, como o João pediu)
 

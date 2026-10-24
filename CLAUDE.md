@@ -44,7 +44,7 @@ João Guilherme Matzenbacher, estudante de Engenharia de Software (PUCPR, 6º pe
 
 ## Estado atual do projeto
 
-**M0 (protótipo técnico) quase pronto** (ver `docs/BACKLOG.md`): solução montada, sala de teste com câmera diagonal, névoa, jogador, objetos examináveis, Diário placeholder, painel de debug e o teste de tamanho/densidade. **Falta o João decidir** o tamanho do sprite e o modo de render (`docs/ARTE.md` 2.1, `docs/PENDENCIAS.md` 12–15) e gerar as imagens do Aulo e da Ismena. Aseprite/LibreSprite/Pixelorama ainda não estão instalados.
+**M0 (protótipo técnico) quase pronto** (ver `docs/BACKLOG.md`): solução montada, sala de teste com câmera diagonal, névoa, jogador, objetos examináveis, Diário placeholder, painel de debug e o teste de tamanho/densidade. **Falta o João decidir** o tamanho do sprite e o modo de render (`docs/ARTE.md` 2.1, `docs/PENDENCIAS.md` 12–15) e gerar as imagens do Aulo e da Ismena. **Pixelorama** instalado para o acabamento dos sprites; prompts do Gemini prontos em `art/concept/prompts_gemini.md`.
 
 ## Pipeline de sprites
 
@@ -61,7 +61,7 @@ Estrutura: `project.godot` e `Lete.Game.csproj` na raiz (o csproj exclui `src/Le
 - Rodar o jogo: `Godot_v4.7.2-stable_mono_win64.exe --path .` (compilar antes com `dotnet build Lete.Game.csproj`)
 - Conferir sem jogar à mão (argumentos depois de `--`, ver `Main.cs`): `--size=32|48|64 --render=low|direct --gender=m|f --teleport=<Marker> --examine --ui=journal|debug --shot=<arquivo.png> --frames=N`. Ex.: `... --path . -- --teleport=Poca --examine --shot=C:/tmp/a.png` (precisa de janela; não funciona com `--headless`)
 - Importar recursos novos sem abrir o editor: `Godot_..._console.exe --headless --path . --import`
-- Exportar Windows: _modelos de exportação ainda não baixados (`PENDENCIAS.md` 15)_
+- Exportar Windows: `Godot_..._console.exe --headless --path . --export-release "Windows Desktop" export/windows/Lete.exe` (gera `Lete.exe`, `Lete.pck` e a pasta `data_Lete.Game_windows_x86_64`, que precisam ir juntos; o processo às vezes não fecha depois de exportar, então confira os arquivos e encerre)
 - Arte placeholder: `python tools/placeholders.py` e depois o `pixelizar.py` nos conceitos de `art/concept/placeholder/`
 
 Controles (Input Map): mover WASD/setas/analógico/direcional; `interact` E/Espaço/Enter/A; `journal` J/Tab/Y; `cancel` Esc/B; `debug_toggle` F1/Back.
