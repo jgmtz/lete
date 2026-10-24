@@ -1,0 +1,21 @@
+{
+  "_descricao": "Modelo de preset para um novo personagem/vista. Copie, renomeie (ex.: ismena_costas.json) e ajuste.",
+  "_passos": [
+    "1) folha_para_quadros.py na folha 3x2 do Gemini (96 px, --cores 28) -> pasta de quadros",
+    "2) rodar montar_ciclo_pernas.py com --troca 1,2,3,4,5,6 --contatos 1,7 e olhar as 12 poses (originais e trocadas)",
+    "3) descartar poses de passo largo ou que fiquem cruzadas/dobradas quando trocadas; escolher 3-4 quadros de uma meia-passada (perna balanca para frente e pousa, a outra desliza para tras)",
+    "4) --tronco: um quadro parado e centrado; --corte: linha da barra da saia/tunica (acima do joelho); --sobra/--sobra-x: ponta de espada ou objeto que passa do corte (0 desliga)",
+    "5) --contatos: posicoes do ciclo em que o corpo desce 1 px (quando um pe pousa); fps 8 com 8 quadros = 2 passos/s",
+    "6) validar: pes apontam para o mesmo lado em todos os quadros; cada pe tem UMA fase de recuo e UMA de avanco; nenhuma perna fora do corpo"
+  ],
+  "pasta": "../../art/sprites/companheiros/NOME/andar_costas_quadros",
+  "prefixo": "NOME_andar_costas_96px",
+  "tronco": 4,
+  "troca": "5,2,3,6",
+  "contatos": "3,7",
+  "corte": 72,
+  "sobra": 0,
+  "sobra_x": 0,
+  "fps": 8,
+  "saida": "../../art/sprites/companheiros/NOME/andar_costas"
+}

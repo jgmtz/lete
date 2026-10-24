@@ -1,0 +1,7 @@
+{
+  "_descricao": "Ismena de COSTAS andando (96 px, --cores 56). Modo --originais, ordem 1,4,2,5,6,3: media da posicao dos dois pes decresce continuamente (178,178,170,169,157,155 na folha). Aprovar com o Joao.",
+  "_entrada": "python tools/folha_para_quadros.py art/concept/gemini/companheiros/ismena/ismena_andar_c_gemini.png --colunas 3 --linhas 2 --alturas 96 --cores 56 --saida <pasta_quadros>",
+  "originais": "1,4,2,5,6,3",
+  "fps": 8,
+  "saida": "../../art/sprites/companheiros/ismena/andar_costas"
+}

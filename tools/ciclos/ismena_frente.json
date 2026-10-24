@@ -1,0 +1,7 @@
+{
+  "_descricao": "Ismena de FRENTE andando (96 px, --cores 56). Modo --originais com a ordem 1,4,3,6,5,2: o pe da frente desliza para tras de forma continua (x do pe: 233,227,205,194,189,187 na folha). A ordem original do Gemini (1..6) fazia o pe pular para a frente no quadro 4. Aprovar com o Joao.",
+  "_entrada": "python tools/folha_para_quadros.py art/concept/gemini/companheiros/ismena/ismena_andar_f_gemini.png --colunas 3 --linhas 2 --alturas 96 --cores 56 --saida <pasta_quadros>",
+  "originais": "1,4,3,6,5,2",
+  "fps": 8,
+  "saida": "../../art/sprites/companheiros/ismena/andar_frente"
+}

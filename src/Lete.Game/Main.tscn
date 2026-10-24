@@ -1,12 +1,12 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://ysq3ays8sfq8"]
 
-[ext_resource type="Script" path="res://src/Lete.Game/Main.cs" id="1_main"]
+[ext_resource type="Script" uid="uid://biyfy1hclevvd" path="res://src/Lete.Game/Main.cs" id="1_main"]
 [ext_resource type="PackedScene" path="res://src/Lete.Game/World/TestRoom.tscn" id="2_sala"]
 
-[node name="Main" type="Node"]
+[node name="Main" type="Node" unique_id=1240019531]
 script = ExtResource("1_main")
 
-[node name="ViewportContainer" type="SubViewportContainer" parent="."]
+[node name="ViewportContainer" type="SubViewportContainer" parent="." unique_id=1368667267]
 texture_filter = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,9 +15,10 @@ grow_horizontal = 2
 grow_vertical = 2
 stretch = true
 
-[node name="SubViewport" type="SubViewport" parent="ViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="ViewportContainer" unique_id=1484760383]
 handle_input_locally = false
 size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
-[node name="TestRoom" parent="ViewportContainer/SubViewport" instance=ExtResource("2_sala")]
+[node name="TestRoom" parent="ViewportContainer/SubViewport" unique_id=1495498611 instance=ExtResource("2_sala")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.43078947, 0.76220274, -0.23913598)

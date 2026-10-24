@@ -15,6 +15,8 @@ João Guilherme Matzenbacher, estudante de Engenharia de Software (PUCPR, 6º pe
 5. `docs/ARTE.md` — direção de arte e pipeline de sprites.
 6. `docs/BACKLOG.md` — marcos (M0 a M5) e tarefas.
 7. `docs/PENDENCIAS.md` — decisões em aberto, números por definir, conteúdo faltante.
+8. `docs/PIPELINE_PERSONAGEM.md` — **receita completa de cada personagem** (Gemini → marionete 3D → 56 px).
+9. `docs/ELENCO_IMAGENS.md` — **registro mestre** das imagens por personagem (estilo realista 96 px) e prompts do Gemini. `docs/PROMPTS_GEMINI.md` é a versão antiga (estilo 16 cores, descartado; as linhas CHARACTER seguem válidas).
 
 ## Regras de trabalho
 
@@ -44,11 +46,11 @@ João Guilherme Matzenbacher, estudante de Engenharia de Software (PUCPR, 6º pe
 
 ## Estado atual do projeto
 
-**M0 (protótipo técnico) quase pronto** (ver `docs/BACKLOG.md`): solução montada, sala de teste com câmera diagonal, névoa, jogador, objetos examináveis, Diário placeholder, painel de debug e o teste de tamanho/densidade. **Falta o João decidir** o tamanho do sprite e o modo de render (`docs/ARTE.md` 2.1, `docs/PENDENCIAS.md` 12–15) e gerar as imagens do Aulo e da Ismena. **Pixelorama** instalado para o acabamento dos sprites; prompts do Gemini prontos em `art/concept/prompts_gemini.md`.
+**M0 (protótipo técnico) quase pronto** (ver `docs/BACKLOG.md`): solução montada, sala de teste com câmera diagonal, névoa, jogador, objetos examináveis, Diário placeholder, painel de debug e o teste de tamanho/densidade. Sprites de mapa do Aulo e da Ismena prontos (56 px, 4 direções, 12 quadros) e jogáveis na cena de teste do andar (`src/Lete.Game/Sandbox/WalkTest.tscn`, ver `docs/M0_PRIMEIRO_TESTE.md`). **Falta o João decidir** o modo de render e aprovar a escala (`docs/ARTE.md` 2.1, `docs/PENDENCIAS.md` 12–15). **Pixelorama** instalado para o acabamento dos sprites; prompts do Gemini prontos em `art/concept/prompts_gemini.md`.
 
 ## Pipeline de sprites
 
-`tools/pixelizar.py` converte imagens do Gemini (fundo magenta liso) em sprites de 32/48/64 px e gera folhas de comparação. Você consegue **ver as imagens geradas** (leia o PNG) e ajustar tolerância, cores e paleta até ficar bom. O acabamento pixel a pixel e a escolha final do tamanho são do João. Detalhes e prompts em `docs/ARTE.md`.
+`tools/pixelizar.py` converte imagens do Gemini (fundo magenta liso) em sprites (decidido: realista 96 px, `--alturas 80 96 --cores 28`) e gera folhas de comparação. Você consegue **ver as imagens geradas** (leia o PNG) e ajustar tolerância, cores e paleta até ficar bom. O acabamento pixel a pixel e a escolha final do tamanho são do João. `tools/folha_para_quadros.py` faz o mesmo para folhas de animação (corta, alinha e gera GIF). `tools/montar_ciclo_pernas.py` conserta o ciclo de andar (pernas alternando; padrão para todos os personagens, presets por personagem em `tools/ciclos/`, ver `docs/ARTE.md` 7.6); `tools/refazer_pernas_opostas.py` troca as pernas em personagens de frente (ver 7.7). Detalhes e prompts em `docs/ARTE.md` e `docs/ELENCO_IMAGENS.md`.
 
 ## Comandos
 
@@ -58,11 +60,12 @@ Estrutura: `project.godot` e `Lete.Game.csproj` na raiz (o csproj exclui `src/Le
 - Build: `dotnet build Lete.sln`
 - Testes: `dotnet test src/Lete.Core.Tests`
 - Abrir no editor: `Godot_v4.7.2-stable_mono_win64.exe --path . --editor`
+- Teste do andar (Aulo/Ismena, sem Diário nem debug): `Godot_v4.7.2-stable_mono_win64.exe --path . res://src/Lete.Game/Sandbox/WalkTest.tscn` (ou abrir a cena no editor e apertar F6)
 - Rodar o jogo: `Godot_v4.7.2-stable_mono_win64.exe --path .` (compilar antes com `dotnet build Lete.Game.csproj`)
 - Conferir sem jogar à mão (argumentos depois de `--`, ver `Main.cs`): `--size=32|48|64 --render=low|direct --gender=m|f --teleport=<Marker> --examine --ui=journal|debug --shot=<arquivo.png> --frames=N`. Ex.: `... --path . -- --teleport=Poca --examine --shot=C:/tmp/a.png` (precisa de janela; não funciona com `--headless`)
 - Importar recursos novos sem abrir o editor: `Godot_..._console.exe --headless --path . --import`
 - Exportar Windows: `Godot_..._console.exe --headless --path . --export-release "Windows Desktop" export/windows/Lete.exe` (gera `Lete.exe`, `Lete.pck` e a pasta `data_Lete.Game_windows_x86_64`, que precisam ir juntos; o processo às vezes não fecha depois de exportar, então confira os arquivos e encerre)
 - Arte placeholder: `python tools/placeholders.py` e depois o `pixelizar.py` nos conceitos de `art/concept/placeholder/`
 
-Controles (Input Map): mover WASD/setas/analógico/direcional; `interact` E/Espaço/Enter/A; `journal` J/Tab/Y; `cancel` Esc/B; `debug_toggle` F1/Back.
+Controles (Input Map): mover WASD/setas/analógico/direcional; `interact` E/Espaço/Enter/A; `journal` J/Tab/Y; `cancel` Esc/B; `debug_toggle` F1/Back; `switch_character` Tab/X e `run` Shift/RB (só no teste do andar).
 - Sprites: `python tools/pixelizar.py <imagem.png> [--alturas 32 48 64] [--paleta "#..."]`

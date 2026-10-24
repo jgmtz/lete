@@ -1,6 +1,6 @@
 # ARTE — direção de arte e pipeline de sprites
 
-> Versão 0.1 (23/out/2026). **Nada aqui é final.** O João quer **ver os personagens de verdade** antes de dar o veredito sobre origens, companheiros e paleta. O tamanho dos sprites será decidido por **teste visual** (32 / 48 / 64 px).
+> Versão 0.2 (23/out/2026). **Decidido: estilo REALISTA, sprite de 96 px** (Aulo realista aprovado pelo João; reserva: 80 px; confirmação final da escala no M0). Origens, companheiros e paleta ainda dependem de ver os personagens. **A lista de todas as imagens a gerar e os prompts estão em `ELENCO_IMAGENS.md`.**
 
 ---
 
@@ -13,13 +13,15 @@
 ## 2. Regras fixas (a testar no M0)
 
 1. **Uma só densidade de pixel** para sprites e texturas do cenário. Pixels de tamanhos muito diferentes entre 2D e 3D ficam estranhos.
-2. **Tamanho do sprite: ~48 px de altura é a recomendação**, mas o **teste de 32 / 48 / 64 px** decide. Resumo: 32 px dá silhueta e cor mas quase nenhum traço de rosto (difícil distinguir 5 origens e 5 companheiros); 48 px mostra rosto simples (olhos e boca), cabelo, roupa e instrumento; 64 a 72 px dá rosto expressivo mas exige quadros demais para uma pessoa só.
+2. **Tamanho do sprite: realista, 96 px de altura** (decidido; reserva 80 px). Rosto legível a partir de ~80 px. Numa base 960×540 ampliada 2×, 96 px ≈ 18% da altura da tela. O estilo chibi 48 px foi testado e descartado por preferência do João. Custo: ~4,5 mil px por quadro; reduzir com roupas em camadas, andar com 4 a 6 quadros e hurt/idle por código.
 3. **Só 2 direções desenhadas** (nordeste e sudeste); as outras duas saem por espelhamento.
 4. **Poucos quadros por ação:** parado 4, andar 6, demais ações 3 a 6. **Cerca de 40 a 55 quadros por personagem humano.** Reduzir quadros com animação por código (inclinação, balanço, deslocamento) sempre que possível.
 5. **Retratos de diálogo 64×64** (companheiros, com 3 a 4 expressões). O retrato do protagonista é um **mosaico** (efeito de shader sobre o mesmo retrato).
 6. **Escala de trabalho:** ordem de grandeza de **1.500 a 2.000 quadros** no total (protagonista com 5 roupas, 5 companheiros, ~15 a 20 sombras nomeadas, 6 chefes maiores, 6 corpos-base de sombras comuns, ícones dos ~65 itens).
 
 ### 2.1 Teste de tamanho e densidade (M0) — **montado, decisão pendente**
+
+> Atualização (24/out/2026): o tamanho foi decidido fora deste teste (sprite de mapa com 56 px, retrato com 96 px; ver 7.8). A fileira 32/48/64 ficou como registro. O andar do Aulo e da Ismena em 56 px está em `src/Lete.Game/Sandbox/WalkTest.tscn` (1 pixel de arte = 3 px de tela a 1080p). **Continua em aberto:** o modo de render e o enquadramento.
 
 A cena de teste (`src/Lete.Game/World/TestRoom.tscn`) aplica **uma só densidade de pixel** a sprites e texturas do cenário (`Lete.Core/Presentation/PixelDensity.cs`):
 
@@ -89,7 +91,7 @@ As cores não se repetem, para os cinco serem reconhecíveis de longe no mapa.
 O Gemini (plano básico, com limite de uso) serve para **conceito e referência em alta resolução**; ele **não** entrega pixel art consistente quadro a quadro. Fluxo:
 
 1. **Gemini:** uma imagem por personagem, de corpo inteiro, em fundo magenta liso (`#FF00FF`), vista 3/4 voltada para a frente-direita. Não pedir animação nem spritesheet ao Gemini.
-2. **`tools/pixelizar.py`:** remove o fundo e gera o sprite em 32, 48 e 64 px, mais folhas de comparação.
+2. **`tools/pixelizar.py`:** remove o fundo e gera o sprite em 32, 48 e 64 px (para o estilo realista usar `--alturas 80 96 --cores 28`), mais folhas de comparação.
 3. **Acabamento manual** em Aseprite, LibreSprite ou Pixelorama: olhos, mãos, contorno, limpeza de cores.
 4. **Animação:** poucos quadros feitos à mão e/ou animação por código; exportar **folha de sprites** (PNG + JSON de quadros) para o Godot.
 5. **Variações** (cabelo, roupa, paleta) por troca de paleta e camadas, sem nova geração.
@@ -108,7 +110,7 @@ python tools/pixelizar.py aulo.png --paleta "#D9CBB0,#B5573B,#8C1F2E,#25222B,#4E
 Saída (pasta `saida_sprites`): `<nome>_<altura>px.png` (sprite real, fundo transparente), `<nome>_comparacao.png` (tamanhos lado a lado ampliados), `<nome>_na_tela.png` (os tamanhos numa tela 1920×1080 para sentir a escala).
 Ajustes: `--tolerancia` (fundo ligado à borda, padrão 90; subir se sobrou borda magenta, descer se sumiu parte do personagem), `--tolerancia-interna` (fundo preso, 40), `--erosao` (pixels comidos na borda, 1), `--zoom`, `--zoom-tela`, `--cores` (16), `--paleta`.
 
-Limitação conhecida: a ferramenta foi testada com imagem simulada; **ainda não foi testada com imagem real do Gemini**. Ajustar conforme os primeiros resultados.
+Testada com imagens reais do Gemini (Aulo): usar `--cores 28` no estilo realista; há remoção de respingo magenta nas bordas.
 
 ### 7.2 Modelo de prompt para o Gemini
 
@@ -135,6 +137,47 @@ Uma geração por personagem; usar a primeira imagem aprovada como referência d
 ### 7.4 Transparência sobre IA
 Os conceitos são gerados com IA e depois refeitos/limpos à mão. **Conferir as regras de divulgação de arte gerada por IA do itch.io** (ou de onde publicar) antes de publicar.
 
+### 7.5 Folhas de animação (`tools/folha_para_quadros.py`)
+
+Corta uma folha de animação do Gemini (grade de quadros em fundo magenta), **alinha os quadros pelos pés e pelo eixo do tronco**, aplica **uma única paleta para todos os quadros** (as cores não mudam entre quadros) e gera: um PNG por quadro, uma folha horizontal para o Godot, uma folha de comparação e um **GIF** para ver o movimento. Usa o `pixelizar.py` (ficam na mesma pasta).
+
+```
+python tools/folha_para_quadros.py aulo_andar.png --colunas 3 --linhas 2 --alturas 48 64 --cores 28 --fps 8
+```
+
+Teste feito com o Aulo realista (folha de caminhada de 6 quadros): rosto, armadura e cores ficaram consistentes entre os quadros; com 16 cores a paleta única estragou a cor (armadura marrom), com 28 ficou boa. O Gemini pode devolver quadros a menos ou encostados: pedir grade 3×2 com margem larga (prompt na conversa de arte).
+
+**Direções (decidido, 23/out/2026):** só **duas vistas desenhadas**, de frente (para baixo/direita) e de costas (para cima/direita); as outras duas saem por espelho. No combate o grupo aparece **de costas** (embaixo à esquerda) e a sombra **de frente, espelhada** (em cima à direita).
+
+### 7.6 Padrão de ciclo de andar: pernas alternando (`tools/montar_ciclo_pernas.py`)
+
+> **Presets salvos em `tools/ciclos/`** (um JSON por personagem e vista). **Aulo de costas (aprovado em 23/out/2026):** `python tools/montar_ciclo_pernas.py --config tools/ciclos/aulo_costas.json`. Para um novo personagem, copie `tools/ciclos/_modelo.json` (traz o passo a passo) e ajuste. (Os arquivos do Aulo antigo foram apagados; o Aulo oficial é o simétrico em `aulo_sim/`.)
+
+**Problema:** o Gemini desenha o andar com uma perna só se mexendo (parece "sapateado"). Pedir de novo melhora pouco. **Padrão para TODOS os personagens:** usar o Gemini só para as **poses** e montar a **alternância** no código.
+
+Receita (Aulo de costas, testada):
+1. Gerar a folha 3×2 e rodar `folha_para_quadros.py` (96 px, `--cores 28`) para ter os quadros alinhados com paleta única.
+2. Olhar os 6 quadros e escolher: **tronco** (um quadro parado e centrado), **contato** (passo mais largo) e **passagem** (uma perna levantada).
+3. Rodar:
+```
+python tools/montar_ciclo_pernas.py <pasta_quadros> --prefixo <nome>_96px --tronco 4 --contato 1 --passagem 3 --troca 5,2,3,6 --contatos 3,7 --corte 72 --sobra 8 --sobra-x 39 --fps 8 --saida <pasta>
+```
+4. O script usa **um tronco fixo** e as pernas dos quadros escolhidos, **na ordem dada em `--pernas`**, **sem espelhar**. **Regra: nunca espelhar as pernas de personagem que anda na diagonal** (cabeça e tronco virados para um lado): os pés passam a apontar para o lado oposto e parece que ele anda para a esquerda num quadro e para a direita no outro (erro cometido e corrigido em 23/out/2026). O modo antigo com `--contato/--passagem` (espelhado) só serve para vistas exatamente frontais ou de costas, sem virada. O tronco desce 1 px nos contatos (balanço).
+5. `--corte` é a linha da barra da saia/túnica (acima do joelho). `--sobra`/`--sobra-x` preservam a ponta da espada (ou outro objeto que passa do corte). `--inverter` troca a ordem se parecer ao contrário.
+6. Conferir o GIF: pés alternam, nada "pula", saia e espada inteiras. Ajustar `--corte`.
+
+**Modo recomendado: `--troca` (testado, medido).** A folha do Gemini costuma ser **3 poses repetidas duas vezes**: só uma perna dá o passo (o pé direito ia a x≈37 duas vezes por ciclo e o esquerdo quase não saía do lugar; parece o personagem indo "para frente e para trás"). `--troca 1,2,3` usa as 3 primeiras poses como 1ª metade e monta a 2ª metade **trocando as pernas de lugar (esquerda↔direita) sem espelhar**, Cada perna é **encaixada pela coxa no quadril do lado certo** (o quadril é a média do centro da coxa nos quadros usados) e o topo da coxa é esticado para baixo da saia (sem fenda); restos da espada são removidos (maior grupo conectado). Erro corrigido em 23/out/2026: com deslocamento fixo (`--d`) a perna saía do corpo e o corte ficava visível. `--d` não é mais usado. Resultado: cada pé desliza para trás por 3 quadros e balança para frente por 3, defasados em meio ciclo. **Escolha das poses (regra):** a pose de passo largo (contato com o pé muito à frente, ex.: quadro 1 do Aulo) **não pode ser trocada de perna**: o pé atravessa na frente da outra perna e a perna parece dobrada para frente (erro corrigido em 23/out/2026). Antes de montar, gerar `--troca` com TODOS os quadros (ex.: `1,2,3,4,5,6`), olhar as 12 poses e usar só as que ficam naturais nas duas versões. No Aulo: `5,2,3,6` (perna esquerda balança para frente e pousa; direita desliza para trás) → ciclo de 8 quadros a 8 fps. Passo curto, mas sem pose impossível.
+
+**Andar de FRENTE (Aulo) = modo `--originais` (sem cortar).** No andar de frente as pernas ficam coladas e a espada/bainha cruza a coxa esquerda; a troca de pernas deixava as coxas **cortadas** (separação vertical por dentro da coxa) e o passo assimétrico (22 px contra 8 a 10 px). Tentativas descartadas em 23/out/2026: `--troca` com `--bainha`/`--topo-pele`/`--zona-coxa` (opções continuam no script, mas não usar para frente). **Solução adotada:** `--originais 4,1,6,3,5,2` só **reordena os quadros inteiros** do Gemini (corpo e pernas intactos, sem nenhum corte), escolhendo a ordem em que o pé de apoio desliza para trás de forma contínua (medir o x do pé). Preset: `tools/ciclos/aulo_frente.json` (6 quadros, 7 fps). **Regra geral:** usar `--troca` quando as pernas ficam bem separadas (andar de costas); usar `--originais` quando ficam coladas ou há objeto cruzando a coxa. **Limite:** o movimento das pernas é o do Gemini (perna esquerda sempre atrás); para movimento melhor pedir nova folha ao Gemini.
+
+**Como validar sempre:** medir o x médio de cada pé por quadro; cada pé deve ter UMA fase de recuo contínuo e UMA de avanço, e os dois defasados. Se um pé aparecer duas vezes à frente no ciclo, está errado.
+
+**Mais quadros sem espelho (modo antigo, não recomendado):** os quadros 5 e 6 da folha repetem 2 e 3 com pequenas diferenças, então servem como intermediários. Ordem usada no Aulo (ciclo de 6): `1,2,5,4,3,6` (`--contatos 1,4` = quadros em que o tronco desce). 6 quadros a 6 fps = 1 s por ciclo (2 passos/s).
+
+**Velocidade:** o ciclo de 4 quadros a 6 fps é rápido demais (3 passos/s). Usar `--fps 4` (2 passos/s). **Não usar `--transicao` com poses repetidas:** com a folha atual do Gemini ele repete a mesma perna levantada em dois quadros seguidos e a perna parece saltar. Só vale se houver um quadro de transição realmente diferente (perna balançando para frente). **Sempre conferir as pernas ampliadas (zoom 8) quadro a quadro antes de aprovar:** contato → perna de trás levanta → contato oposto → outra perna levanta.
+
+Limites: sem balanço de braços (o tronco é fixo); luz das botas espelha (quase imperceptível a 96 px); personagens de capa/manto longo escondem as pernas e podem dispensar o ciclo de 6 quadros do Gemini. Para andar de frente usar a mesma receita.
+
 ## 8. Lista do que precisa ser desenhado (ordem de grandeza)
 
 Protagonista (base + 5 roupas + 3–4 cabelos + 3 marcas), 5 companheiros (+ retratos 64×64 com 3–4 expressões), 15–20 sombras nomeadas, 6 corpos-base de sombras comuns (com adereços e paletas), 6 chefes + 1 opcional, ~65 ícones de itens, 5 gestos (UI), HUD de combate, telas de menu (Diário, Mosaico, Bolsa, mapa), tiles/texturas por região (~15 regiões, cada uma com acento de cor), modelos 3D modulares low-poly por região, efeitos de névoa, a romã (evolução visual da Marca), Trívias e estruturas (tochas), anéis de juramento no braço.
@@ -142,3 +185,17 @@ Protagonista (base + 5 roupas + 3–4 cabelos + 3 marcas), 5 companheiros (+ ret
 ## 9. Interface (a definir na arte)
 
 Menu principal, tela de início (origem, gênero, aparência, modo), Diário, Mosaico (mosaico sem moldura, pedras por tipo com cor), Bolsa/alforje, equipamento, mapa que se preenche, opções, combate (layout em `GDD.md` 4.7), julgamento, despedida no portão. Fonte legível, tamanho ajustável, opção para daltonismo.
+
+### 7.7 Andar de frente (pernas coladas): receita aprovada (Aulo, 12 quadros)
+
+Quando o `--troca` corta as coxas (personagem de frente, pernas coladas), use `tools/refazer_pernas_opostas.py`: separa as duas pernas abaixo da barra da saia (componentes conectados; se estiverem coladas, divide numa coluna de vale), troca uma pela outra no quadril e gira cada uma em torno do quadril para manter a passada. Giro maximo 12 graus nos contatos e ~27 nas passagens (mais que isso a perna da frente parece quebrada). Ciclo = 6 quadros originais + 6 trocados = 12 quadros, 10 fps. Preset em `tools/ciclos/aulo_frente_12.json`; o script de lote do Aulo é `tools/refazer_pernas_lote_aulo_frente.py` (copiar e ajustar `ordem` e o arquivo de entrada para outros personagens). Aulo de costas continua com `tools/ciclos/aulo_costas.json` (aprovado).
+
+> Nota (Ismena): personagens muito escuros (preto + detalhe azul-gelo) perdem o detalhe colorido com `--cores 28` (o azul virou cinza). Use `--cores 56` e pixelize frente e costas JUNTAS (folha_para_quadros com as duas imagens lado a lado, `--colunas 2`) para que as duas dividam a mesma paleta; separadas, o azul vira cinza na costas.
+
+### 7.8 Dois visuais por personagem (decisão 2026-10-24)
+
+- **Retrato detalhado** (inventário, menu, diálogo, tela cheia): a imagem do Gemini, 96 px ou maior.
+- **Sprite de andar** (mapa): ~56 px de altura (referência: JRPG estilo Suikoden II, personagens de ~57 px com muito detalhe e cores bem distintas entre si). Feito por `tools/render3d/` (esqueleto 3D + marionete do sprite pintado) e reduzido com `tools/sprite_andar.py` (redução suave + nitidez + contorno escuro de 1 px, 32 cores). Reduzir direto com `pixelizar.py` vira mancha; usar sempre `sprite_andar.py`.
+
+### 7.9 Receita completa do personagem (marionete 3D, perfis, 56 px)
+Ver `docs/PIPELINE_PERSONAGEM.md` (feita com o Aulo; vale para todos os personagens de pernas visíveis).

@@ -23,7 +23,7 @@ import os
 import sys
 from collections import Counter
 
-from PIL import Image, ImageDraw, ImageFilter, ImageStat
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageStat
 
 RES_BOX = Image.Resampling.BOX if hasattr(Image, "Resampling") else Image.BOX
 RES_NEAREST = Image.Resampling.NEAREST if hasattr(Image, "Resampling") else Image.NEAREST
@@ -100,6 +100,13 @@ def remover_fundo(img, tolerancia, tolerancia_interna, erosao):
         alfa = alfa.filter(ImageFilter.MinFilter(3))
 
     resultado = img.convert("RGBA")
+    # 4) tira o "respingo" magenta das bordas (pixels misturados com a cor do fundo)
+    if fundo[0] > 150 and fundo[2] > 150 and fundo[1] < 100:
+        r, g, b = resultado.convert("RGB").split()
+        rosa_r = ImageChops.subtract(r, g).point(lambda v: 255 if v > 60 else 0)
+        rosa_b = ImageChops.subtract(b, g).point(lambda v: 255 if v > 60 else 0)
+        rosa = ImageChops.multiply(rosa_r, rosa_b)
+        alfa = ImageChops.subtract(alfa, rosa)
     resultado.putalpha(alfa)
     return resultado
 

@@ -1,0 +1,117 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://src/Lete.Game/Sandbox/WalkTest.cs" id="1_test"]
+[ext_resource type="Script" path="res://src/Lete.Game/Sandbox/WalkingCharacter.cs" id="2_char"]
+[ext_resource type="Script" path="res://src/Lete.Game/Sandbox/WalkSpriteSet.cs" id="3_set"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/CameraRig.cs" id="4_cam"]
+[ext_resource type="Texture2D" path="res://art/sprites/placeholder/sombra_chao.png" id="5_sombra"]
+
+[sub_resource type="Resource" id="Set_aulo"]
+script = ExtResource("3_set")
+Folder = "res://art/sprites/companheiros/aulo_sim"
+Prefix = "aulo"
+WalkFps = 16.0
+
+[sub_resource type="Resource" id="Set_ismena"]
+script = ExtResource("3_set")
+Folder = "res://art/sprites/companheiros/ismena_sim"
+Prefix = "ismena"
+WalkFps = 16.0
+
+[sub_resource type="Environment" id="Environment_teste"]
+background_mode = 1
+background_color = Color(0.82, 0.82, 0.84, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_branco"]
+albedo_color = Color(0.96, 0.96, 0.96, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="Mesh_chao"]
+material = SubResource("Mat_branco")
+size = Vector2(80, 80)
+
+[sub_resource type="StandardMaterial3D" id="Mat_cinza"]
+albedo_color = Color(0.55, 0.55, 0.58, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Mesh_cubo"]
+material = SubResource("Mat_cinza")
+
+[sub_resource type="StandardMaterial3D" id="Mat_sombra"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("5_sombra")
+texture_filter = 0
+
+[sub_resource type="PlaneMesh" id="Mesh_sombra"]
+material = SubResource("Mat_sombra")
+size = Vector2(0.9, 0.45)
+
+[node name="WalkTest" type="Node3D"]
+script = ExtResource("1_test")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_teste")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8192, -0.4698, 0.329, 0, 0.5736, 0.8192, -0.5736, -0.671, 0.4698, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_chao")
+
+[node name="Cubes" type="Node3D" parent="."]
+
+[node name="Cube1" type="MeshInstance3D" parent="Cubes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, -3)
+mesh = SubResource("Mesh_cubo")
+
+[node name="Cube2" type="MeshInstance3D" parent="Cubes"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -6, 1, -5)
+mesh = SubResource("Mesh_cubo")
+
+[node name="Cube3" type="MeshInstance3D" parent="Cubes"]
+transform = Transform3D(1, 0, 0, 0, 1.7, 0, 0, 0, 1, -3, 0.85, 4)
+mesh = SubResource("Mesh_cubo")
+
+[node name="Cube4" type="MeshInstance3D" parent="Cubes"]
+transform = Transform3D(3, 0, 0, 0, 0.5, 0, 0, 0, 1, 7, 0.25, 6)
+mesh = SubResource("Mesh_cubo")
+
+[node name="Cube5" type="MeshInstance3D" parent="Cubes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.5, -9)
+mesh = SubResource("Mesh_cubo")
+
+[node name="Cube6" type="MeshInstance3D" parent="Cubes"]
+transform = Transform3D(1.5, 0, 0, 0, 3, 0, 0, 0, 1.5, -10, 1.5, 9)
+mesh = SubResource("Mesh_cubo")
+
+[node name="Character" type="CharacterBody3D" parent="."]
+script = ExtResource("2_char")
+MoveSpeed = 1.6
+Characters = [SubResource("Set_aulo"), SubResource("Set_ismena")]
+
+[node name="Sprite" type="AnimatedSprite3D" parent="Character"]
+cast_shadow = 0
+billboard = 1
+shaded = true
+alpha_cut = 1
+texture_filter = 0
+
+[node name="GroundShadow" type="MeshInstance3D" parent="Character"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
+cast_shadow = 0
+mesh = SubResource("Mesh_sombra")
+
+[node name="CameraRig" type="Node3D" parent="." node_paths=PackedStringArray("Target")]
+script = ExtResource("4_cam")
+Target = NodePath("../Character")
+
+[node name="Pitch" type="Node3D" parent="CameraRig"]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/Pitch"]
+projection = 1
+far = 200.0

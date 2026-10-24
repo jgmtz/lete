@@ -10,7 +10,7 @@
 | # | Tema | Situação | Proposta (se houver) |
 |---|---|---|---|
 | 1 | **Gênero e silhueta** | O João escolheu **escolher o gênero no início**. Falta decidir se o gênero muda só o **tratamento nos textos** ou também o **corpo do sprite** | Recomendado: só texto (um corpo, aparência por cabelo e marcas). Dois corpos dobram os trajes por origem |
-| 2 | **Tamanho do sprite** | A decidir por teste visual (32 / 48 / 64 px) | Recomendação inicial: 48 px |
+| 2 | **Tamanho do sprite** | ✅ **Decidido (23/out/2026): realista 96 px** (reserva 80 px). Depois (24/out/2026): **sprite de mapa com 56 px** e retrato com 96 px ou mais (`ARTE.md` 7.8). Confirmar a escala no M0 dentro do cenário 3D | Ver `ARTE.md` e `ELENCO_IMAGENS.md` |
 | 3 | **Maré: granularidade** | O GDD define 5 degraus por marco, **mais** avanço "pequeno" por viagem entre Trívias **e** 1 ou 2 degraus por derrota. Os dois usos de "degrau" precisam de uma unidade comum | Proposta: Maré como valor numérico (`TideValue`); marcos somam 1,0; derrota soma 0/1/2 por modo; viagem soma uma fração (TBD). Tabelas por região reagem ao **degrau inteiro** |
 | 4 | **Paleta final** | A "cerâmica dos mortos" é paleta de partida; o João quer **ver** os personagens antes de aprovar | — |
 | 5 | **Origens, companheiros e sombras visuais** | O João quer ver imagens reais antes de aprovar | Primeiro teste: Aulo e Ismena |
@@ -21,7 +21,7 @@
 | 10 | **Barca de Caronte** como segunda rede de viagem | Opcional; fica para depois | — |
 | 11 | **Fim do Diário e da Tabuinha** | O destino de cada um por desfecho ainda precisa ser escrito | — |
 | 12 | **Modo de render** (M0) | Os dois modos estão prontos na cena de teste (painel de debug). Ver `ARTE.md` 2.1 e `art/testes_m0/` | Baixa resolução unifica a grade de pixels (mais "HD-2D"); direto deixa o 3D liso |
-| 13 | **Enquadramento e câmera** (M0) | Valores de teste: personagem de 1,75 m com 192 px de altura a 1080p (~9,8 m visíveis na vertical); câmera com inclinação de 35° e giro de 45° | Ajustáveis no Inspector (`Main` e `CameraRig`) |
+| 13 | **Enquadramento e câmera** (M0) | Valores de teste: personagem de 1,75 m com 192 px de altura a 1080p (~9,8 m visíveis na vertical); no teste do andar, 1,7 m com 56 px × 3 = 168 px a 1080p; câmera com inclinação de 35° e giro de 45° | Ajustáveis no Inspector (`Main` e `CameraRig`) |
 | 14 | **Billboard dos sprites** | Hoje o sprite encara a câmera por inteiro (pixels sem distorção) e a sombra é uma elipse no chão, não projetada | A elipse combina com a Marca alta (some a sombra) |
 | 15 | **Exportar para Windows** | ~~Modelos não baixados~~ **Resolvido:** modelos 4.7.2 .NET (só Windows) instalados e preset `Windows Desktop` versionado; o `.exe` exportado roda | Falta ícone do jogo (`application/icon`) |
 

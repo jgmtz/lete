@@ -1,0 +1,126 @@
+<!doctype html><html><body style="margin:0;background:#f0f">
+<canvas id="c" width="600" height="800"></canvas>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+const W=600,H=800;
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:false,preserveDrawingBuffer:true});
+renderer.setSize(W,H,false); renderer.setClearColor(0xff00ff,1);
+const scene=new THREE.Scene();
+const asp=W/H, vh=2.35;
+const cam=new THREE.OrthographicCamera(-vh*asp/2,vh*asp/2,vh/2,-vh/2,0.1,50);
+const el=THREE.MathUtils.degToRad(22);
+cam.position.set(0,Math.sin(el)*10+0.95,Math.cos(el)*10); cam.lookAt(0,0.95,0);
+scene.add(new THREE.AmbientLight(0xffffff,0.55));
+const dl=new THREE.DirectionalLight(0xffffff,2.2); dl.position.set(-3,5,4); scene.add(dl);
+const grad=new THREE.DataTexture(new Uint8Array([90,170,255]),3,1,THREE.RedFormat); grad.minFilter=grad.magFilter=THREE.NearestFilter; grad.needsUpdate=true;
+const mats={};
+function mat(c){ if(!mats[c]) mats[c]=new THREE.MeshToonMaterial({color:c,gradientMap:grad}); return mats[c]; }
+const outlineMat=new THREE.MeshBasicMaterial({color:0x14110f,side:THREE.BackSide});
+function mesh(geo,color,pos=[0,0,0],out=1.07){
+  const m=new THREE.Mesh(geo,mat(color)); m.position.set(...pos);
+  const o=new THREE.Mesh(geo,outlineMat); o.scale.setScalar(out); m.add(o); return m;
+}
+const box=(w,h,d,c,pos,out)=>mesh(new THREE.BoxGeometry(w,h,d),c,pos,out);
+const SKIN=0xd2a77a, RED=0xa4503a, IRON=0x7b8d94, DIRON=0x4f5f66, LEATH=0x5b4231, BOOT=0x4a3626, HAIR=0x9a9a9a, GOLD=0xb8964a, HELM=0x3a4448;
+const root=new THREE.Group(); scene.add(root);
+const hips=new THREE.Group(); root.add(hips);
+// torso
+const torso=new THREE.Group(); torso.position.y=0.08; hips.add(torso);
+torso.add(box(0.46,0.30,0.26,LEATH,[0,0.15,0]));            // cintura/couro
+torso.add(box(0.50,0.13,0.30,IRON,[0,0.27,0]));
+torso.add(box(0.52,0.13,0.31,DIRON,[0,0.39,0]));
+torso.add(box(0.50,0.12,0.30,IRON,[0,0.51,0]));
+torso.add(box(0.48,0.10,0.28,DIRON,[0,0.60,0]));
+const belt=box(0.50,0.07,0.30,LEATH,[0,0.02,0]); torso.add(belt);
+torso.add(box(0.09,0.20,0.02,GOLD,[0,0.0,0.16],1.0));
+// cabeca
+const head=new THREE.Group(); head.position.set(0,0.74,0); torso.add(head);
+head.add(box(0.09,0.08,0.09,SKIN,[0,-0.02,0]));
+head.add(box(0.19,0.23,0.21,SKIN,[0,0.12,0.01]));
+head.add(box(0.205,0.09,0.225,HAIR,[0,0.235,0]));
+head.add(box(0.205,0.14,0.05,HAIR,[0,0.15,-0.09]));
+head.add(box(0.035,0.03,0.012,0x1c1714,[-0.045,0.15,0.116],1.0)); head.add(box(0.035,0.03,0.012,0x1c1714,[0.045,0.15,0.116],1.0));
+head.add(box(0.19,0.07,0.012,0x8d7b66,[0,0.06,0.113],1.0)); head.add(box(0.09,0.02,0.012,0x3a2a22,[0,0.085,0.12],1.0));
+// saia
+function skirt(){
+  const g=new THREE.Group();
+  const geo=new THREE.CylinderGeometry(0.24,0.31,0.30,8,1,true);
+  const m=new THREE.Mesh(geo,new THREE.MeshToonMaterial({color:RED,gradientMap:grad,side:THREE.DoubleSide})); m.position.y=-0.10; g.add(m);
+  const ring=new THREE.Mesh(new THREE.CylinderGeometry(0.255,0.268,0.08,8,1,true),new THREE.MeshToonMaterial({color:LEATH,gradientMap:grad,side:THREE.DoubleSide})); ring.position.y=0.0; ring.rotation.y=Math.PI/8; g.add(ring);
+  const o=new THREE.Mesh(new THREE.CylinderGeometry(0.245,0.318,0.31,8,1,true),new THREE.MeshBasicMaterial({color:0x14110f,side:THREE.BackSide})); o.position.y=-0.10; g.add(o);
+  return g;
+}
+hips.add(skirt());
+// perna
+function leg(side){
+  const hip=new THREE.Group(); hip.position.set(side*0.11,0,0); hips.add(hip);
+  hip.add(box(0.17,0.46,0.18,SKIN,[0,-0.23,0]));
+  const knee=new THREE.Group(); knee.position.set(0,-0.46,0); hip.add(knee);
+  knee.add(box(0.14,0.30,0.15,SKIN,[0,-0.16,0]));
+  knee.add(box(0.16,0.27,0.17,BOOT,[0,-0.27,0]));
+  knee.add(box(0.19,0.05,0.20,LEATH,[0,-0.145,0]));
+  const ankle=new THREE.Group(); ankle.position.set(0,-0.42,0); knee.add(ankle);
+  ankle.add(box(0.15,0.07,0.28,BOOT,[0,-0.035,0.06]));
+  return {hip,knee,ankle};
+}
+const R=leg(-1), L=leg(1);
+// bracos
+function arm(side){
+  const sh=new THREE.Group(); sh.position.set(side*0.32,0.66,0); torso.add(sh);
+  sh.add(box(0.21,0.09,0.30,IRON,[side*0.01,0.03,0]));
+  sh.add(box(0.15,0.17,0.16,RED,[0,-0.09,0]));
+  sh.add(box(0.12,0.14,0.13,SKIN,[0,-0.24,0]));
+  const el=new THREE.Group(); el.position.set(0,-0.31,0); sh.add(el);
+  el.add(box(0.12,0.28,0.12,SKIN,[0,-0.14,0]));
+  el.add(box(0.10,0.10,0.11,SKIN,[0,-0.31,0.0]));
+  return {sh,el};
+}
+const AR=arm(-1), AL=arm(1);
+// capacete sob o braco esquerdo (+x)
+const helm=new THREE.Group(); AL.el.add(helm); helm.position.set(0.08,-0.30,0.05);
+helm.add(mesh(new THREE.SphereGeometry(0.15,8,5,0,Math.PI*2,0,Math.PI/2),HELM,[0,0,0],1.08));
+helm.add(box(0.30,0.03,0.30,DIRON,[0,0,0],1.05));
+// espada no quadril direito (-x)
+const sword=new THREE.Group(); sword.position.set(-0.30,0.06,-0.02); sword.rotation.x=0.45; hips.add(sword);
+sword.add(box(0.06,0.52,0.035,LEATH,[0,-0.30,0.0]));
+sword.add(box(0.045,0.10,0.045,GOLD,[0,0.02,0]));
+sword.add(box(0.14,0.03,0.05,GOLD,[0,-0.04,0]));
+const clamp=(x,a,b)=>Math.max(a,b>a?Math.min(x,b):x);
+function setLeg(l,ph,A){
+  const s=Math.sin(2*Math.PI*ph), c=Math.cos(2*Math.PI*ph);
+  const th=A*s;
+  const knee=0.10+0.78*Math.pow(Math.max(0,Math.cos(2*Math.PI*(ph+0.06))),2)*0.9+0.18*Math.max(0,Math.sin(2*Math.PI*(ph-0.30)))*Math.max(0,-c+0.2);
+  l.hip.rotation.x=-th; l.knee.rotation.x=knee;
+  l.ankle.rotation.x=(th-knee)+(-0.22*Math.max(0,s)+0.5*Math.max(0,-s)*Math.max(0,-c+0.6)*0.6);
+}
+function pose(ph,A=0.52){
+  if(ph===null){ for(const l of [R,L]){l.hip.rotation.set(0,0,0);l.knee.rotation.set(0,0,0);l.ankle.rotation.set(0,0,0);} for(const a of [AR,AL]){a.sh.rotation.set(0,0,0);a.el.rotation.set(0,0,0);} torso.rotation.set(0,0,0);hips.rotation.set(0,0,0);head.rotation.set(0,0,0);hips.position.y=0.95;root.updateMatrixWorld(true);let mY=1e9;const vv=new THREE.Vector3();for(const l of [R,L]){for(const p of [[0,-0.07,0.19],[0,-0.07,-0.07]]){vv.set(...p);l.ankle.localToWorld(vv);mY=Math.min(mY,vv.y);}}hips.position.y-=mY;root.updateMatrixWorld(true);return;}
+  setLeg(R,ph,A); setLeg(L,ph+0.5,A);
+  const sA=0.42*Math.sin(2*Math.PI*ph);
+  AR.sh.rotation.x= sA*-1*-1; AR.sh.rotation.x=-(-sA); // braco direito oposto a perna direita
+  AR.sh.rotation.x=-0.42*Math.sin(2*Math.PI*ph)*-1; AR.sh.rotation.x=0.30*Math.sin(2*Math.PI*ph);
+  AR.el.rotation.x=-0.18-0.14*Math.max(0,Math.sin(2*Math.PI*ph));
+  AL.sh.rotation.x=0.15+0.05*Math.sin(2*Math.PI*ph); AL.el.rotation.x=-1.25; AL.sh.rotation.z=-0.08;
+  torso.rotation.y=0.09*Math.sin(2*Math.PI*ph); hips.rotation.y=-0.07*Math.sin(2*Math.PI*ph);
+  head.rotation.y=-0.06*Math.sin(2*Math.PI*ph);
+  sword.rotation.x=0.45+0.12*Math.sin(2*Math.PI*ph+0.8);
+  hips.position.y=0.95;
+  root.updateMatrixWorld(true);
+  // ajusta para o pe mais baixo tocar o chao
+  let minY=1e9; const v=new THREE.Vector3();
+  for(const l of [R,L]){ for(const p of [[0,-0.07,0.19],[0,-0.07,-0.07]]){ v.set(...p); l.ankle.localToWorld(v); minY=Math.min(minY,v.y);} }
+  hips.position.y-=minY; root.updateMatrixWorld(true);
+}
+window.renderFrame=(ph,yawDeg)=>{ root.rotation.y=THREE.MathUtils.degToRad(yawDeg); pose(ph); renderer.render(scene,cam); return document.getElementById('c').toDataURL('image/png'); };
+
+function P(obj,loc=[0,0,0]){ const v=new THREE.Vector3(...loc); obj.localToWorld(v); const d=v.clone().applyMatrix4(cam.matrixWorldInverse).z; v.project(cam); return [(v.x*0.5+0.5)*W,(1-(v.y*0.5+0.5))*H,d]; }
+window.joints=(ph,yaw)=>{ root.rotation.y=THREE.MathUtils.degToRad(yaw); pose(ph); root.updateMatrixWorld(true); cam.updateMatrixWorldInverse&&0; cam.updateMatrixWorld(true);
+  const o={};
+  o.pelvis=P(hips); o.neck=P(head);
+  for(const [n,l] of [['R',R],['L',L]]){ o['hip'+n]=P(l.hip); o['knee'+n]=P(l.knee); o['ankle'+n]=P(l.ankle); o['toe'+n]=P(l.ankle,[0,-0.035,0.20]); }
+  for(const [n,a] of [['R',AR],['L',AL]]){ o['sh'+n]=P(a.sh); o['el'+n]=P(a.el); o['wr'+n]=P(a.el,[0,-0.36,0]); }
+  o.feet0=P(root,[0,0,0]); o.top=P(root,[0,1.84,0]);
+  return o; };
+window.ready=true;
+</script></body></html>
