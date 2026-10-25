@@ -17,13 +17,12 @@ namespace Lete.Game;
 /// </summary>
 public partial class Main : Node
 {
-    public static readonly int[] SpriteSizes = { 32, 48, 64 };
+    /// <summary>Altura dos sprites de mapa (ARTE.md 7.8).</summary>
+    [Export] public int SpriteHeightPx { get; set; } = 56;
+    [Export] public float CharacterHeightMeters { get; set; } = 1.7f;
 
-    [Export] public int SpriteHeightPx { get; set; } = 48;
-    [Export] public float CharacterHeightMeters { get; set; } = 1.75f;
-
-    /// <summary>Altura do personagem na tela em 1080p. Precisa ser múltipla de 32, 48 e 64 (192 serve).</summary>
-    [Export] public int CharacterScreenHeightPx { get; set; } = 192;
+    /// <summary>Altura do personagem na tela em 1080p. Múltipla de 56 para o viewport de baixa resolução (168 = 3×).</summary>
+    [Export] public int CharacterScreenHeightPx { get; set; } = 168;
 
     [Export] public bool LowResRender { get; set; } = true;
 
@@ -55,12 +54,6 @@ public partial class Main : Node
         _ = RunCommandLineAsync();
     }
 
-    public void SetSpriteSize(int heightPx)
-    {
-        SpriteHeightPx = heightPx;
-        ApplyPixelSettings();
-    }
-
     public void SetLowResRender(bool lowRes)
     {
         LowResRender = lowRes;
@@ -82,10 +75,10 @@ public partial class Main : Node
     /// <summary>Aplica a mesma densidade de pixel a sprites, texturas do cenário, câmera e viewport.</summary>
     private void ApplyPixelSettings()
     {
-        var viewportHeight = (int)ProjectSettings.GetSetting("display/window/size/viewport_height");
+        var viewportHeight = UI.Screen.LogicalHeight(this);
         var density = new PixelDensity(SpriteHeightPx, CharacterHeightMeters, CharacterScreenHeightPx, viewportHeight);
 
-        _player.SetSpriteSize(SpriteHeightPx, density.PixelSize);
+        _player.PixelSize = density.PixelSize;
         _cameraRig.Camera.Size = density.CameraSize;
         _container.StretchShrink = LowResRender ? density.LowResShrink : 1;
 
@@ -101,7 +94,7 @@ public partial class Main : Node
 
     /// <summary>
     /// Argumentos depois de "--" na linha de comando, para conferir a cena sem jogar à mão:
-    /// --size=32|48|64  --render=low|direct  --gender=m|f  --teleport=Nome  --examine
+    /// --render=low|direct  --gender=m|f  --teleport=Nome  --examine
     /// --ui=journal|debug  --shot=caminho.png  --frames=N
     /// </summary>
     private async Task RunCommandLineAsync()
@@ -113,11 +106,6 @@ public partial class Main : Node
         if (args.Count == 0)
         {
             return;
-        }
-
-        if (args.TryGetValue("size", out var size))
-        {
-            SpriteHeightPx = int.Parse(size);
         }
 
         if (args.TryGetValue("render", out var render))

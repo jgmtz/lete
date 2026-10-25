@@ -1,0 +1,86 @@
+{
+  "id": "remador",
+  "_rascunho": "Textos e fixação escritos pelo Claude para o João revisar (25/out/2026); ver PENDENCIAS.md.",
+  "kind": "named",
+  "region": "cabo_tenaro",
+  "resolve": { "_tbd": true, "value": 100 },
+  "murmur_key": "shade.remador.murmurio",
+  "attacks": [
+    {
+      "kind": "direct",
+      "gesture": "aparo_basico",
+      "caption_key": "shade.remador.gesto.remo",
+      "breath_damage": {
+        "perfect": { "_tbd": true, "value": 0 },
+        "good": { "_tbd": true, "value": 8 },
+        "failed": { "_tbd": true, "value": 20 }
+      }
+    },
+    {
+      "kind": "pattern",
+      "gesture": "esquiva_ondas",
+      "caption_key": "shade.remador.gesto.ondas",
+      "breath_damage": {
+        "perfect": { "_tbd": true, "value": 0 },
+        "good": { "_tbd": true, "value": 10 },
+        "failed": { "_tbd": true, "value": 22 }
+      }
+    },
+    {
+      "kind": "direct",
+      "gesture": "aparo_basico",
+      "caption_key": "shade.remador.gesto.mao",
+      "breath_damage": {
+        "perfect": { "_tbd": true, "value": 0 },
+        "good": { "_tbd": true, "value": 8 },
+        "failed": { "_tbd": true, "value": 20 }
+      }
+    }
+  ],
+  "listen": [
+    { "cycle_step": 0, "reveals": "clue", "text_key": "shade.remador.escuta.margem", "partial_key": "shade.remador.escuta.margem.metade" },
+    { "cycle_step": 1, "reveals": "name", "text_key": "shade.remador.escuta.nome", "partial_key": "shade.remador.escuta.nome.metade" },
+    { "cycle_step": 2, "reveals": "fixation", "text_key": "shade.remador.escuta.fixacao", "partial_key": "shade.remador.escuta.fixacao.metade" }
+  ],
+  "fixation": {
+    "id": "culpa",
+    "options": [
+      { "id": "saudade", "label_key": "shade.remador.fixacao.saudade", "wrong_key": "shade.remador.corrige.saudade" },
+      { "id": "medo", "label_key": "shade.remador.fixacao.medo", "wrong_key": "shade.remador.corrige.medo" },
+      { "id": "culpa", "label_key": "shade.remador.fixacao.culpa" }
+    ]
+  },
+  "absorb": {
+    "resolve_fraction_max": { "_tbd": true, "value": 0.3 },
+    "weak_fill_factor": { "_tbd": true, "value": 0.6 },
+    "mark_gain": {
+      "perfect": { "_tbd": true, "value": 1 },
+      "good": { "_tbd": true, "value": 1 },
+      "failed": { "_tbd": true, "value": 2 }
+    }
+  },
+  "echo": {
+    "id": "eco_remada",
+    "name_key": "shade.remador.eco.nome",
+    "description_key": "shade.remador.eco.descricao",
+    "gesture": "eco_remada",
+    "resolve_damage": {
+      "perfect": { "_tbd": true, "value": 45 },
+      "good": { "_tbd": true, "value": 30 },
+      "failed": { "_tbd": true, "value": 12 }
+    },
+    "mark_on_use": { "_tbd": true, "value": 1 }
+  },
+  "liberation": {
+    "peace": { "_tbd": true, "value": 100 },
+    "peace_gain": {
+      "perfect": { "_tbd": true, "value": 50 },
+      "good": { "_tbd": true, "value": 35 },
+      "failed": { "_tbd": true, "value": 15 }
+    },
+    "lucidity_cost": { "_tbd": true, "value": 15 },
+    "enraged_damage_multiplier": { "_tbd": true, "value": 1.5 },
+    "progress_key": "shade.remador.libertar.progresso",
+    "freed_key": "shade.remador.libertar.parte"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "sombra_de_teste",
+  "kind": "common",
+  "resolve": { "_tbd": true, "value": 100 },
+  "attacks": [
+    {
+      "kind": "direct",
+      "gesture": "aparo_basico",
+      "caption_key": "combate.sombra.teste.golpe",
+      "breath_damage": {
+        "perfect": { "_tbd": true, "value": 0 },
+        "good": { "_tbd": true, "value": 8 },
+        "failed": { "_tbd": true, "value": 20 }
+      }
+    },
+    {
+      "kind": "pattern",
+      "gesture": "esquiva_ondas",
+      "caption_key": "combate.sombra.teste.ondas",
+      "breath_damage": {
+        "perfect": { "_tbd": true, "value": 0 },
+        "good": { "_tbd": true, "value": 10 },
+        "failed": { "_tbd": true, "value": 22 }
+      }
+    }
+  ]
+}

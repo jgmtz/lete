@@ -285,7 +285,7 @@ Nenhum caminho é estritamente melhor que outro. Alguns inimigos são **imunes**
 
 ### 4.7 HUD de combate
 
-**Layout em diagonal / 3D** (pedido explícito): personagens embaixo à esquerda (protagonista e companheiro), a sombra em destaque no canto superior direito, caixa de opções no canto inferior direito. Indicadores do protagonista no canto superior esquerdo; os da sombra no superior direito, em cima dela. O gesto da sombra aparece numa faixa no meio, como legenda de texto ("ela puxa o fio... e repete") que é a principal fonte de informação.
+**Layout em diagonal / 3D** (pedido explícito): personagens embaixo à esquerda (protagonista e companheiro; **o protagonista fica sempre na posição mais à direita do grupo**), a sombra em destaque no canto superior direito, caixa de opções no canto inferior direito. Indicadores do protagonista no canto superior esquerdo; os da sombra no superior direito, em cima dela. O gesto da sombra aparece numa faixa no meio, como legenda de texto ("ela puxa o fio... e repete") que é a principal fonte de informação.
 
 **Botões principais (menu em caixa):**
 - **Atacar:** gesto Anel.
@@ -495,6 +495,17 @@ Na tela de início o jogador escolhe: **origem, gênero, aparência, modo de dif
 ## 10. Interface e conteúdo a produzir
 
 **Telas:** menu principal, tela de início (origem, gênero, aparência, modo), Diário, Mosaico, Bolsa/Alforje, equipamento, mapa (que se preenche), opções (controles, acessibilidade, idioma), tela de combate (4.7), tela de julgamento, tela de despedida no portão.
+
+**Identidade visual da interface: barro e ouro (pedido do João, 25/out/2026).** Vale para todas as telas, atuais e futuras, por um tema central (`src/Lete.Game/UI/UiStyle.cs` + paleta `ui_paleta.tres`; arte gerada por `tools/ui_arte.py` em `art/ui/`, provisória):
+- **Paleta:** barro escuro `#7A3E2B` (bordas, molduras), terracota clara `#B8664A` (destaques e **perigo**, nunca vermelho forte: a romã continua o único), ouro envelhecido `#C9A24B` (filetes, ícones, títulos), ouro escuro `#8C6B2A` (sombra do filete), azul-noite `#1E2430` translúcido (fundo dos painéis), marfim `#E9DFC7` (texto), cinza-barro `#6E5E58` (desativado), azul-lápis só para Lucidez e água.
+- **Painéis:** moldura dupla (barro por fora, filete de ouro por dentro), quadrado de meandro em cada canto, fundo azul-noite translúcido; nada de caixa preta lisa.
+- **Menu de ação:** tabuinha de barro com friso de meandro em cima e embaixo; cursor de folha de louro/ponta de lança dourada; desativado em cinza-barro; filete de ouro antes de Fugir. Ao abrir, os frisos se desenham da esquerda para a direita (0,3 s).
+- **Barras:** trilho escuro, preenchimento colorido, tampas de meandro douradas e um ícone na mesma linha (sopro = Fôlego, gota = Lucidez, vulto = Firmeza). Fôlego baixo pulsa em terracota.
+- **Retrato:** medalhão dourado. **Quadros de gesto:** filete de ouro com cantos de meandro; o ponto do jogador em marfim com brilho. **Anel de alvo no chão:** aro de ouro envelhecido com desgaste e quatro marcadores de meandro.
+- **Texto:** fonte pixel (Pixelify Sans) com contorno escuro e sombra de 1 pixel da arte; títulos em ouro, corpo em marfim.
+- **Transições:** fade curto na cor do fundo (azul-noite).
+- **Proporções:** a base é 1920×1080; em telas mais estreitas (16:10, 4:3) a tela lógica cresce na vertical (`stretch/aspect = expand`) e o HUD se posiciona por frações da tela (dados em `content/battle/hud_layouts.json` e `battle_hud_estilo.tres`).
+- Propostas do Claude que ainda dependem de aprovação: ver `PENDENCIAS.md` 24 a 26.
 
 **Conteúdo total estimado (por partida e no jogo):** sombras ~40 a 60 (nomeadas 15 a 20, comuns reutilizando 6 corpos-base), Lembranças ~45, itens ~65, juramentos 8 a 10, julgamentos 4 a 6, missões 15 a 20, 6 chefes (+1 opcional), 5 origens, 5 companheiros, ~15 regiões. Ordem de grandeza de arte: 1.500 a 2.000 quadros (ver `ARTE.md`).
 

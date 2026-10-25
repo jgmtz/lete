@@ -55,3 +55,5 @@ As pernas não aparecem: o rig de pernas não se aplica. Usar balanço da barra 
 1. Imagens: F, C, PD (perfil com a ponta de um sapato). Um só perfil serve de andando e parado.
 2. `python tools/andar_vestido.py img.png --vista frente|costas|lado [--espelhar --pe-tras --lift 3.2 --pe-desl 120] --saida folha.png`, depois `python tools/sprite_andar.py folha.png --colunas 4 --linhas 3 --altura 56 --cores 56 --celula-fixa --saida pasta --nome nome` (personagens escuros: 56 cores).
 3. Gerar o perfil ESQUERDO (`--espelhar --pe-tras`) e espelhar os quadros para a direita. Parado = quadro 1 de cada direção.
+
+- **Saia curta (joelho) com canela visível (Lia):** `marionete_capa.py` modo `fc` com `sem_coxa` para frente/costas e modo `duas` para o perfil (duas pernas pintadas, divisor inclinado, `amp` reduz o balanço). Perna/pé tortos do Gemini na vista simétrica: espelhar a metade boa em vez de pedir de novo.

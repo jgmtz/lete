@@ -1,0 +1,24 @@
+{
+  "id": "teste_batalha",
+  "layout": {
+    "party": [
+      { "x": -0.6, "y": -1.25 },
+      { "x": -1.1, "y": -0.85 }
+    ],
+    "enemy": [
+      { "x": 0.8, "y": -0.45 }
+    ]
+  },
+  "party": [
+    { "id": "aulo", "art": "aulo_c", "height": { "_tbd": true, "value": 1.0 } },
+    { "id": "ismena", "art": "ismena_c", "height": { "_tbd": true, "value": 0.93 } }
+  ],
+  "enemy": [
+    { "id": "sombra_teste", "art": "dimas_34", "height": { "_tbd": true, "value": 1.0 }, "flip_h": false, "tint": "#8C9BAD" }
+  ],
+  "styles": [
+    { "id": "liso", "folder": "liso", "filter": "linear" },
+    { "id": "pixel_128", "folder": "pixel_128", "filter": "nearest" },
+    { "id": "pixel_160", "folder": "pixel_160", "filter": "nearest" }
+  ]
+}

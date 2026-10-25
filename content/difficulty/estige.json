@@ -1,0 +1,7 @@
+{
+  "id": "estige",
+  "gesture_windows": {
+    "perfect": { "_tbd": true, "value": 0.8 },
+    "good": { "_tbd": true, "value": 0.4 }
+  }
+}

@@ -1,0 +1,60 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/Lete.Game/Sandbox/BattleTest.cs" id="1_test"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/CameraRig.cs" id="2_cam"]
+[ext_resource type="Resource" path="res://src/Lete.Game/Combat/battle_anim_teste.tres" id="3_tuning"]
+
+[sub_resource type="Environment" id="Environment_teste"]
+background_mode = 1
+background_color = Color(0.82, 0.82, 0.84, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_branco"]
+albedo_color = Color(0.96, 0.96, 0.96, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="Mesh_chao"]
+material = SubResource("Mat_branco")
+size = Vector2(40, 40)
+
+[sub_resource type="StandardMaterial3D" id="Mat_cinza"]
+albedo_color = Color(0.55, 0.55, 0.58, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Mesh_cubo"]
+material = SubResource("Mat_cinza")
+size = Vector3(0.6, 0.6, 0.6)
+
+[node name="BattleTest" type="Node3D"]
+script = ExtResource("1_test")
+Tuning = ExtResource("3_tuning")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_teste")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8192, -0.4698, 0.329, 0, 0.5736, 0.8192, -0.5736, -0.671, 0.4698, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_chao")
+
+[node name="CubeA" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0.3, -2.4)
+mesh = SubResource("Mesh_cubo")
+
+[node name="CubeB" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0.3, 1.2)
+mesh = SubResource("Mesh_cubo")
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("2_cam")
+
+[node name="Pitch" type="Node3D" parent="CameraRig"]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/Pitch"]
+projection = 1
+current = true
+far = 200.0

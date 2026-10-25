@@ -19,9 +19,9 @@
 5. **Retratos de diálogo 64×64** (companheiros, com 3 a 4 expressões). O retrato do protagonista é um **mosaico** (efeito de shader sobre o mesmo retrato).
 6. **Escala de trabalho:** ordem de grandeza de **1.500 a 2.000 quadros** no total (protagonista com 5 roupas, 5 companheiros, ~15 a 20 sombras nomeadas, 6 chefes maiores, 6 corpos-base de sombras comuns, ícones dos ~65 itens).
 
-### 2.1 Teste de tamanho e densidade (M0) — **montado, decisão pendente**
+### 2.1 Teste de tamanho e densidade (M0) — **decidido**
 
-> Atualização (24/out/2026): o tamanho foi decidido fora deste teste (sprite de mapa com 56 px, retrato com 96 px; ver 7.8). A fileira 32/48/64 ficou como registro. O andar do Aulo e da Ismena em 56 px está em `src/Lete.Game/Sandbox/WalkTest.tscn` (1 pixel de arte = 3 px de tela a 1080p). **Continua em aberto:** o modo de render e o enquadramento.
+> Atualização (24/out/2026): o tamanho foi decidido fora deste teste (sprite de mapa com 56 px, retrato com 96 px; ver 7.8). A fileira 32/48/64 ficou como registro. O andar do Aulo e da Ismena em 56 px está em `src/Lete.Game/Sandbox/WalkTest.tscn` (1 pixel de arte = 3 px de tela a 1080p). **Decidido (24/out/2026):** render em **viewport de baixa resolução**; enquadramento de 168 px a 1080p (3×), câmera com inclinação de 35° e giro de 45°. Aulo e Ismena já andam na sala com névoa; a fileira 32/48/64 foi removida da cena.
 
 A cena de teste (`src/Lete.Game/World/TestRoom.tscn`) aplica **uma só densidade de pixel** a sprites e texturas do cenário (`Lete.Core/Presentation/PixelDensity.cs`):
 
@@ -33,9 +33,23 @@ A cena de teste (`src/Lete.Game/World/TestRoom.tscn`) aplica **uma só densidade
 
 Observação do teste: no modo de baixa resolução, qualquer sprite com densidade diferente da escolhida fica reamostrado (ver a fileira). Isso é a regra 1 acima na prática: escolher o tamanho também fixa a densidade de todo o cenário.
 
-**Falta decidir (João):** tamanho do sprite, modo de render, e se o enquadramento (192 px a 1080p) e o ângulo da câmera (inclinação 35°, giro 45°) estão bons. Ver `PENDENCIAS.md`.
+*(Decisões registradas na atualização acima e em `PENDENCIAS.md` 12 e 13.)*
 
 **Sprites e texturas placeholder:** gerados por `tools/placeholders.py` (o "conceito" do protagonista passa pelo `pixelizar.py`, como uma imagem do Gemini). Ficam em `art/sprites/placeholder/` e `art/tiles/`; substituir quando houver arte real.
+
+### 2.2 Arte de batalha (24/out/2026) — **decidido: pixel_160**
+
+Batalha em 3D (câmera diagonal, sprites virados para a câmera só no eixo Y) com **arte própria**: as imagens originais do Gemini (assimétricas, 3/4, com itens nas mãos), separadas dos sprites simétricos de mapa. Cena de comparação: `src/Lete.Game/Sandbox/BattleTest.tscn` (ver `BATALHA_TESTE.md`), arte em `art/sprites/batalha/{liso,pixel_128,pixel_160}/`.
+
+- **Mesma altura na tela nas três versões:** um participante de altura 1,0 ocupa **640 px a 1080p** (~59% da tela, 2,86 vezes o sprite de mapa a 4×). 640 = 128 × 5 = 160 × 4, então `pixel_128` fica a **5×** e `pixel_160` a **4×** (o mesmo N do mapa), os dois com pixels inteiros; `liso` (855 px no Aulo) usa filtro linear com mipmaps.
+- Alturas no mundo, posições e versões ficam em `content/battle/teste_batalha.json`; animações por código (respiração, dano com piscada, avanço, derrota) em `src/Lete.Game/Combat/battle_anim_teste.tres`.
+- A sombra provisória é o Dimas de frente, espelhado e com tinta azul-acinzentada (nunca usar como arte final).
+
+**Decidido pelo João (24/out/2026): `pixel_160`.** A arte de batalha de cada personagem é a imagem do Gemini pixelizada para **160 px de altura** (filtro nearest), exibida a **4×** (640 px a 1080p, o mesmo N do mapa). As versões `liso` e `pixel_128` ficam só como registro do teste.
+
+**Interface de combate (provisória, 24/out/2026):** caixa de ações desenhada dentro do viewport de baixa resolução (mesmo pixel da cena), moldura de vaso grego em terracota e osso sobre carvão (`art/ui/painel_acoes.png`, 9-patch), faixa de meandro (`art/ui/meandro.png`), cursor dourado (`art/ui/cursor.png`) e fonte **Pixelify Sans** a 10 px (`art/fonts/`, licença OFL, uso comercial permitido). Sombra derrotada se desintegra em pó (shader `flash`, parâmetros em `battle_anim_ataque.tres`).
+
+**HUD de combate em pixel art (24/out/2026, provisório):** tudo dentro do viewport de baixa resolução. Fundo provisório escuro em cena separada (`src/Lete.Game/Combat/BattleBackdrop.tscn`: carvão + névoa azul-petróleo subindo de baixo), trocável pelo cenário real. Barras finas sem número com tampas de meandro e moldura em ouro apagado (Fôlego osso, Lucidez azul-petróleo, Firmeza azul-acinzentado; **nunca vermelho**); Compreensão como 3 óbolos; nome da sombra "???" até ser revelado; indicadores da sombra seguem a sombra na tela; anel de turno no chão sob quem age, marca de alvo e retrato do personagem ativo; legenda numa faixa escura com meandro fino no alto. Cores e medidas em `battle_hud_estilo.tres`; layout em `content/battle/hud_layouts.json`, validado para nunca invadir a área central dos gestos. **Decidido (25/out/2026): layout normal** (o painel grande foi descartado). O protagonista fica sempre na posição mais à direita do grupo (GDD 4.7). Arte de batalha 3/4 (frente e costas, nas 3 versões) de Aulo, Ismena, Dimas, Septímia e Cálias em `art/sprites/batalha/`; a sombra de teste usa o Dimas 3/4 (`dimas_34`).
 
 ## 3. Paleta "cerâmica dos mortos"
 
@@ -49,6 +63,8 @@ Paleta curta e terrosa, com um acento por região, que lembra as figuras em vaso
 | Carvão | `#25222B` | Sombras, contornos, fundo |
 | Água do Lete | `#4E7F86` | Água, névoa, esquecimento |
 | Ouro | `#C8A24A` | Relíquias, brilho, Elísios |
+
+**Interface (25/out/2026):** a UI tem paleta própria de barro e ouro (`GDD.md` 10), derivada desta: barro `#7A3E2B`, terracota clara `#B8664A`, ouro envelhecido `#C9A24B` (substitui o ouro apagado `#A99572` da UI), ouro escuro `#8C6B2A`, marfim `#E9DFC7` (substitui o osso no texto), azul-noite `#1E2430`. Fonte única: `src/Lete.Game/UI/ui_paleta.tres`; a arte da UI (`art/ui/`) é gerada dela por `python tools/ui_arte.py` (desenhos provisórios do Claude; o João pode trocar qualquer arquivo por um definitivo de mesmo nome e tamanho).
 
 **Regra:** a romã é o único vermelho forte, para que a Marca sempre se destaque. **Cuidado:** o Veterano e Aulo usam "vermelho desbotado"; mantê-lo dessaturado (mais terracota que romã) para não competir com a Marca. **Acento por região** (exemplos): azul-gelo do Cocito, laranja do Flegetonte, dourado de Elísios; os demais são TBD.
 

@@ -1,0 +1,8 @@
+{
+  "id": "absorver",
+  "gesture": "hold",
+  "fill_seconds": { "_tbd": true, "value": 1.4 },
+  "target": { "_tbd": true, "value": 0.8 },
+  "zero_score_distance": { "_tbd": true, "value": 0.25 },
+  "wait_seconds": { "_tbd": true, "value": 3.0 }
+}

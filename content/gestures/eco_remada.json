@@ -1,0 +1,8 @@
+{
+  "id": "eco_remada",
+  "gesture": "ring",
+  "repeats": { "_tbd": true, "value": 2 },
+  "shrink_seconds": { "_tbd": true, "value": 0.9 },
+  "start_scale": { "_tbd": true, "value": 2.5 },
+  "zero_score_offset_seconds": { "_tbd": true, "value": 0.25 }
+}

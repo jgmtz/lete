@@ -39,7 +39,18 @@ Usadas em diálogos, revelação de névoa, estoque de mercadores, missões, eve
     "pattern_id": "fios_cruzados",
     "cycle_length": 3
   },
-  "fixation": { "id": "espera", "clue_keys": ["shade.tecela.clue1", "shade.tecela.clue2"] },
+  "fixation": { "id": "espera", "clue_keys": ["shade.tecela.clue1", "shade.tecela.clue2"],
+    "options": [                         // o que o jogador pode acreditar ao Libertar (pistas nunca são exatas)
+      { "id": "espera", "label_key": "shade.tecela.fix.espera" },
+      { "id": "luto", "label_key": "shade.tecela.fix.luto", "wrong_key": "shade.tecela.corrige.luto" }  // fala que corrige a pista
+    ] },
+  "murmur_key": "shade.tecela.murmurio", // o que se ouve num Escutar falho ou num golpe sem fala
+  "listen": [                            // Escutar: o que ela murmura em cada golpe do ciclo (contando do 0)
+    { "cycle_step": 1, "reveals": "name", "text_key": "shade.tecela.nome_ouvido", "partial_key": "shade.tecela.nome_metade" }
+  ],                                     // reveals: clue | name | fixation (exatamente um name e um fixation)
+  "liberation": { "peace": "_tbd", "peace_gain": { "perfect": "_tbd", "good": "_tbd", "failed": "_tbd" },
+    "lucidity_cost": "_tbd", "enraged_damage_multiplier": "_tbd",
+    "progress_key": "shade.tecela.libertar.progresso", "freed_key": "shade.tecela.libertar.parte" },
   "true_name": { "id": "nome_tecela", "revealed_by": ["escutar_ciclo2", "oferenda_agua"] },
   "ways_open": { "fight": true, "free": true, "absorb": true, "witness": true, "spare": true, "flee": true },
   "ways_immune": [],
@@ -51,7 +62,17 @@ Usadas em diálogos, revelação de névoa, estoque de mercadores, missões, eve
   "voices": [
     { "when": { "resolve_pct_below": 40 }, "text_key": "shade.tecela.voice1" }
   ],
-  "echo": { "id": "eco_fio_que_prende", "gesture": "fios_cruzados" },
+  "attacks": [                           // ciclo de golpes no turno da sombra (repete)
+    { "kind": "direct",  "gesture": "aparo_basico",  "caption_key": "shade.tecela.golpe",
+      "breath_damage": { "perfect": 0, "good": "_tbd", "failed": "_tbd" } },   // aparar com o Anel
+    { "kind": "pattern", "gesture": "esquiva_ondas", "caption_key": "shade.tecela.fios",
+      "breath_damage": { "perfect": 0, "good": "_tbd", "failed": "_tbd" } }    // quadro da Esquiva
+  ],
+  "absorb": { "resolve_fraction_max": "_tbd", "weak_fill_factor": "_tbd",       // Absorver: só com Firmeza baixa
+    "mark_gain": { "perfect": "_tbd", "good": "_tbd", "failed": "_tbd" } },
+  "echo": { "id": "eco_fio_que_prende", "name_key": "shade.tecela.eco.nome", "description_key": "shade.tecela.eco.descricao",
+    "gesture": "fios_cruzados",                // gesto em content/gestures (um Anel pode ter "repeats")
+    "resolve_damage": { "perfect": "_tbd", "good": "_tbd", "failed": "_tbd" }, "mark_on_use": "_tbd" },
   "rewards": {
     "free": { "recollection_fragment": "o_fio_da_espera", "hospitality": true },
     "fight": { "obols": 0, "items": [] }
@@ -196,7 +217,7 @@ Modos: `asfodelo` (janelas largas; derrota perde parte das oferendas, Maré +0; 
 ## 8. Origem, companheiro, juramento, julgamento, missão
 
 - **Origem** (`origins/`): `id`, `ambition_key`, `betrayed_key`, `alternative` (efeito mecânico poupado), `friction` (efeito mecânico cobrado), `outfit`, `exclusive_recollections` (3 ids), `chain` (4 capítulos com `act`, `quest_id`).
-- **Companheiro** (`companions/`): `id`, `meet_region`, `support` (`id`, `effect`, `interval_turns`), `approval` (mapa via→ aprova/tolera/reprova), `chapters` (0 a 4 com `quest_id`), `gate_offer` (`id`, `scene_id`), `portrait` (3 a 4 expressões).
+- **Companheiro** (`companions/`): `id`, `meet_region`, `support` (`id`, `effect`, `interval_turns`, `window_widening` na Postura), `approval` (mapa via→ aprova/tolera/reprova), `chapters` (0 a 4 com `quest_id`), `gate_offer` (`id`, `scene_id`), `portrait` (3 a 4 expressões).
 - **Juramento** (`oaths/`): `id`, `blessing`, `heel`, `condition` (como condição DSL avaliável ao longo do tempo), `giver`, `conflicts_with`. Perjúrio publica `OathBroken` (Marca sobe, bênção some).
 - **Julgamento** (`trials/`): `id`, `judge`, `shade`, `evidence_slots`, `verdicts` (destinos e consequências), `perjury_if` (Lembrança incerta/falsa como prova).
 - **Missão** (`missions/`): `id`, `type` (region | offering | origin | companion), `hook` (condição de aparecer), `stages` (lista com condição de avanço), `consequences`, `closed_by_fight` (bool). Sem campo de marcador de mapa.

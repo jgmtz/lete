@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="BattleAnimTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/BattleAnimTuning.cs" id="1_tuning"]
+
+[resource]
+script = ExtResource("1_tuning")
+BreathePixels = 1.5
+BreatheSeconds = 2.4
+HitShakePixels = 8.0
+HitShakeCount = 4
+HitShakeStepSeconds = 0.04
+HitFlashSeconds = 0.18
+AdvanceMeters = 1.0
+CharacterHeightMeters = 1.7
+AdvanceSeconds = 0.18
+AdvanceHoldSeconds = 0.12
+ReturnSeconds = 0.3
+FallDegrees = 90.0
+FallSeconds = 0.5
+FadeSeconds = 0.7

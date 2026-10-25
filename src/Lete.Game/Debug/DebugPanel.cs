@@ -7,7 +7,7 @@ using Lete.Game.UI;
 namespace Lete.Game.Debug;
 
 /// <summary>
-/// Painel de debug (ação "debug_toggle", F1). No M0: render, tamanho do sprite, gênero,
+/// Painel de debug (ação "debug_toggle", F1). No M0: render, gênero,
 /// teleporte, flags e Diário. Marca, Maré, Lembranças e juramentos entram com os sistemas (M2).
 /// </summary>
 public partial class DebugPanel : CanvasLayer
@@ -34,7 +34,7 @@ public partial class DebugPanel : CanvasLayer
     {
         Layer = 10;
 
-        _panel = UiStyle.MakePanel(0.94f);
+        _panel = UiStyle.MakePanel();
         _panel.Position = new Vector2(24, 24);
         _panel.CustomMinimumSize = new Vector2(520, 0);
         AddChild(_panel);
@@ -49,16 +49,6 @@ public partial class DebugPanel : CanvasLayer
         _renderButton = new Button();
         _renderButton.Pressed += () => _main.SetLowResRender(!_main.LowResRender);
         column.AddChild(_renderButton);
-
-        column.AddChild(UiStyle.MakeLabel(T("debug.sprite")));
-        var sizes = new HBoxContainer();
-        foreach (var px in Main.SpriteSizes)
-        {
-            var button = new Button { Text = $"{px} px", CustomMinimumSize = new Vector2(110, 0) };
-            button.Pressed += () => _main.SetSpriteSize(px);
-            sizes.AddChild(button);
-        }
-        column.AddChild(sizes);
 
         column.AddChild(UiStyle.MakeLabel(T("debug.genero")));
         _genderButton = new Button();

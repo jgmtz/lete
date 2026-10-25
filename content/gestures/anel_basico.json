@@ -1,0 +1,12 @@
+{
+  "id": "anel_basico",
+  "gesture": "ring",
+  "shrink_seconds": { "_tbd": true, "value": 1.2 },
+  "start_scale": { "_tbd": true, "value": 3.0 },
+  "zero_score_offset_seconds": { "_tbd": true, "value": 0.25 },
+  "resolve_damage": {
+    "perfect": { "_tbd": true, "value": 30 },
+    "good": { "_tbd": true, "value": 18 },
+    "failed": { "_tbd": true, "value": 6 }
+  }
+}

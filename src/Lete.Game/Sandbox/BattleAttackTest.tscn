@@ -1,0 +1,121 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://src/Lete.Game/Sandbox/BattleAttackTest.cs" id="1_test"]
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/BattleStage.cs" id="2_stage"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/CameraRig.cs" id="3_cam"]
+[ext_resource type="Resource" path="res://src/Lete.Game/Combat/battle_anim_ataque.tres" id="4_tuning"]
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/Gestures/RingGesture.cs" id="5_ring"]
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/ActionMenu.cs" id="6_menu"]
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/BattleHud.cs" id="7_hud"]
+[ext_resource type="Resource" path="res://src/Lete.Game/Combat/battle_hud_estilo.tres" id="8_style"]
+[ext_resource type="PackedScene" path="res://src/Lete.Game/Combat/BattleBackdrop.tscn" id="9_backdrop"]
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/Gestures/DodgeGesture.cs" id="10_dodge"]
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/Gestures/HoldGesture.cs" id="11_hold"]
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/Gestures/DragGesture.cs" id="12_drag"]
+
+[node name="BattleAttackTest" type="Node"]
+script = ExtResource("1_test")
+HudStyle = ExtResource("8_style")
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="."]
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="ViewportContainer"]
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="Stage" type="Node3D" parent="ViewportContainer/SubViewport"]
+script = ExtResource("2_stage")
+SetupPath = "res://content/battle/teste_ataque.json"
+Tuning = ExtResource("4_tuning")
+
+[node name="BattleBackdrop" parent="ViewportContainer/SubViewport/Stage" instance=ExtResource("9_backdrop")]
+
+[node name="CameraRig" type="Node3D" parent="ViewportContainer/SubViewport/Stage"]
+script = ExtResource("3_cam")
+
+[node name="Pitch" type="Node3D" parent="ViewportContainer/SubViewport/Stage/CameraRig"]
+
+[node name="Camera3D" type="Camera3D" parent="ViewportContainer/SubViewport/Stage/CameraRig/Pitch"]
+projection = 1
+current = true
+far = 200.0
+
+[node name="HudLayer" type="CanvasLayer" parent="ViewportContainer/SubViewport"]
+layer = 1
+
+[node name="ActionMenu" type="Control" parent="ViewportContainer/SubViewport/HudLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_menu")
+Style = ExtResource("8_style")
+
+[node name="BattleHud" type="Control" parent="ViewportContainer/SubViewport/HudLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_hud")
+Style = ExtResource("8_style")
+
+[node name="RingLayer" type="CanvasLayer" parent="ViewportContainer/SubViewport"]
+layer = 2
+
+[node name="Ring" type="Control" parent="ViewportContainer/SubViewport/RingLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("5_ring")
+Antialiased = false
+
+[node name="Dodge" type="Control" parent="ViewportContainer/SubViewport/RingLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("10_dodge")
+Style = ExtResource("8_style")
+
+[node name="Hold" type="Control" parent="ViewportContainer/SubViewport/RingLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("11_hold")
+Style = ExtResource("8_style")
+
+[node name="Drag" type="Control" parent="ViewportContainer/SubViewport/RingLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("12_drag")
+Style = ExtResource("8_style")

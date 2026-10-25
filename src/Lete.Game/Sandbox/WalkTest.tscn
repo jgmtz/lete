@@ -1,8 +1,8 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://src/Lete.Game/Sandbox/WalkTest.cs" id="1_test"]
-[ext_resource type="Script" path="res://src/Lete.Game/Sandbox/WalkingCharacter.cs" id="2_char"]
-[ext_resource type="Script" path="res://src/Lete.Game/Sandbox/WalkSpriteSet.cs" id="3_set"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/WalkingCharacter.cs" id="2_char"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/WalkSpriteSet.cs" id="3_set"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/CameraRig.cs" id="4_cam"]
 [ext_resource type="Texture2D" path="res://art/sprites/placeholder/sombra_chao.png" id="5_sombra"]
 
@@ -10,13 +10,31 @@
 script = ExtResource("3_set")
 Folder = "res://art/sprites/companheiros/aulo_sim"
 Prefix = "aulo"
-WalkFps = 16.0
 
 [sub_resource type="Resource" id="Set_ismena"]
 script = ExtResource("3_set")
 Folder = "res://art/sprites/companheiros/ismena_sim"
 Prefix = "ismena"
-WalkFps = 16.0
+
+[sub_resource type="Resource" id="Set_dimas"]
+script = ExtResource("3_set")
+Folder = "res://art/sprites/companheiros/dimas_sim"
+Prefix = "dimas"
+
+[sub_resource type="Resource" id="Set_septimia"]
+script = ExtResource("3_set")
+Folder = "res://art/sprites/companheiros/septimia_sim"
+Prefix = "septimia"
+
+[sub_resource type="Resource" id="Set_calias"]
+script = ExtResource("3_set")
+Folder = "res://art/sprites/companheiros/calias_sim"
+Prefix = "calias"
+
+[sub_resource type="Resource" id="Set_lia"]
+script = ExtResource("3_set")
+Folder = "res://art/sprites/companheiros/lia_sim"
+Prefix = "lia"
 
 [sub_resource type="Environment" id="Environment_teste"]
 background_mode = 1
@@ -91,8 +109,7 @@ mesh = SubResource("Mesh_cubo")
 
 [node name="Character" type="CharacterBody3D" parent="."]
 script = ExtResource("2_char")
-MoveSpeed = 1.6
-Characters = [SubResource("Set_aulo"), SubResource("Set_ismena")]
+Characters = [SubResource("Set_aulo"), SubResource("Set_ismena"), SubResource("Set_dimas"), SubResource("Set_septimia"), SubResource("Set_calias"), SubResource("Set_lia")]
 
 [node name="Sprite" type="AnimatedSprite3D" parent="Character"]
 cast_shadow = 0

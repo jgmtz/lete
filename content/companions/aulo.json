@@ -1,0 +1,10 @@
+{
+  "id": "aulo",
+  "name_key": "companheiro.aulo.nome",
+  "support": {
+    "id": "postura",
+    "effect": "widen_dodge_parry",
+    "interval_turns": { "_tbd": true, "value": 2 },
+    "window_widening": { "_tbd": true, "value": 0.15 }
+  }
+}
