@@ -97,6 +97,8 @@ public class HudAndTurnTests
         var set = HudData.FromJson(File.ReadAllText(Path.Combine(dir!.FullName, "content/battle/hud_layouts.json")));
         Assert.Equal(new[] { "normal" }, set.Layouts.Select(l => l.Id));
 
-        BattleData.FromJson(File.ReadAllText(Path.Combine(dir.FullName, "content/battle/teste_ataque.json")));
+        BattleData.FromJson(
+            File.ReadAllText(Path.Combine(dir.FullName, "content/battle/teste_ataque.json")),
+            CastData.FromJson(File.ReadAllText(Path.Combine(dir.FullName, "content/characters/elenco.json"))));
     }
 }

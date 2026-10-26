@@ -100,6 +100,50 @@ public static class ShadeData
         return errors.Count == 0 ? rules : throw new FormatException(string.Join(" ", errors));
     }
 
+    /// <summary>
+    /// Campos narrativos: <c>voices</c>, <c>phases</c>, <c>story_keys</c> (Presenciar), <c>flee_clue_key</c>,
+    /// <c>yield</c> (falas e custo), <c>defeat_clue_keys</c> (pistas de Hécate), <c>spare_key</c> e <c>offering</c> (opcional).
+    /// </summary>
+    public static ShadeStory StoryFromJson(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        var yield = Required(root, "yield");
+
+        var story = new ShadeStory(
+            Required(root, "voices").EnumerateArray()
+                .Select(v => new ShadeVoice(TbdNumber.Read(v, "resolve_fraction_below"), String(v, "text_key")))
+                .ToList(),
+            Required(root, "phases").EnumerateArray()
+                .Select(p => new ShadePhase(
+                    TbdNumber.Read(p, "resolve_fraction_below"),
+                    CombatData.ReadAttacks(Required(p, "attacks")),
+                    String(p, "caption_key"),
+                    OptionalString(p, "reveals") switch
+                    {
+                        null => null,
+                        "name" => ListenReveal.Name,
+                        "fixation" => ListenReveal.Fixation,
+                        var other => throw new FormatException($"Fase revela '{other}', que não existe (use name ou fixation)."),
+                    }))
+                .ToList(),
+            Keys(root, "story_keys"),
+            String(root, "flee_clue_key"),
+            Keys(yield, "text_keys"),
+            TbdNumber.Read(yield, "lucidity_cost"),
+            Keys(root, "defeat_clue_keys"),
+            String(root, "spare_key"),
+            root.TryGetProperty("offering", out var offering)
+                ? new ShadeOffering(String(offering, "accepts"), String(offering, "accept_key"), String(offering, "refuse_key"))
+                : null);
+
+        var errors = story.Validate().ToList();
+        return errors.Count == 0 ? story : throw new FormatException(string.Join(" ", errors));
+    }
+
+    private static IReadOnlyList<string> Keys(JsonElement element, string property) =>
+        Required(element, property).EnumerateArray().Select(k => k.GetString() ?? "").ToList();
+
     private static GradeValues Grades(JsonElement e) =>
         new(TbdNumber.Read(e, "perfect"), TbdNumber.Read(e, "good"), TbdNumber.Read(e, "failed"));
 

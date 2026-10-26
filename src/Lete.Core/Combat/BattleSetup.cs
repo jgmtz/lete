@@ -65,7 +65,18 @@ public sealed record BattleLayout(IReadOnlyList<Vector2> Party, IReadOnlyList<Ve
 /// <paramref name="Portrait"/>: imagem do retrato pequeno (turno); <paramref name="NameKey"/>: chave do nome verdadeiro.
 /// </summary>
 public sealed record BattleActorArt(
-    string Id, string Art, float Height, bool FlipH, string? Tint, string? Portrait = null, string? NameKey = null);
+    string Id, string Art, float Height, bool FlipH, string? Tint, string? Portrait = null, string? NameKey = null,
+    IdleAnimation? Idle = null);
+
+/// <summary>
+/// Animação de quadros parada (ex.: o flutuar de 6 quadros de uma sombra). <paramref name="PrefixByStyle"/>: para cada
+/// versão de arte (id do estilo), o caminho dos arquivos sem o número (<c>..._flutuar_</c> + <c>01.png</c>...). Versões
+/// sem quadros usam a imagem única com o balanço feito por código.
+/// </summary>
+public sealed record IdleAnimation(int Frames, float Fps, IReadOnlyDictionary<string, string> PrefixByStyle)
+{
+    public string FramePath(string style, int frame) => $"{PrefixByStyle[style]}{frame + 1:00}.png";
+}
 
 /// <summary>Uma versão de arte para comparar (liso, pixel_128, pixel_160).</summary>
 public sealed record BattleArtStyle(string Id, string Folder, bool Smooth);

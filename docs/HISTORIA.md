@@ -22,13 +22,14 @@ O protagonista **já desceu uma vez ao Além e voltou**, deixando alguém no lug
 
 Mesma estrutura para todas; muda o rosto. Os nomes dos traídos ficam de fora de propósito (foram apagados).
 
-| Origem | Ambição | Quem foi traído |
-|---|---|---|
-| Pescador | Fama no porto | O parceiro de barco |
-| Sacerdote | Poder dentro do culto | O aprendiz iniciado |
-| Veterano | Glória de guerra | O camarada de armas |
-| Artesão | Uma obra-prima | O aprendiz ou sócio de ofício |
-| Estrangeiro | Pertencer | Quem confiou nele primeiro (quando ninguém mais confiava) |
+| Origem | Ambição | Quem foi traído | Personagem/gênero (proposta) |
+|---|---|---|---|
+| Pescador | Fama no porto | O parceiro de barco | *(nome pendente)*, masculino |
+| Sacerdote | Poder dentro do culto | O aprendiz iniciado | *(nome pendente)*, feminino |
+| Veterano | Glória de guerra | O camarada de armas | *(nome pendente)*, masculino |
+| Artesão | Uma obra-prima | O aprendiz ou sócio de ofício | *(nome pendente)*, masculino |
+| Estrangeiro | Pertencer | Quem confiou nele primeiro (quando ninguém mais confiava) | *(nome pendente)*, feminino |
+| Retratista *(proposta, ver `docs/LIA_PROPOSTA.md`)* | Ser lembrada como a melhor pintora de rostos | A menina pobre que posou e a quem ela negou o retrato | **Lia**, feminino |
 
 ### 1.2 As seis Memórias Pesadas (sequência de verdades, cada uma pior)
 

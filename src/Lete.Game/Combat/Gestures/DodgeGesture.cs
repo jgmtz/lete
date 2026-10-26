@@ -17,6 +17,9 @@ public partial class DodgeGesture : Control, IGesture
     /// <summary>Opacidade do fundo do quadro (a cena continua visível atrás).</summary>
     [Export] public float BoxAlpha { get; set; } = 0.8f;
 
+    /// <summary>Opacidade da abertura dourada da saída (Fugir).</summary>
+    [Export] public float ExitAlpha { get; set; } = 0.55f;
+
     /// <summary>Brilho em volta do ponto do jogador: largura em pixels da arte e opacidade.</summary>
     [Export] public float GlowPixels { get; set; } = 1f;
     [Export] public float GlowAlpha { get; set; } = 0.45f;
@@ -31,6 +34,18 @@ public partial class DodgeGesture : Control, IGesture
     public DodgeSettings Settings { get; set; } = null!;
     public IDodgePattern Pattern { get; set; } = null!;
 
+    /// <summary>Saída do quadro (Fugir); nula numa Esquiva comum.</summary>
+    public EscapeExit? Exit { get; set; }
+
+    /// <summary>Onde está o marcador e onde fica a saída, em coordenadas do controle (para o modo demo).</summary>
+    public Vector2 MarkerPosition => _run is null ? Vector2.Zero : BoxOrigin + new Vector2(_run.Marker.X, _run.Marker.Y);
+
+    public Vector2? ExitCenter => Exit is { } e
+        ? BoxOrigin + new Vector2((e.X + e.Width / 2f) * Settings.BoxWidth, (e.Y + e.Height / 2f) * Settings.BoxHeight)
+        : null;
+
+    private Vector2 BoxOrigin => ((Center ?? Size / 2f) - new Vector2(Settings.BoxWidth, Settings.BoxHeight) / 2f).Round();
+
     private DodgeRun? _run;
 
     public event Action<float>? Completed;
@@ -42,7 +57,7 @@ public partial class DodgeGesture : Control, IGesture
 
     public void Begin()
     {
-        _run = new DodgeRun(Settings, Pattern);
+        _run = new DodgeRun(Settings, Pattern, Exit);
         IsRunning = true;
         Visible = true;
         QueueRedraw();
@@ -82,6 +97,12 @@ public partial class DodgeGesture : Control, IGesture
         var box = new Rect2(origin, size);
 
         GestureFrame.Draw(this, box, BoxAlpha);
+        if (Exit is { } exit)
+        {
+            // A saída: uma abertura dourada na borda do quadro.
+            var gap = new Rect2(origin + new Vector2(exit.X * size.X, exit.Y * size.Y), new Vector2(exit.Width * size.X, exit.Height * size.Y));
+            DrawRect(gap.Grow(1f), new Color(Style.Palette.Gold, ExitAlpha));
+        }
         // Golpes recortados no quadro: só aparecem dentro dele.
         foreach (var bullet in _run.Bullets.Select(b => origin + new Vector2(b.X, b.Y)))
         {

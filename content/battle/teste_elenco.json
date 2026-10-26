@@ -1,0 +1,54 @@
+{
+  "id": "teste_elenco",
+  "layout": {
+    "party": [
+      {
+        "x": -0.6,
+        "y": -1.25
+      },
+      {
+        "x": -1.1,
+        "y": -0.85
+      }
+    ],
+    "enemy": [
+      {
+        "x": 0.8,
+        "y": -0.45
+      }
+    ]
+  },
+  "party": [
+    {
+      "id": "lia",
+      "pose": "back"
+    },
+    {
+      "id": "aulo",
+      "pose": "back"
+    }
+  ],
+  "enemy": [
+    {
+      "id": "remador",
+      "pose": "front"
+    }
+  ],
+  "styles": [
+    {
+      "id": "pixel_160",
+      "folder": "pixel_160",
+      "filter": "nearest"
+    }
+  ],
+  "cast_cycle": [
+    "lia",
+    "aulo",
+    "ismena",
+    "dimas",
+    "septimia",
+    "calias",
+    "remador",
+    "tecela"
+  ]
+}

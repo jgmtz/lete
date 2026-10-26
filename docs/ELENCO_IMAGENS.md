@@ -40,15 +40,21 @@
 | Septímia, a Vestal | F, C, AF, AC | AT, DX |
 | Cálias, o Aedo | F, C, AF, AC | AT, DX |
 
-### 3.2 Protagonista — 5 origens × (F, C, AF, AC)
-Pescador, Sacerdote, Veterano, Artesão, Estrangeiro. **Rosto neutro, cabelo curto liso, sem cicatriz/tatuagem** (Veterano tem cicatriz). Tabuinha Rasurada no cinto sempre.
-- **Teste de gênero (pendência 1):** gerar o **Pescador masculino e feminino** (só F) e comparar antes de decidir se o corpo muda.
-- **Economia:** gerar completo (F, C, AF, AC) só do **Pescador**; as outras origens começam só com F e C, e as folhas de andar entram depois de validado o pipeline (a roupa pode virar camada).
-- Variações (cabelo, pele, marcas) saem por troca de paleta/camadas, **sem nova geração**.
+### 3.2 Protagonistas — 6 personagens fixos (decisão de 25/out, ver `docs/PROTAGONISTAS_FIXOS.md`)
+Cada origem é um personagem fixo; o gênero vem do sprite (proposta: 3 homens e 3 mulheres, a confirmar). Por personagem: **batalha frente e costas** (assimétricas, com as ferramentas do ofício) e **mapa F, C e PD** (simétricas, sem itens; PE = espelho do PD). A roupa vem da origem. Tabuinha Rasurada no cinto sempre.
+
+| # | Origem | Personagem | Gênero (proposta) | Arte |
+|---|---|---|---|---|
+| 1 | Pescador | *(nome pendente)* | Masculino | a fazer |
+| 2 | Sacerdote | *(nome pendente)* | Feminino | a fazer |
+| 3 | Veterano | *(nome pendente)* | Masculino | a fazer |
+| 4 | Artesão | *(nome pendente)* | Masculino | a fazer |
+| 5 | Estrangeiro | *(nome pendente)* | Feminino | a fazer |
+| 6 | Retratista | **Lia** | Feminino | ✅ batalha + mapa prontos |
 
 ### 3.3 Sombras — F + FL (+ AT depois)
 Pedir **opacas** (translucidez entra por shader). Sem vista de costas (no jogo aparecem de frente).
-- Definidas: **Remador** (tutorial), **Tecelã** (Campos do Luto), **Padeiro** (Rua dos Ofícios).
+- Definidas: **Remador** (tutorial) ✅ **feito** (25/out, mapa + batalha), **Tecelã** (Campos do Luto) ✅ **feita** (25/out, mapa + batalha), **Padeiro** (Rua dos Ofícios).
 - A definir: as outras ~12 a 17 nomeadas e os **6 corpos-base** das sombras comuns (ver `PENDENCIAS.md`).
 
 ### 3.4 Chefes (6 + 1 opcional) — F + FL + AT (3 fases → 1 AT por fase quando for a hora)
@@ -58,7 +64,7 @@ A Fome · Cérbero (3 cabeças, vista própria) · O Campeão · O Sonho · As F
 Retratos 64×64 (3–4 expressões por companheiro), ícones dos ~65 itens, UI, texturas de cenário, romã/Marca. Ver `ARTE.md` seção 8.
 
 ### 3.6 Contagem do primeiro lote
-Companheiros 20 (3 já feitas) + Pescador 4 + 4 origens × 2 (F, C) + 2 teste de gênero + 3 sombras × 2 = **~44 imagens** de conceito/folha. Plano de uso do limite diário do Gemini: 4 a 6 por dia, conforme a cota real do plano (não verificada).
+Protagonistas: Lia pronta; os outros 5 × 5 imagens (2 de batalha + 3 de mapa) = **25 imagens**. Companheiros e sombras seguem a conta das seções 3.1 e 3.3 (Remador e Tecelã já feitos). Plano de uso do limite diário do Gemini: 4 a 6 por dia, conforme a cota real do plano (não verificada).
 
 ---
 
@@ -189,8 +195,8 @@ art/sprites/        (saída do pixelizador, mesma estrutura)
 - [x] Aulo AC (gerado; ciclo de 8 quadros aprovado, preset `tools/ciclos/aulo_costas.json`)
 - [~] Aulo AF: ciclo de 6 quadros inteiros do Gemini, sem corte (`tools/ciclos/aulo_frente.json`, modo `--originais`); aguardando aprovação
 - [ ] Ismena F/C/AF/AC · Dimas · Septímia · Cálias
-- [ ] Pescador m/f F (teste de gênero) → Pescador C/AF/AC
-- [ ] Outras origens F/C
+- [x] Lia (Retratista): batalha + mapa
+- [ ] Outros 5 protagonistas: batalha F/C + mapa F/C/PD
 - [ ] Sombras definidas (Remador, Tecelã, Padeiro) F/FL
 - [ ] Chefes (descrições a escrever)
 
@@ -256,3 +262,7 @@ Use the attached image as the exact reference: same character, outfit, colors, p
 **Lia (25/out, batalha APROVADA, proposta de protagonista):** originais do Gemini em `art/concept/gemini/batalha/lia_34_original.png` e `lia_34_costas_original.png`; versões ESPELHADAS (frente olha para a esquerda, costas para a direita, como no layout de batalha) em `lia_34.png` e `lia_34_costas.png`. Sprites: `art/sprites/batalha/{liso,pixel_128,pixel_160}/lia_34*.png`. Depois do espelho: pincel na mão DIREITA, painel na ESQUERDA, bolsa no quadril direito (frente). Mapa simétrico (F/C/PD/PP) ainda não gerado.
 
 **Lia (25/out, versão simétrica FECHADA para o mapa, proposta de protagonista):** imagens F, C e PD em `art/concept/gemini/companheiros/lia_sim/` (`sim_f/c/pd.png`; `pad_*.png` = cópias em 1024x1024; `sim_f_gemini.png` = frente original do Gemini). A frente teve a perna e o pé direitos refeitos por ESPELHO da metade esquerda (a partir de y=760), porque o Gemini devolvia pé torto. Sem itens nas mãos (painel/pincel/bolsa só na arte de batalha). Cabelo cobre nuca e costas. **As 3 vistas: `tools/render3d/marionete_capa.py lia_frente|lia_costas|lia_direita joints.json saida.png`** (saia na altura do joelho, só canela e pé animados; `lia_direita` modo "duas": duas pernas pintadas separadas por divisor inclinado, `amp=0.5` reduz o balanço para o joelho não aparecer fora da barra; `q_n=57`). Andar 56 px nas 4 direções + parado em `art/sprites/companheiros/lia_sim/` (esquerda = espelho da direita; parado = quadro 1, a passagem).
+
+**Remador / Lícon (25/out, sombra FECHADA, mapa + batalha):** conceito em `art/concept/gemini/sombras/` (`remador_batalha_original.png` = do Gemini; `remador_batalha.png` = ESPELHADA para olhar o grupo, que fica à esquerda; `remador_sim/sim_f/c/pd.png` = vistas simétricas do mapa, sem remo e sem corda). Sombra opaca, parte de baixo se desfaz em fiapos (sem pernas). Mapa: `tools/andar_sombra.py` (deslizar: sobe e desce, barra balança, fiapos ondulam) + `tools/sprite_andar.py ... --celula-fixa --flutuar`; 12 quadros em 56 px nas 4 direções (esquerda = espelho da direita) e parado = quadro 1, em `art/sprites/sombras/remador/`. Batalha: `art/sprites/batalha/{liso,pixel_128,pixel_160}/remador_34.png` e o flutuar de 6 quadros em `art/sprites/sombras/remador/batalha_flutuar_{128,160}/` (`andar_sombra.py --vista batalha`).
+
+**Tecelã (25/out, sombra FECHADA, mapa + batalha):** conceito em `art/concept/gemini/sombras/` (`tecela_batalha_original.png` = do Gemini; `tecela_batalha.png` = ESPELHADA; `tecela_batalha_fios_k2/k3.png` = cópias com os fios recoloridos e engrossados só para a pixelização; `tecela_sim/sim_f/c/pd.png` = vistas simétricas do mapa, sem fios, sem naveta e sem trouxa). Mesmo método do Remador (`tools/andar_sombra.py`, `--canvas 1024x1024` porque a arte é em retrato). **Fios finos de 1 px (lição):** a cor lilás clara do fio some na redução (parece o fundo magenta e tem 1 px). Recolorir o fio para azul-gelo (196,212,232) e dilatá-lo antes de pixelizar: 5 px (k=2) para 160 px de altura e 7 px (k=3) para 128 px dão 1 px final. Sprites: mapa em `art/sprites/sombras/tecela/andar_56px/` (+ `parado/`), batalha em `art/sprites/batalha/{liso,pixel_128,pixel_160}/tecela_34.png` e flutuar em `batalha_flutuar_{128,160}/`.

@@ -40,7 +40,23 @@ public partial class BattleAttackTest : Node
     private const string EchoId = "eco";
     private const string FixationPrefix = "fixacao:";
     private const string EchoPrefix = "eco:";
+    private const string MemoryId = "memoria";
+    private const string MemoryPrefix = "memoria:";
+    private const string MemoriesPath = "res://content/memories/teste.json";
     private const string AbsorbPath = "res://content/gestures/absorver.json";
+    private const string WitnessPath = "res://content/gestures/presenciar.json";
+    private const string FleePath = "res://content/gestures/fuga.json";
+    private const string BagPath = "res://content/items/bolsa_teste.json";
+    private const string WitnessId = "presenciar";
+    private const string KeepWitnessingId = "presenciar_continuar";
+    private const string StopWitnessingId = "presenciar_parar";
+    private const string SpareId = "poupar";
+    private const string YieldId = "ceder";
+    private const string OfferingId = "oferenda";
+    private const string BagId = "bolsa";
+    private const string FleeId = "fugir";
+    private const string OfferingPrefix = "oferenda:";
+    private const string ProvisionPrefix = "provisao:";
 
     /// <summary>Raio e espessura do Anel na tela (1080p); convertidos para o viewport de baixa resolução.</summary>
     [Export] public float RingScreenRadiusPx { get; set; } = 90f;
@@ -71,6 +87,13 @@ public partial class BattleAttackTest : Node
     private string _murmurKey = "";
     private LiberationRules _liberationRules = null!;
     private AbsorbRules _absorbRules = null!;
+    private MemoryBook _memories = null!;
+    private ShadeStory _story = null!;
+    private ShadeNarration _narration = null!;
+    private HoldTiming _witnessHold = null!;
+    private (DodgeSettings Settings, IDodgePattern Pattern, EscapeExit Exit) _flee;
+    private AssistSettings _assistSettings = null!;
+    private int _defeatTideSteps;
     private HoldTiming _absorbHold = null!;
     private ProtagonistStats _protagonistStats = null!;
     private CompanionSupport? _support;
@@ -86,6 +109,7 @@ public partial class BattleAttackTest : Node
     private DodgeGesture _dodge = null!;
     private HoldGesture _hold = null!;
     private DragGesture _drag = null!;
+    private StrokeGesture _stroke = null!;
     private BattleHud _hud = null!;
     private ActionMenu _menu = null!;
     private TurnRing _turnRing = null!;
@@ -99,11 +123,24 @@ public partial class BattleAttackTest : Node
         Approach,
         Fixation,
         Echo,
+        Memory,
+        Offering,
+        Bag,
+        Witness,
     }
 
     // Ecos e Marca duram a sessão inteira do teste (entre uma luta e outra); no jogo, vão para o WorldState (M2).
     private static readonly EchoSlots Echoes = new();
     private static readonly MarkCounter Mark = new();
+
+    // Bolsa, espólio da sombra, Maré e derrotas: também duram a sessão do teste (no jogo, WorldState no M2).
+    private static BattleBag? _bag;
+    private static readonly ShadeHoard Hoard = new();
+    private static int _tide;
+    private static int _defeats;
+    private static GestureAssist _assist = GestureAssist.Off;
+
+    private static BattleBag Bag => _bag!;
 
     private static string T(string key) => GameRoot.Instance.Text(key);
 
@@ -123,6 +160,7 @@ public partial class BattleAttackTest : Node
         _dodge = container.GetNode<DodgeGesture>("SubViewport/RingLayer/Dodge");
         _hold = container.GetNode<HoldGesture>("SubViewport/RingLayer/Hold");
         _drag = container.GetNode<DragGesture>("SubViewport/RingLayer/Drag");
+        _stroke = container.GetNode<StrokeGesture>("SubViewport/RingLayer/Stroke");
         _hud = container.GetNode<BattleHud>("SubViewport/HudLayer/BattleHud");
         _menu = container.GetNode<ActionMenu>("SubViewport/HudLayer/ActionMenu");
 
@@ -146,7 +184,19 @@ public partial class BattleAttackTest : Node
         (_listenEntries, _murmurKey) = ShadeData.ListeningFromJson(shade);
         _liberationRules = ShadeData.LiberationFromJson(shade);
         _absorbRules = ShadeData.AbsorbFromJson(shade);
+        _story = ShadeData.StoryFromJson(shade);
+        foreach (var gesture in _story.Phases.SelectMany(p => p.Attacks).Select(a => a.Gesture).Distinct())
+        {
+            _gestures[gesture] = FileAccess.GetFileAsString($"{GesturesFolder}/{gesture}.json");
+        }
         _absorbHold = GestureData.HoldFromJson(FileAccess.GetFileAsString(AbsorbPath));
+        _memories = new MemoryBook(MemoryData.FromJson(FileAccess.GetFileAsString(MemoriesPath)));
+        _witnessHold = GestureData.HoldFromJson(FileAccess.GetFileAsString(WitnessPath));
+        _flee = BagData.EscapeFromJson(FileAccess.GetFileAsString(FleePath));
+        var difficulty = FileAccess.GetFileAsString(DifficultyPath);
+        _assistSettings = BagData.AssistFromDifficulty(difficulty);
+        _defeatTideSteps = BagData.DefeatTideSteps(difficulty);
+        _bag ??= BagData.FromJson(FileAccess.GetFileAsString(BagPath));
         _gestures[_absorbRules.Echo.Gesture] = FileAccess.GetFileAsString($"{GesturesFolder}/{_absorbRules.Echo.Gesture}.json");
         foreach (var gesture in _shadeAttacks.Select(a => a.Gesture).Distinct())
         {
@@ -160,7 +210,7 @@ public partial class BattleAttackTest : Node
 
         _ring.CircleRadius = Mathf.Round(RingScreenRadiusPx / shrink);
         _ring.LineWidth = Mathf.Max(1f, Mathf.Round(RingScreenLineWidthPx / shrink));
-        foreach (var gesture in new Control[] { _ring, _dodge, _hold, _drag })
+        foreach (var gesture in new Control[] { _ring, _dodge, _hold, _drag, _stroke })
         {
             gesture.Visible = false;
         }
@@ -181,9 +231,9 @@ public partial class BattleAttackTest : Node
         NewBattle();
         RunBattle();
 
-        if (System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--demo") >= 0)
+        if (System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--demo")) is { } demo)
         {
-            RunDemo();
+            RunDemo(demo["--demo".Length..].TrimStart('='));
         }
         Debug.ScreenshotArgs.Run(this);
     }
@@ -223,6 +273,12 @@ public partial class BattleAttackTest : Node
         {
             _hud.ToggleGestureAreaGuide();
         }
+        else if (@event.IsActionPressed("assist_toggle"))
+        {
+            // Acessibilidade ajustável a qualquer momento (GDD 4.4); vira opção do menu quando ele existir.
+            _assist = AssistSettings.Next(_assist);
+            _hud.SetCaption(T($"combate.assistencia.{_assist.ToString().ToLowerInvariant()}"));
+        }
     }
 
     private void NewBattle()
@@ -236,13 +292,30 @@ public partial class BattleAttackTest : Node
             _shadeAttacks,
             _support,
             new Liberation(_liberationRules));
+        // Teste: -- --folego=N começa a luta com N de Fôlego (para conferir a derrota sem jogar muito).
+        if (System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--folego=")) is { } breathArg
+            && float.TryParse(breathArg["--folego=".Length..], System.Globalization.CultureInfo.InvariantCulture, out var startBreath))
+        {
+            _flow.Breath.Reduce(System.Math.Max(0f, _flow.Breath.Max - startBreath));
+        }
+
+        // Teste: -- --firmeza=N começa a sombra com N de Firmeza (para conferir Absorver sem jogar muito).
+        if (System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--firmeza=")) is { } resolveArg
+            && float.TryParse(resolveArg["--firmeza=".Length..], System.Globalization.CultureInfo.InvariantCulture, out var startResolve))
+        {
+            _flow.Resolve.Reduce(System.Math.Max(0f, _flow.Resolve.Max - startResolve));
+        }
+
         _hud.SetBreath(_flow.Breath.Fraction);
         _hud.SetLucidity(_flow.Lucidity.Fraction);
         _hud.SetResolve(_flow.Resolve.Fraction);
         _hud.SetPeace(0f);
         _hud.SetTargetMarked(true);
+        _hud.ResetShadePanel();
         _mainFocus = AttackId;
         Echoes.NewBattle();
+        _memories.Rest();
+        _narration = new ShadeNarration(_story);
         RefreshShadeKnowledge();
         RefreshSupport();
     }
@@ -295,9 +368,51 @@ public partial class BattleAttackTest : Node
         _hud.SetCaption(T(_flow.NextShadeAttack.CaptionKey));
         _hud.SetGestureActive(false);
         _playerAction = new TaskCompletionSource();
-        ShowMainPage();
+        if (_flow.IsWitnessing)
+        {
+            ShowWitnessPage();
+        }
+        else
+        {
+            ShowMainPage();
+        }
+
         _menu.ShowMenu(true);
         await _playerAction.Task;
+        await Narrate();
+    }
+
+    /// <summary>
+    /// Conforme a Firmeza cai, a sombra recupera clareza e fala (GDD 4.3); na metade, o Remador muda de gesto e a
+    /// fixação escapa. Só enquanto a luta continua.
+    /// </summary>
+    private async Task Narrate()
+    {
+        if (_flow.IsEnding || _flow.Resolve.IsBroken || _flow.Liberation is { IsFreed: true })
+        {
+            return;
+        }
+
+        foreach (var voice in _narration.NewVoices(_flow.Resolve.Fraction))
+        {
+            await ShowLine(T(voice.TextKey), LineSeconds);
+        }
+
+        if (_narration.NewPhase(_flow.Resolve.Fraction) is { } phase)
+        {
+            _flow.ChangeCycle(phase.Attacks);
+            if (phase.Reveals == ListenReveal.Fixation)
+            {
+                _understanding.RevealFixation();
+            }
+            else if (phase.Reveals == ListenReveal.Name)
+            {
+                _understanding.RevealName();
+            }
+
+            RefreshShadeKnowledge();
+            await ShowLine(T(phase.CaptionKey), LineSeconds);
+        }
     }
 
     private void ShowMainPage()
@@ -306,7 +421,8 @@ public partial class BattleAttackTest : Node
         var entries = new List<MenuEntry>
         {
             new(AttackId, "combate.acao.atacar", "combate.acao.atacar.descricao"),
-            new("memoria", "combate.acao.memoria", "combate.acao.memoria.descricao"),
+            new(MemoryId, "combate.acao.memoria", "combate.acao.memoria.descricao",
+                Available: _memories.Skills.Any(s => _memories.CanUse(s.Id, _flow.Lucidity))),
             new(ApproachId, "combate.acao.aproximar", "combate.acao.aproximar.descricao"),
         };
 
@@ -320,8 +436,9 @@ public partial class BattleAttackTest : Node
             : Echoes.HasUsable ? "combate.acao.eco.descricao"
             : "combate.acao.eco.usado";
         entries.Add(new MenuEntry(EchoId, "combate.acao.eco", echoDescription, Available: Echoes.HasUsable));
-        entries.Add(new MenuEntry("bolsa", "combate.acao.bolsa", "combate.acao.bolsa.descricao"));
-        entries.Add(new MenuEntry("fugir", "combate.acao.fugir", "combate.acao.fugir.descricao", SeparatorBefore: true));
+        entries.Add(new MenuEntry(BagId, "combate.acao.bolsa",
+            Bag.HasAnyProvision ? "combate.acao.bolsa.descricao" : "combate.bolsa.vazia", Available: Bag.HasAnyProvision));
+        entries.Add(new MenuEntry(FleeId, "combate.acao.fugir", "combate.acao.fugir.descricao", SeparatorBefore: true));
         _menu.ShowPage(entries, _mainFocus);
     }
 
@@ -336,9 +453,13 @@ public partial class BattleAttackTest : Node
         {
             new MenuEntry(ListenId, "combate.acao.escutar", "combate.acao.escutar.descricao"),
             new MenuEntry(FreeId, "combate.acao.libertar", freeDescription, Available: Liberation.CanAttempt(_understanding, _flow.Lucidity)),
-            new MenuEntry("oferenda", "combate.acao.oferenda", "combate.acao.oferenda.descricao"),
-            new MenuEntry("presenciar", "combate.acao.presenciar", "combate.acao.presenciar.descricao"),
-            new MenuEntry("poupar", "combate.acao.poupar", "combate.acao.poupar.descricao"),
+            new MenuEntry(OfferingId, "combate.acao.oferenda",
+                Bag.HasAnyOffering ? "combate.acao.oferenda.descricao" : "combate.acao.oferenda.vazia", Available: Bag.HasAnyOffering),
+            new MenuEntry(WitnessId, "combate.acao.presenciar", "combate.acao.presenciar.descricao"),
+            new MenuEntry(SpareId, "combate.acao.poupar", "combate.acao.poupar.descricao"),
+            new MenuEntry(YieldId, "combate.acao.ceder",
+                _flow.Lucidity.Current >= _story.YieldLucidityCost ? "combate.acao.ceder.descricao" : "combate.acao.ceder.sem_lucidez",
+                Available: _flow.Lucidity.Current >= _story.YieldLucidityCost),
             new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true),
         }, focus);
     }
@@ -352,6 +473,56 @@ public partial class BattleAttackTest : Node
             .Append(new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true))
             .ToList();
         _menu.ShowPage(entries);
+    }
+
+    /// <summary>As Memórias: cada uma com seu Traço; esquecidas ou sem Lucidez aparecem em cinza, explicando o porquê.</summary>
+    private void ShowMemoryPage()
+    {
+        _page = MenuPage.Memory;
+        var entries = _memories.Skills
+            .Select(s => new MenuEntry(
+                MemoryPrefix + s.Id,
+                s.NameKey,
+                _memories.IsForgotten(s.Id) ? "combate.memoria.esquecida"
+                    : !_memories.CanUse(s.Id, _flow.Lucidity) ? "combate.memoria.sem_lucidez"
+                    : s.DescriptionKey,
+                Available: _memories.CanUse(s.Id, _flow.Lucidity)))
+            .Append(new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true))
+            .ToList();
+        _menu.ShowPage(entries);
+    }
+
+    /// <summary>As oferendas da bolsa (só os tipos que ainda tem).</summary>
+    private void ShowOfferingPage()
+    {
+        _page = MenuPage.Offering;
+        var entries = Bag.Offerings.Where(o => o.Value > 0)
+            .Select(o => new MenuEntry(OfferingPrefix + o.Key, $"oferenda.{o.Key}", "combate.oferenda.descricao"))
+            .Append(new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true))
+            .ToList();
+        _menu.ShowPage(entries);
+    }
+
+    /// <summary>As provisões da bolsa.</summary>
+    private void ShowBagPage()
+    {
+        _page = MenuPage.Bag;
+        var entries = Bag.Provisions.Where(p => Bag.ProvisionCount(p.Id) > 0)
+            .Select(p => new MenuEntry(ProvisionPrefix + p.Id, p.NameKey, p.DescriptionKey))
+            .Append(new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true))
+            .ToList();
+        _menu.ShowPage(entries);
+    }
+
+    /// <summary>Presenciando: só manter a atenção ou parar (e voltar a lutar).</summary>
+    private void ShowWitnessPage()
+    {
+        _page = MenuPage.Witness;
+        _menu.ShowPage(new[]
+        {
+            new MenuEntry(KeepWitnessingId, "combate.presenciar.continuar", "combate.presenciar.continuar.descricao"),
+            new MenuEntry(StopWitnessingId, "combate.presenciar.parar", "combate.presenciar.parar.descricao", SeparatorBefore: true),
+        });
     }
 
     /// <summary>Os Ecos guardados (até 3); cada um uma vez por batalha.</summary>
@@ -376,8 +547,16 @@ public partial class BattleAttackTest : Node
             case MenuPage.Fixation:
                 ShowApproachPage(FreeId);
                 break;
-            case MenuPage.Approach or MenuPage.Echo:
+            case MenuPage.Approach or MenuPage.Echo or MenuPage.Memory or MenuPage.Bag:
                 ShowMainPage();
+                break;
+            case MenuPage.Offering:
+                ShowApproachPage(OfferingId);
+                break;
+            case MenuPage.Witness:
+                // Presenciando não há para onde voltar: Esc não faz nada.
+                break;
+            case MenuPage.Main:
                 break;
         }
     }
@@ -414,6 +593,43 @@ public partial class BattleAttackTest : Node
             case EchoId:
                 ShowEchoPage();
                 break;
+            case OfferingId:
+                ShowOfferingPage();
+                break;
+            case BagId:
+                ShowBagPage();
+                break;
+            case WitnessId:
+                DoStartWitnessing();
+                break;
+            case KeepWitnessingId:
+                DoKeepWitnessing();
+                break;
+            case StopWitnessingId:
+                _flow.StopWitnessing();
+                ShowMainPage();
+                break;
+            case SpareId:
+                DoSpare();
+                break;
+            case YieldId:
+                DoYield();
+                break;
+            case FleeId:
+                DoFlee();
+                break;
+            case var offering when offering.StartsWith(OfferingPrefix):
+                DoOffering(offering[OfferingPrefix.Length..]);
+                break;
+            case var provision when provision.StartsWith(ProvisionPrefix):
+                DoProvision(provision[ProvisionPrefix.Length..]);
+                break;
+            case MemoryId:
+                ShowMemoryPage();
+                break;
+            case var memory when memory.StartsWith(MemoryPrefix):
+                DoMemory(memory[MemoryPrefix.Length..]);
+                break;
             case BackId:
                 GoBack();
                 break;
@@ -435,7 +651,7 @@ public partial class BattleAttackTest : Node
     {
         _menu.ShowMenu(false);
         _hud.SetGestureActive(true);
-        var grade = _windows.Grade(await RunRing(_attackRing, Shade, _windows));
+        var grade = Windows.Grade(await RunRing(_attackRing, Shade, Windows));
 
         // O falho ainda cumpre a ação (GDD 4.4): o golpe acontece, só mais fraco.
         await Protagonist.PlayAdvance(Shade.Position, () =>
@@ -453,7 +669,7 @@ public partial class BattleAttackTest : Node
     {
         _menu.ShowMenu(false);
         _hud.SetGestureActive(true, T("combate.gesto.escutar"));
-        var grade = _windows.Grade(await RunHold(_listenHold));
+        var grade = Windows.Grade(await RunHold(_listenHold));
 
         var heard = _listening.Listen(_flow.NextShadeAttackIndex, grade);
         RefreshShadeKnowledge();
@@ -466,12 +682,13 @@ public partial class BattleAttackTest : Node
     {
         _menu.ShowMenu(false);
         _hud.SetGestureActive(true, T("combate.gesto.libertar"));
-        var grade = _windows.Grade(await RunDrag());
+        var grade = Windows.Grade(await RunDrag());
 
         var result = Liberation.Attempt(fixation, grade, _flow.Lucidity);
         _hud.SetLucidity(_flow.Lucidity.Fraction);
         _hud.SetPeace(Liberation.Fraction);
         await ShowLine(T(result.TextKey), LineSeconds);
+        await CheckForgetting();
         if (!result.Correct)
         {
             _flow.Enrage();
@@ -479,6 +696,53 @@ public partial class BattleAttackTest : Node
         }
 
         _playerAction?.TrySetResult();
+    }
+
+    /// <summary>
+    /// Memória (gesto Traço): gasta Lucidez (mais se falhar) e faz o efeito do tipo da Lembrança. Cura e golpe valem
+    /// na hora; proteção, lentidão e foco valem até o fim do próximo golpe da sombra.
+    /// </summary>
+    private async void DoMemory(string id)
+    {
+        _menu.ShowMenu(false);
+        _hud.SetGestureActive(true, T("combate.gesto.traco"));
+        var skill = _memories.Skills.First(s => s.Id == id);
+        var grade = Windows.Grade(await RunStroke(skill.Stroke));
+        var use = _memories.Use(id, grade, _flow.Lucidity);
+        _hud.SetLucidity(_flow.Lucidity.Fraction);
+
+        switch (skill.Effect)
+        {
+            case MemoryEffectKind.Heal:
+                _flow.Breath.Restore(use.Power);
+                _hud.SetBreath(_flow.Breath.Fraction);
+                await ShowLine(T("combate.memoria.efeito.heal"), LineSeconds);
+                break;
+            case MemoryEffectKind.Strike:
+                await Protagonist.PlayAdvance(Shade.Position, () =>
+                {
+                    _flow.Resolve.Reduce(use.Power);
+                    _hud.SetResolve(_flow.Resolve.Fraction);
+                    return Shade.PlayHit(HitStrength(grade));
+                });
+                break;
+            default:
+                _flow.ApplyUntilShadeTurnEnds(skill.Effect, use.Power);
+                await ShowLine(T($"combate.memoria.efeito.{skill.Effect.ToString().ToLowerInvariant()}"), LineSeconds);
+                break;
+        }
+
+        await CheckForgetting();
+        _playerAction?.TrySetResult();
+    }
+
+    /// <summary>Lucidez zerada: a Memória mais usada fica esquecida (GDD 4.2), e a legenda conta.</summary>
+    private async Task CheckForgetting()
+    {
+        if (_memories.CheckForgetting(_flow.Lucidity) is { } forgotten)
+        {
+            await ShowLine(string.Format(T("combate.memoria.esqueceu"), T(forgotten.NameKey)), LineSeconds);
+        }
     }
 
     /// <summary>
@@ -490,7 +754,7 @@ public partial class BattleAttackTest : Node
         _menu.ShowMenu(false);
         _hud.SetGestureActive(true, T("combate.gesto.absorver"));
         var factor = _absorbRules.FillFactor(_flow.Resolve.Fraction);
-        var grade = _windows.Grade(await RunHold(_absorbHold with { FillSeconds = _absorbHold.FillSeconds * factor }));
+        var grade = Windows.Grade(await RunHold(_absorbHold with { FillSeconds = _absorbHold.FillSeconds * factor }));
 
         AddMark((int)_absorbRules.MarkGain.For(grade));
         var echo = _absorbRules.Echo;
@@ -514,10 +778,10 @@ public partial class BattleAttackTest : Node
         var total = 0f;
         for (var i = 0; i < repeats; i++)
         {
-            total += await RunRing(timing, Shade, _windows);
+            total += await RunRing(timing, Shade, Windows);
         }
 
-        var grade = _windows.Grade(total / repeats);
+        var grade = Windows.Grade(total / repeats);
         AddMark(echo.MarkOnUse);
         await Protagonist.PlayAdvance(Shade.Position, () =>
         {
@@ -525,6 +789,112 @@ public partial class BattleAttackTest : Node
             _hud.SetResolve(_flow.Resolve.Fraction);
             return Shade.PlayHit(HitStrength(grade));
         });
+
+        _playerAction?.TrySetResult();
+    }
+
+    /// <summary>Oferenda (gesto Arrastar, sem pressa): a certa a faz lembrar nome e fixação; a errada se perde.</summary>
+    private async void DoOffering(string kind)
+    {
+        _menu.ShowMenu(false);
+        _hud.SetGestureActive(true, T("combate.gesto.libertar"));
+        await RunDrag();
+        Bag.SpendOffering(kind);
+        if (_story.Offering is { } offering && offering.AcceptsKind == kind)
+        {
+            _understanding.RevealName();
+            _understanding.RevealFixation();
+            RefreshShadeKnowledge();
+            await ShowLine(T(offering.AcceptKey), LineSeconds);
+        }
+        else
+        {
+            await ShowLine(T(_story.Offering?.RefuseKey ?? "combate.teste.ainda_nao"), LineSeconds);
+        }
+
+        _playerAction?.TrySetResult();
+    }
+
+    /// <summary>Provisão da Bolsa: imediata, sem gesto. As do Além sobem a Marca (GDD 4.8).</summary>
+    private async void DoProvision(string id)
+    {
+        _menu.ShowMenu(false);
+        var provision = Bag.UseProvision(id);
+        _flow.Breath.Restore(provision.BreathRestore);
+        _hud.SetBreath(_flow.Breath.Fraction);
+        if (provision.MarkGain > 0)
+        {
+            AddMark(provision.MarkGain);
+        }
+
+        await ShowLine(string.Format(T("combate.bolsa.usou"), T(provision.NameKey)), LineSeconds);
+        _playerAction?.TrySetResult();
+    }
+
+    private async void DoStartWitnessing()
+    {
+        _menu.ShowMenu(false);
+        _flow.StartWitnessing();
+        await ShowLine(T("combate.presenciar.comeca"), LineSeconds);
+        _playerAction?.TrySetResult();
+    }
+
+    /// <summary>Presenciando: a cada vez, um Segurar curto mantém a atenção; falhar quebra o Presenciar.</summary>
+    private async void DoKeepWitnessing()
+    {
+        _menu.ShowMenu(false);
+        _hud.SetGestureActive(true, T("combate.gesto.presenciar"));
+        var grade = Windows.Grade(await RunHold(_witnessHold));
+        if (grade == GestureGrade.Failed)
+        {
+            _flow.StopWitnessing();
+            await ShowLine(T("combate.presenciar.distraiu"), LineSeconds);
+        }
+
+        _playerAction?.TrySetResult();
+    }
+
+    private async void DoSpare()
+    {
+        _menu.ShowMenu(false);
+        await ShowLine(T(_story.SpareKey), LineSeconds);
+        _flow.EndBattle(BattleOutcome.Spared);
+        _playerAction?.TrySetResult();
+    }
+
+    /// <summary>Deixar-se vencer (escolha, não a derrota): custa Lucidez e mostra uma cena curta e uma lembrança dela.</summary>
+    private async void DoYield()
+    {
+        _menu.ShowMenu(false);
+        _flow.Lucidity.Reduce(_story.YieldLucidityCost);
+        _hud.SetLucidity(_flow.Lucidity.Fraction);
+        foreach (var key in _story.YieldKeys)
+        {
+            await ShowLine(T(key), LineSeconds);
+        }
+
+        await CheckForgetting();
+        _flow.EndBattle(BattleOutcome.Yielded);
+        _playerAction?.TrySetResult();
+    }
+
+    /// <summary>Fugir: Esquiva até a saída. Chegou sem levar golpes demais, escapa (e ouve algo); senão, perde a vez.</summary>
+    private async void DoFlee()
+    {
+        _menu.ShowMenu(false);
+        _hud.SetGestureActive(true, T("combate.gesto.fugir"));
+        _dodge.Exit = _flee.Exit;
+        var grade = Windows.Grade(await RunDodge(_flee.Settings, _flee.Pattern));
+        _dodge.Exit = null;
+        if (grade == GestureGrade.Failed)
+        {
+            await ShowLine(T("combate.fuga.falhou"), LineSeconds);
+        }
+        else
+        {
+            await ShowLine(T(_story.FleeClueKey), LineSeconds);
+            _flow.EndBattle(BattleOutcome.Fled);
+        }
 
         _playerAction?.TrySetResult();
     }
@@ -560,20 +930,23 @@ public partial class BattleAttackTest : Node
         _hud.SetGestureActive(true);
         await Wait(ShadeTellSeconds);
 
-        var windows = _flow.SupportActive && _support is not null ? _windows.Widened(_support.WindowWidening) : _windows;
+        var widening = (_flow.SupportActive && _support is not null ? _support.WindowWidening : 0f) + _flow.FocusWidening;
+        var windows = Windows.Widened(widening);
+        var slow = _flow.ShadeSlowFactor;
         var gesture = _gestures[attack.Gesture];
 
         if (attack.Kind == ShadeAttackKind.Direct)
         {
             _hud.SetGestureActive(true, T("combate.gesto.aparar"));
-            var grade = windows.Grade(await RunRing(GestureData.RingFromJson(gesture), Protagonist, windows));
+            var timing = GestureData.RingFromJson(gesture);
+            var grade = windows.Grade(await RunRing(timing with { ShrinkSeconds = timing.ShrinkSeconds * slow }, Protagonist, windows));
             await Shade.PlayAdvance(Protagonist.Position, () => TakeHit(attack, grade));
         }
         else
         {
             _hud.SetGestureActive(true, T("combate.gesto.esquivar"));
             var (settings, pattern) = GestureData.DodgeFromJson(gesture);
-            var grade = windows.Grade(await RunDodge(settings, pattern));
+            var grade = windows.Grade(await RunDodge(settings, pattern.Slowed(slow)));
             await TakeHit(attack, grade);
         }
     }
@@ -582,7 +955,7 @@ public partial class BattleAttackTest : Node
     private Task TakeHit(ShadeAttack attack, GestureGrade grade)
     {
         var rage = _flow.Enraged ? _liberationRules.EnragedDamageMultiplier : 1f;
-        _flow.Breath.Reduce(attack.BreathDamage.For(grade) * rage);
+        _flow.Breath.Reduce(attack.BreathDamage.For(grade) * rage * (1f - _flow.GuardFraction));
         _hud.SetBreath(_flow.Breath.Fraction);
         return grade == GestureGrade.Perfect
             ? Task.CompletedTask
@@ -604,12 +977,40 @@ public partial class BattleAttackTest : Node
         else if (_flow.Outcome == BattleOutcome.Absorbed)
         {
             _hud.SetCaption(T("combate.sombra.absorvida"));
+            _hud.FadeShadePanel(_stage.Tuning.AbsorbSeconds);
             await Shade.PlayAbsorbInto(Protagonist.Position);
+        }
+        else if (_flow.Outcome == BattleOutcome.Witnessed)
+        {
+            // A história inteira, que só quem fica até o fim do ciclo vê (GDD 4.5).
+            foreach (var key in _story.StoryKeys)
+            {
+                await ShowLine(T(key), LineSeconds);
+            }
+
+            _hud.SetCaption(T("combate.sombra.vista"));
+            await Shade.PlayDepart();
+        }
+        else if (_flow.Outcome is BattleOutcome.Spared or BattleOutcome.Fled or BattleOutcome.Yielded)
+        {
+            _hud.SetCaption(T(_flow.Outcome switch
+            {
+                BattleOutcome.Spared => "combate.sombra.poupada",
+                BattleOutcome.Fled => "combate.fuga.escapou",
+                _ => "combate.sombra.cedeu",
+            }));
+            await Shade.PlayDepart();
         }
         else
         {
             _hud.SetCaption(T("combate.sombra.desfeita"));
             await Shade.PlayDisintegrate();
+        }
+
+        // Vencida (por qualquer via), a sombra devolve o que guardava de uma derrota anterior.
+        if (_flow.Outcome is not (BattleOutcome.Spared or BattleOutcome.Fled or BattleOutcome.Yielded) && Hoard.ReturnTo(Bag))
+        {
+            await ShowLine(T("combate.espolio.devolvido"), LineSeconds);
         }
 
         await Wait(DefeatHoldSeconds);
@@ -622,7 +1023,25 @@ public partial class BattleAttackTest : Node
         _hud.SetCaption(T("combate.derrota"));
         await Protagonist.PlayDefeat();
         await _hud.Fade(toBlack: true, DefeatFadeSeconds);
-        await Wait(DefeatHoldSeconds);
+
+        // Derrota com custo (GDD 4.9): acorda na Trívia, perde óbolos e oferendas (ficam com ela), a Maré sobe e
+        // Hécate dá uma pista nova. O Diário mantém o que viu.
+        _defeats++;
+        await ShowLine(T("combate.derrota.trivia"), LineSeconds);
+        var lostObols = Hoard.TakeFrom(Bag);
+        if (lostObols > 0 || !Hoard.IsEmpty)
+        {
+            await ShowLine(T("combate.derrota.perdas"), LineSeconds);
+        }
+
+        if (_defeatTideSteps > 0)
+        {
+            _tide += _defeatTideSteps;
+            GD.Print($"[debug] Maré: {_tide}");
+            await ShowLine(T("combate.derrota.mare"), LineSeconds);
+        }
+
+        await ShowLine(T(ShadeNarration.DefeatClue(_story, _defeats)), LineSeconds);
         await Restart();
     }
 
@@ -683,6 +1102,17 @@ public partial class BattleAttackTest : Node
         return score;
     }
 
+    private async Task<float> RunStroke(StrokePattern pattern)
+    {
+        _stroke.Pattern = pattern;
+        _stroke.Center = GestureAreaCenter();
+        var score = await RunGesture(_stroke);
+        await Wait(ResultHoldSeconds);
+        _stroke.Visible = false;
+        _hud.SetGestureActive(true); // tira a dica: o gesto acabou
+        return score;
+    }
+
     private async Task<float> RunDrag()
     {
         _drag.Settings = _freeDrag;
@@ -694,8 +1124,17 @@ public partial class BattleAttackTest : Node
         return score;
     }
 
-    private static Task<float> RunGesture(IGesture gesture)
+    /// <summary>Janelas do modo, com a assistência de gestos aplicada.</summary>
+    private GestureWindows Windows => _assistSettings.WindowsFor(_assist, _windows);
+
+    private Task<float> RunGesture(IGesture gesture)
     {
+        // Assistência automática: o gesto se faz sozinho, sempre "bom" (nunca perfeito).
+        if (_assist == GestureAssist.Automatic)
+        {
+            return Task.FromResult(_assistSettings.AutoScore);
+        }
+
         var done = new TaskCompletionSource<float>();
         void OnCompleted(float score)
         {
@@ -793,18 +1232,17 @@ public partial class BattleAttackTest : Node
     /// <summary>Período (em ms, dividido por 2π) do sobe e desce do marcador da Esquiva no modo demo.</summary>
     private const float DemoDodgeSwingMs = 600f;
 
-    /// <summary>Distância (pixels da arte) em que o demo considera um ponto do caminho do Arrastar alcançado.</summary>
-    private const float DemoDragReach = 2f;
-
     /// <summary>
-    /// Com <c>-- --demo</c>: joga sozinho para gravar vídeo, mostrando a via Libertar inteira. Escuta nos três
-    /// momentos do ciclo (pista, nome, fixação), tenta Libertar com a fixação errada (a sombra corrige e se
-    /// enfurece) e depois com a certa até ela partir. Na luta seguinte só ataca. Apara no tempo e foge dos golpes
-    /// subindo e descendo (de propósito, nem sempre consegue).
+    /// Com <c>-- --demo</c>: joga sozinho para gravar vídeo, mostrando a via Libertar inteira (escuta nos três
+    /// momentos do ciclo, erra a fixação, acerta até ela partir); na luta seguinte usa as cinco Memórias e ataca até
+    /// absorver; depois usa o Eco. Com <c>-- --demo=vias</c>: uma luta por via nova (oferenda e Presenciar; provisão
+    /// e Poupar; Fugir; Deixar-se vencer). Apara no tempo e foge dos golpes subindo e descendo (nem sempre consegue).
     /// </summary>
-    private async void RunDemo()
+    private async void RunDemo(string mode)
     {
-        var script = new Queue<string[]>(new[]
+        var vias = mode == "vias";
+        // --demo=absorver: sem roteiro (absorve assim que der; use com --firmeza=25).
+        var script = vias ? ViasScript() : mode == "absorver" ? new Queue<string[]>() : new Queue<string[]>(new[]
         {
             new[] { ApproachId, ListenId },
             new[] { ApproachId, ListenId },
@@ -814,13 +1252,20 @@ public partial class BattleAttackTest : Node
             new[] { ApproachId, FreeId, FixationPrefix + "culpa" },
         });
 
+        foreach (var memory in mode != "" ? System.Array.Empty<string>() : new[] { "noite_das_tochas", "agua_parada", "mesa_cheia", "maos_no_barro", "colo_da_avo" })
+        {
+            script.Enqueue(new[] { MemoryId, MemoryPrefix + memory });
+        }
+
         while (IsInsideTree())
         {
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             if (_menu.MenuVisible && _flow.Phase == BattlePhase.PlayerTurn)
             {
                 await Wait(1f);
-                var choices = script.Count > 0 ? script.Dequeue()
+                // Presenciando, só mantém a atenção; fora disso segue o roteiro, depois absorve, usa o Eco ou ataca.
+                var choices = _flow.IsWitnessing ? new[] { KeepWitnessingId }
+                    : script.Count > 0 ? script.Dequeue()
                     : _menu.IsAvailable(AbsorbId) ? new[] { AbsorbId }
                     : Echoes.HasUsable ? new[] { EchoId, EchoPrefix + Echoes.Echoes[0].Id }
                     : new[] { AttackId };
@@ -841,9 +1286,21 @@ public partial class BattleAttackTest : Node
             {
                 await FollowPath();
             }
+            else if (_stroke.IsRunning)
+            {
+                await PlayStroke();
+            }
+            else if (_dodge.IsRunning && _dodge.ExitCenter is { } exit)
+            {
+                // Fugindo: vai direto para a saída.
+                var dir = (exit - _dodge.MarkerPosition).Normalized();
+                SetAxis("move_left", "move_right", dir.X);
+                SetAxis("move_up", "move_down", dir.Y);
+            }
             else
             {
                 // Na Esquiva, sobe e desce devagar: às vezes escapa, às vezes leva golpe. Fora dela, solta tudo.
+                SetAxis("move_left", "move_right", 0f);
                 var up = _dodge.IsRunning && Mathf.Sin(Time.GetTicksMsec() / DemoDodgeSwingMs) > 0f;
                 var down = _dodge.IsRunning && !up;
                 Input.ParseInputEvent(new InputEventAction { Action = "move_up", Pressed = up });
@@ -851,6 +1308,17 @@ public partial class BattleAttackTest : Node
             }
         }
     }
+
+    /// <summary>Uma luta por via nova, nesta ordem.</summary>
+    private static Queue<string[]> ViasScript() => new(new[]
+    {
+        new[] { ApproachId, OfferingId, OfferingPrefix + "agua" },
+        new[] { ApproachId, WitnessId },
+        new[] { BagId, ProvisionPrefix + "sementes_roma" },
+        new[] { ApproachId, SpareId },
+        new[] { FleeId },
+        new[] { ApproachId, YieldId },
+    });
 
     /// <summary>Como o jogador: sobe ou desce o cursor até a opção e confirma.</summary>
     private async Task Choose(string id)
@@ -886,29 +1354,56 @@ public partial class BattleAttackTest : Node
         }
     }
 
-    /// <summary>Conduz a luz ponto a ponto pelo caminho, com o analógico simulado (força de cada direção).</summary>
+    /// <summary>Conduz a luz no ritmo da guia: segura "para a frente" quando está atrás e solta quando passa dela.</summary>
     private async Task FollowPath()
     {
-        var points = _drag.PathPoints;
-        var next = 1;
         while (_drag.IsRunning)
         {
-            var toTarget = points[next] - _drag.MarkerPosition;
-            if (toTarget.Length() < DemoDragReach && next < points.Length - 1)
-            {
-                next++;
-                continue;
-            }
-
-            var dir = toTarget.Normalized();
-            SetAxis("move_left", "move_right", dir.X);
-            SetAxis("move_up", "move_down", dir.Y);
+            var push = _drag.Gap < 0f ? _drag.Tangent : Vector2.Zero;
+            SetAxis("move_left", "move_right", push.X);
+            SetAxis("move_up", "move_down", push.Y);
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }
 
         SetAxis("move_left", "move_right", 0f);
         SetAxis("move_up", "move_down", 0f);
         while (_drag.Visible)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
+    }
+
+    /// <summary>Aperta cada direção do Traço no pulso (diagonal = as duas teclas juntas).</summary>
+    private async Task PlayStroke()
+    {
+        var pattern = _stroke.Pattern;
+        for (var i = 0; i < pattern.Steps.Count && _stroke.IsRunning; i++)
+        {
+            await Wait(Mathf.Max(0f, pattern.IdealTime(i) - _stroke.Elapsed));
+            var actions = pattern.Steps[i] switch
+            {
+                StrokeDirection.Up => new[] { "move_up" },
+                StrokeDirection.UpRight => new[] { "move_up", "move_right" },
+                StrokeDirection.Right => new[] { "move_right" },
+                StrokeDirection.DownRight => new[] { "move_down", "move_right" },
+                StrokeDirection.Down => new[] { "move_down" },
+                StrokeDirection.DownLeft => new[] { "move_down", "move_left" },
+                StrokeDirection.Left => new[] { "move_left" },
+                _ => new[] { "move_up", "move_left" },
+            };
+            foreach (var action in actions)
+            {
+                Input.ParseInputEvent(new InputEventAction { Action = action, Pressed = true });
+            }
+
+            await Wait(_stroke.ChordSeconds * 2f);
+            foreach (var action in actions)
+            {
+                Input.ParseInputEvent(new InputEventAction { Action = action, Pressed = false });
+            }
+        }
+
+        while (_stroke.Visible)
         {
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }

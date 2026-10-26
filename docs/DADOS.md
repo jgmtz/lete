@@ -48,6 +48,15 @@ Usadas em diálogos, revelação de névoa, estoque de mercadores, missões, eve
   "listen": [                            // Escutar: o que ela murmura em cada golpe do ciclo (contando do 0)
     { "cycle_step": 1, "reveals": "name", "text_key": "shade.tecela.nome_ouvido", "partial_key": "shade.tecela.nome_metade" }
   ],                                     // reveals: clue | name | fixation (exatamente um name e um fixation)
+  "voices": [ { "resolve_fraction_below": "_tbd", "text_key": "shade.tecela.voz1" } ],   // falas conforme a Firmeza cai
+  "phases": [ { "resolve_fraction_below": "_tbd", "caption_key": "shade.tecela.fase2", "reveals": "fixation",
+                "attacks": [ /* ciclo novo, no formato de "attacks" */ ] } ],
+  "story_keys": [ "shade.tecela.historia1" ],  // Presenciar: a história inteira
+  "flee_clue_key": "shade.tecela.fuga",        // o que se ouve ao fugir
+  "yield": { "lucidity_cost": "_tbd", "text_keys": [ "shade.tecela.ceder1" ] },  // Deixar-se vencer
+  "defeat_clue_keys": [ "shade.tecela.hecate1" ],  // pistas de Hécate, uma por derrota
+  "spare_key": "shade.tecela.poupar",
+  "offering": { "accepts": "agua", "accept_key": "shade.tecela.oferenda.aceita", "refuse_key": "shade.tecela.oferenda.recusa" },
   "liberation": { "peace": "_tbd", "peace_gain": { "perfect": "_tbd", "good": "_tbd", "failed": "_tbd" },
     "lucidity_cost": "_tbd", "enraged_damage_multiplier": "_tbd",
     "progress_key": "shade.tecela.libertar.progresso", "freed_key": "shade.tecela.libertar.parte" },
@@ -116,6 +125,12 @@ Sombras **comuns** referenciam um `base_body` (um dos 6 corpos-base) e um conjun
 ```
 
 **Memória pesada:** `scope: "heavy"`, ordem fixa (`order`), `gate`: condição para aflorar, `choice`: `{ "face": { "skill": "culpa_x", "profile_effect": {...} }, "leave": { "lightness": {...} } }`. Decisão **definitiva** (sem campo de reversão).
+
+**Batalha (`content/battle/<id>.json`), participante:** além de `id`, `art`, `height`, `flip_h`, `tint`, `portrait` e `name_key`, pode ter `idle_frames` (`frames`, `fps`, `by_style`: id da versão de arte → caminho dos quadros sem o número, ex. `.../remador_flutuar_` + `01.png`); versões sem quadros usam a imagem única com o balanço por código.
+
+**Bolsa de teste (`content/items/bolsa_*.json`, até o inventário do M2):** `obols`, `offerings` (tipo → quantidade: mel, vinho, leite, agua, farinha) e `provisions` (`id`, `name_key`, `description_key`, `breath_restore`, `mark_gain`, `count`). **Modo de dificuldade** também traz `assist` (`window_widening`, `auto_score`, que precisa dar "bom") e `defeat_tide_steps` (0 a 2). **Fuga:** gesto de Esquiva com `exit` (`x`, `y`, `w`, `h` em frações do quadro).
+
+**Memórias de combate (`content/memories/<id>.json`, campo `memories`):** `id`, `kind` (childhood | feast | family | mourning | craft), `name_key`, `description_key`, `stroke` (`steps`: 2 a 4 de up, up_right, right, down_right, down, down_left, left, up_left; `beat_seconds`, `zero_score_offset_seconds`, `lead_in_seconds`), `lucidity_cost`, `failed_cost_multiplier`, `effect` (heal | strike | guard | slow | focus) e `power` (perfect/good/failed). Todos os números `_tbd`.
 
 **Memória (habilidade) `MemorySkill`:** `kind` herdado do tipo, `stroke_pattern` (conjunto de direções), `lucidity_cost` (`_tbd`), `effect`.
 

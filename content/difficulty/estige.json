@@ -1,7 +1,27 @@
 {
   "id": "estige",
   "gesture_windows": {
-    "perfect": { "_tbd": true, "value": 0.8 },
-    "good": { "_tbd": true, "value": 0.4 }
+    "perfect": {
+      "_tbd": true,
+      "value": 0.8
+    },
+    "good": {
+      "_tbd": true,
+      "value": 0.4
+    }
+  },
+  "assist": {
+    "window_widening": {
+      "_tbd": true,
+      "value": 0.2
+    },
+    "auto_score": {
+      "_tbd": true,
+      "value": 0.6
+    }
+  },
+  "defeat_tide_steps": {
+    "_tbd": true,
+    "value": 1
   }
 }

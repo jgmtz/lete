@@ -41,6 +41,10 @@ public partial class Main : Node
         _container = GetNode<SubViewportContainer>("ViewportContainer");
         _world = _container.GetNode<Node3D>("SubViewport/TestRoom");
         _player = _world.GetNode<Player>("Player");
+        if (GameRoot.Instance.State.ProtagonistId is { } chosen)
+        {
+            _player.SelectCharacter(chosen);
+        }
         _cameraRig = _world.GetNode<CameraRig>("CameraRig");
 
         _hud = new Hud(_player);

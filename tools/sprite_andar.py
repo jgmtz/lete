@@ -31,6 +31,7 @@ def main():
     p.add_argument("--nitidez", type=float, default=1.6); p.add_argument("--contorno", type=int, default=1)
     p.add_argument("--fps", type=int, default=8); p.add_argument("--zoom", type=int, default=6)
     p.add_argument("--celula-fixa", action="store_true", help="reduz a celula inteira (mesma grade em todos os quadros): partes que so se deslocam ficam identicas")
+    p.add_argument("--flutuar", action="store_true", help="(com --celula-fixa) corta todos os quadros pelo retangulo uniao, sem realinhar os pes: preserva subir/descer de quem flutua")
     p.add_argument("--saida", required=True); p.add_argument("--nome", default="andar")
     a = p.parse_args()
     os.makedirs(a.saida, exist_ok=True)
@@ -56,9 +57,13 @@ def main():
         col = np.clip(s[:, :, :3] / al2, 0, 255)
         rgb = Image.fromarray(col.astype(np.uint8), "RGB").filter(ImageFilter.UnsharpMask(radius=1, percent=int(a.nitidez * 100), threshold=2))
         alfa = Image.fromarray(((s[:, :, 3] > 127) * 255).astype(np.uint8), "L")
-        if a.celula_fixa:
+        if a.celula_fixa and not a.flutuar:
             bb = alfa.getbbox(); rgb, alfa = rgb.crop(bb), alfa.crop(bb)
         quadros.append((rgb, alfa, b))
+    if a.celula_fixa and a.flutuar:
+        ub = [al.getbbox() for _, al, _ in quadros]
+        U = (min(b[0] for b in ub), min(b[1] for b in ub), max(b[2] for b in ub), max(b[3] for b in ub))
+        quadros = [(r.crop(U), al.crop(U), b) for r, al, b in quadros]
     # tela comum: pes alinhados, tronco centralizado
     def ancora(rgb, alfa):
         al = np.array(alfa); topo = al[: max(1, al.shape[0] // 2)]

@@ -11,7 +11,7 @@ namespace Lete.Game.Combat;
 public partial class BattleActor : Node3D
 {
     private static readonly Shader FlashShader = GD.Load<Shader>("res://src/Lete.Game/Combat/flash.gdshader");
-    private static readonly Texture2D BlobTexture = GD.Load<Texture2D>("res://art/sprites/placeholder/sombra_chao.png");
+    private static readonly Texture2D BlobTexture = GD.Load<Texture2D>("res://art/sprites/comum/sombra_chao.png");
 
     /// <summary>Tamanho da sombra de blob no chão, em unidades do mundo.</summary>
     [Export] public Vector2 BlobSize { get; set; } = new(0.5f, 0.25f);
@@ -20,6 +20,14 @@ public partial class BattleActor : Node3D
     private Sprite3D _sprite = null!;
     private ShaderMaterial _material = null!;
     private Tween? _breathe;
+    private bool _smooth;
+    private Texture2D[]? _idleFrames;
+    private float _idleFps;
+    private float _idleTime;
+    private int _idleFrame = -1;
+
+    /// <summary>A animação parada já começou (para reaplicá-la quando a arte troca).</summary>
+    public bool IdleRunning { get; private set; }
     private float _height;
     private CpuParticles3D _dust = null!;
     private CpuParticles3D? _sparks;
@@ -104,6 +112,7 @@ public partial class BattleActor : Node3D
     public void SetArt(Texture2D texture, float worldHeight, bool smooth, bool flipH, Color tint)
     {
         _height = worldHeight;
+        _smooth = smooth;
         _sprite.Texture = texture;
         _sprite.PixelSize = worldHeight / texture.GetHeight();
         _sprite.Offset = new Vector2(0, texture.GetHeight() / 2f);
@@ -117,8 +126,45 @@ public partial class BattleActor : Node3D
     public Vector3 PointAtHeight(float fraction) => ToGlobal(new Vector3(0, _height * fraction, 0));
 
     /// <summary>Animação parada: os vivos respiram, as sombras flutuam devagar.</summary>
+    /// <summary>
+    /// Quadros desenhados da animação parada (o flutuar das sombras); nulo volta à imagem única com o balanço por
+    /// código. Os quadros já sobem e descem, então com eles a sombra não balança por código.
+    /// </summary>
+    public void SetIdleFrames(Texture2D[]? frames, float fps)
+    {
+        _idleFrames = frames is { Length: > 0 } ? frames : null;
+        _idleFps = fps;
+        _idleTime = 0f;
+        _idleFrame = -1;
+        ShowIdleFrame(0);
+    }
+
+    public override void _Process(double delta)
+    {
+        if (_idleFrames is null)
+        {
+            return;
+        }
+
+        _idleTime += (float)delta;
+        ShowIdleFrame((int)(_idleTime * _idleFps) % _idleFrames.Length);
+    }
+
+    private void ShowIdleFrame(int frame)
+    {
+        if (_idleFrames is null || frame == _idleFrame)
+        {
+            return;
+        }
+
+        _idleFrame = frame;
+        _sprite.Texture = _idleFrames[frame];
+        _material.SetShaderParameter(_smooth ? "tex_linear" : "tex_nearest", _idleFrames[frame]);
+    }
+
     public void StartIdle()
     {
+        IdleRunning = true;
         _breathe?.Kill();
         ((StandardMaterial3D)((PlaneMesh)_blob.Mesh).Material).AlbedoColor =
             new Color(1, 1, 1, IsSpirit ? Tuning.BlobAlphaSpirit : Tuning.BlobAlphaLiving);
@@ -126,6 +172,11 @@ public partial class BattleActor : Node3D
         var amplitude = IsSpirit
             ? Tuning.FloatMeters / Tuning.CharacterHeightMeters / Scale.Y
             : Tuning.BreathePixels * WorldPerScreenPixel / Scale.Y;
+        if (IsSpirit && _idleFrames is not null)
+        {
+            return;
+        }
+
         var period = IsSpirit ? Tuning.FloatSeconds : Tuning.BreatheSeconds;
         _breathe = CreateTween().SetLoops().SetTrans(Tween.TransitionType.Sine);
         _breathe.TweenProperty(_body, "position:y", amplitude, period / 2f);

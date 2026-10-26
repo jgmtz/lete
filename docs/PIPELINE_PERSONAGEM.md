@@ -57,3 +57,5 @@ As pernas não aparecem: o rig de pernas não se aplica. Usar balanço da barra 
 3. Gerar o perfil ESQUERDO (`--espelhar --pe-tras`) e espelhar os quadros para a direita. Parado = quadro 1 de cada direção.
 
 - **Saia curta (joelho) com canela visível (Lia):** `marionete_capa.py` modo `fc` com `sem_coxa` para frente/costas e modo `duas` para o perfil (duas pernas pintadas, divisor inclinado, `amp` reduz o balanço). Perna/pé tortos do Gemini na vista simétrica: espelhar a metade boa em vez de pedir de novo.
+
+- **Sombras (25/out):** 4 imagens por sombra no Gemini: batalha (frente 3/4, assimétrica, com itens), mapa F, C e PD (simétricas, sem itens). Sem folhas de andar do Gemini: andar = deslizar por deformação (`tools/andar_sombra.py`), sem rig de pernas. A imagem de batalha é **espelhada** antes de pixelizar (a sombra olha para o grupo, à esquerda); guardar o original como `*_original.png`. Em `sprite_andar.py` usar `--celula-fixa --flutuar` (sem `--flutuar` os pés são realinhados e o subir/descer some).

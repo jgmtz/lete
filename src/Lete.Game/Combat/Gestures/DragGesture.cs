@@ -7,7 +7,8 @@ namespace Lete.Game.Combat.Gestures;
 
 /// <summary>
 /// Gesto Arrastar (Oferenda, Libertar; GDD 4.4): conduzir uma luz devagar por um caminho com as ações de
-/// movimento. O caminho fica em ouro apagado, o fim em ouro vivo; a luz esmaece quando se afasta do caminho.
+/// movimento. A luz anda presa no caminho (as curvas são automáticas); uma luz-guia vai à frente, devagar, e a
+/// luz do jogador esmaece quando se afasta dela (com pressa ou ficando para trás).
 /// A regra fica em <see cref="DragRun"/>; aqui só entrada e desenho, em pixels da arte.
 /// </summary>
 public partial class DragGesture : Control, IGesture
@@ -20,8 +21,9 @@ public partial class DragGesture : Control, IGesture
     /// <summary>Raio da luz e da marca do fim do caminho, em pixels da arte.</summary>
     [Export] public float MarkerRadius { get; set; } = 2f;
 
-    /// <summary>Opacidade mínima da luz quando está bem fora do caminho.</summary>
+    /// <summary>Opacidade mínima da luz quando está bem longe da guia; opacidade da guia.</summary>
     [Export] public float FarMarkerAlpha { get; set; } = 0.35f;
+    [Export] public float GuideAlpha { get; set; } = 0.55f;
 
     /// <summary>Centro do quadro em coordenadas do controle; sem valor, usa o meio do controle.</summary>
     public Vector2? Center { get; set; }
@@ -35,8 +37,12 @@ public partial class DragGesture : Control, IGesture
 
     public bool IsRunning { get; private set; }
 
-    /// <summary>Onde está a luz e para onde o caminho segue, em coordenadas do controle (para o modo demo).</summary>
+    /// <summary>Onde está a luz, para onde o trecho segue e se ela está à frente da guia (para o modo demo).</summary>
     public Vector2 MarkerPosition => _run is null ? Vector2.Zero : Origin + new Vector2(_run.Marker.X, _run.Marker.Y);
+
+    public Vector2 Tangent => _run is null ? Vector2.Right : new Vector2(_run.Tangent.X, _run.Tangent.Y);
+
+    public float Gap => _run?.Gap ?? 0f;
 
     public Vector2[] PathPoints => Settings.PathPixels.Select(p => Origin + new Vector2(p.X, p.Y)).ToArray();
 
@@ -82,8 +88,12 @@ public partial class DragGesture : Control, IGesture
         DrawPolyline(path.Select(p => p.Round()).ToArray(), new Color(Style.Palette.Gold, 0.6f), 1f, antialiased: false);
         DrawCircle(path[^1].Round(), MarkerRadius + 1f, Style.Palette.Gold, filled: false, antialiased: false);
 
-        // A luz fica mais fraca quanto mais longe do caminho, para o jogador sentir o desvio sem número.
-        var closeness = 1f - Mathf.Clamp(_run.Deviation / (Settings.DeviationToZero * 2f), 0f, 1f);
+        // A guia: um ponto dourado mais fraco que anda devagar à frente.
+        var guide = (Origin + new Vector2(_run.Guide.X, _run.Guide.Y)).Round();
+        DrawCircle(guide, MarkerRadius, new Color(Style.Palette.Gold, GuideAlpha), filled: true, antialiased: false);
+
+        // A luz fica mais fraca quanto mais longe da guia, para o jogador sentir o ritmo sem número.
+        var closeness = 1f - Mathf.Clamp(Mathf.Abs(_run.Gap) / (Settings.GapToZero * 2f), 0f, 1f);
         var light = new Color(Style.Palette.Ivory, Mathf.Lerp(FarMarkerAlpha, 1f, closeness));
         DrawCircle(MarkerPosition.Round(), MarkerRadius, light, filled: true, antialiased: false);
     }

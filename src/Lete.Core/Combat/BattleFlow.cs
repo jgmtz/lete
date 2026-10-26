@@ -6,27 +6,45 @@ public enum BattlePhase
     PlayerTurn,
     CompanionSupport,
     ShadeTurn,
+
+    /// <summary>A luta acabou por uma das vias (ver <see cref="BattleFlow.Outcome"/>), sem derrota.</summary>
     Victory,
+
+    /// <summary>O Fôlego zerou (a derrota involuntária, com custo: GDD 4.9).</summary>
     Defeat,
 }
 
-/// <summary>Como a luta terminou a favor do jogador (as vias de GDD 4.5 que já existem).</summary>
+/// <summary>Como a luta terminou sem derrota: as vias de GDD 4.5.</summary>
 public enum BattleOutcome
 {
     Destroyed,
     Freed,
     Absorbed,
+
+    /// <summary>Presenciar: ficou até o fim do ciclo dela, sem lutar, e viu a história inteira.</summary>
+    Witnessed,
+
+    /// <summary>Poupar: deixou-a ir; ela segue vagando, "ainda por resolver".</summary>
+    Spared,
+
+    /// <summary>Fugir: escapou (e saiu sabendo algo).</summary>
+    Fled,
+
+    /// <summary>Deixar-se vencer: escolheu perder (não é a derrota involuntária).</summary>
+    Yielded,
 }
 
 /// <summary>
 /// Máquina de turnos do combate (GDD 4.1): jogador → apoio do companheiro (quando é a vez dele) → sombra,
-/// com as checagens de vitória e derrota depois de cada passo. Não sabe de animação nem de gesto: quem
-/// conduz a cena avisa quando cada passo terminou.
+/// com as checagens de fim de luta depois de cada passo. Não sabe de animação nem de gesto: quem conduz a cena
+/// avisa quando cada passo terminou.
 /// </summary>
 public sealed class BattleFlow
 {
-    private readonly IReadOnlyList<ShadeAttack> _attacks;
+    private IReadOnlyList<ShadeAttack> _attacks;
     private int _shadeTurns;
+    private int _cycleStart;
+    private BattleOutcome? _pendingOutcome;
 
     public BattleFlow(
         Gauge breath,
@@ -57,14 +75,17 @@ public sealed class BattleFlow
 
     public BattlePhase Phase { get; private set; } = BattlePhase.PlayerTurn;
 
-    /// <summary>Como a luta foi vencida; nulo enquanto não houver vitória.</summary>
+    /// <summary>Como a luta acabou; nulo enquanto não acabar (ou se acabou em derrota).</summary>
     public BattleOutcome? Outcome { get; private set; }
 
     /// <summary>Rodada atual, começando em 1.</summary>
     public int Round { get; private set; } = 1;
 
+    /// <summary>Quantos golpes tem o ciclo atual da sombra.</summary>
+    public int CycleLength => _attacks.Count;
+
     /// <summary>Posição do próximo golpe no ciclo da sombra (o ciclo se repete, como o gesto que ela fazia em vida).</summary>
-    public int NextShadeAttackIndex => _shadeTurns % _attacks.Count;
+    public int NextShadeAttackIndex => (_shadeTurns - _cycleStart) % _attacks.Count;
 
     public ShadeAttack NextShadeAttack => _attacks[NextShadeAttackIndex];
 
@@ -83,10 +104,84 @@ public sealed class BattleFlow
 
     public void Enrage() => Enraged = true;
 
-    /// <summary>A sombra foi absorvida (a ação do jogador terminou com ela dentro dele).</summary>
-    public bool ShadeAbsorbed { get; private set; }
+    /// <summary>Família: fração do próximo golpe da sombra que não chega (0 = nenhuma proteção).</summary>
+    public float GuardFraction { get; private set; }
 
-    public void AbsorbShade() => ShadeAbsorbed = true;
+    /// <summary>Luto: o próximo golpe da sombra fica este tanto mais lento (1 = normal).</summary>
+    public float ShadeSlowFactor { get; private set; } = 1f;
+
+    /// <summary>Ofício: quanto as janelas da próxima defesa ficam mais largas.</summary>
+    public float FocusWidening { get; private set; }
+
+    /// <summary>Presenciando: quantos golpes dela ainda faltam para fechar o ciclo; nulo se não está presenciando.</summary>
+    public int? WitnessTurnsLeft { get; private set; }
+
+    public bool IsWitnessing => WitnessTurnsLeft is not null;
+
+    /// <summary>
+    /// Efeito de uma Memória que vale até o fim do próximo turno da sombra (Família, Luto, Ofício). Usar a mesma
+    /// de novo não soma: vale a mais forte.
+    /// </summary>
+    public void ApplyUntilShadeTurnEnds(MemoryEffectKind effect, float power)
+    {
+        switch (effect)
+        {
+            case MemoryEffectKind.Guard:
+                GuardFraction = Math.Max(GuardFraction, Math.Clamp(power, 0f, 1f));
+                break;
+            case MemoryEffectKind.Slow:
+                ShadeSlowFactor = Math.Max(ShadeSlowFactor, Math.Max(1f, power));
+                break;
+            case MemoryEffectKind.Focus:
+                FocusWidening = Math.Max(FocusWidening, Math.Max(0f, power));
+                break;
+            default:
+                throw new ArgumentException($"{effect} não dura até o turno da sombra.", nameof(effect));
+        }
+    }
+
+    /// <summary>A sombra foi absorvida (a ação do jogador terminou com ela dentro dele).</summary>
+    public void AbsorbShade() => EndBattle(BattleOutcome.Absorbed);
+
+    /// <summary>
+    /// A ação do jogador encerra a luta por uma via imediata (Absorver, Poupar, Fugir, Deixar-se vencer); vale quando
+    /// a ação terminar (<see cref="EndPlayerAction"/>).
+    /// </summary>
+    public void EndBattle(BattleOutcome outcome)
+    {
+        if (outcome is BattleOutcome.Destroyed or BattleOutcome.Freed or BattleOutcome.Witnessed)
+        {
+            throw new ArgumentException($"{outcome} acontece pela regra, não por escolha direta.", nameof(outcome));
+        }
+
+        _pendingOutcome = outcome;
+    }
+
+    /// <summary>A ação do jogador já decidiu o fim da luta (Absorver, Poupar, Fugir, Deixar-se vencer).</summary>
+    public bool IsEnding => _pendingOutcome is not null;
+
+    /// <summary>Presenciar: a partir de agora só se defende, até ela completar um ciclo inteiro de golpes.</summary>
+    public void StartWitnessing() => WitnessTurnsLeft = CycleLength;
+
+    /// <summary>Desistir de presenciar no meio (volta a lutar normalmente).</summary>
+    public void StopWitnessing() => WitnessTurnsLeft = null;
+
+    /// <summary>A sombra muda de gesto (fase nova): o ciclo novo começa do primeiro golpe.</summary>
+    public void ChangeCycle(IReadOnlyList<ShadeAttack> attacks)
+    {
+        if (attacks.Count == 0)
+        {
+            throw new ArgumentException("O ciclo novo precisa de pelo menos um golpe.", nameof(attacks));
+        }
+
+        _attacks = attacks;
+        _cycleStart = _shadeTurns;
+        if (IsWitnessing)
+        {
+            // Presenciar acompanha o ciclo inteiro: com o gesto novo, conta de novo.
+            WitnessTurnsLeft = CycleLength;
+        }
+    }
 
     /// <summary>A ação do jogador terminou (já com o efeito aplicado na Firmeza, Lucidez etc.).</summary>
     public void EndPlayerAction()
@@ -115,6 +210,14 @@ public sealed class BattleFlow
         _shadeTurns++;
         SupportActive = false;
         Enraged = false;
+        GuardFraction = 0f;
+        ShadeSlowFactor = 1f;
+        FocusWidening = 0f;
+        if (WitnessTurnsLeft is { } left)
+        {
+            WitnessTurnsLeft = left - 1;
+        }
+
         if (!Check())
         {
             Round++;
@@ -124,27 +227,36 @@ public sealed class BattleFlow
 
     private bool Check()
     {
-        if (ShadeAbsorbed)
+        if (_pendingOutcome is { } chosen)
         {
-            Phase = BattlePhase.Victory;
-            Outcome = BattleOutcome.Absorbed;
+            End(chosen);
         }
         else if (Liberation is { IsFreed: true })
         {
-            Phase = BattlePhase.Victory;
-            Outcome = BattleOutcome.Freed;
+            End(BattleOutcome.Freed);
         }
         else if (Resolve.IsBroken)
         {
-            Phase = BattlePhase.Victory;
-            Outcome = BattleOutcome.Destroyed;
+            End(BattleOutcome.Destroyed);
         }
         else if (Breath.IsEmpty)
         {
             Phase = BattlePhase.Defeat;
         }
+        else if (WitnessTurnsLeft == 0)
+        {
+            // Aguentou o ciclo inteiro sem lutar: ela conta a história toda.
+            End(BattleOutcome.Witnessed);
+        }
 
         return IsOver;
+    }
+
+    private void End(BattleOutcome outcome)
+    {
+        Phase = BattlePhase.Victory;
+        Outcome = outcome;
+        WitnessTurnsLeft = null;
     }
 
     private void Expect(BattlePhase phase)

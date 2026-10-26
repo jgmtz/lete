@@ -1,0 +1,246 @@
+{
+  "id": "teste",
+  "_rascunho": "Cinco Memórias de teste, uma por tipo (GDD 2.1). Nomes, efeitos e números são do Claude, para o João revisar.",
+  "memories": [
+    {
+      "id": "colo_da_avo",
+      "kind": "childhood",
+      "name_key": "memoria.colo_da_avo.nome",
+      "description_key": "memoria.colo_da_avo.descricao",
+      "stroke": {
+        "steps": [
+          "right",
+          "up_right",
+          "up"
+        ],
+        "beat_seconds": {
+          "_tbd": true,
+          "value": 0.55
+        },
+        "zero_score_offset_seconds": {
+          "_tbd": true,
+          "value": 0.22
+        },
+        "lead_in_seconds": {
+          "_tbd": true,
+          "value": 0.9
+        }
+      },
+      "lucidity_cost": {
+        "_tbd": true,
+        "value": 12
+      },
+      "failed_cost_multiplier": {
+        "_tbd": true,
+        "value": 1.5
+      },
+      "effect": "heal",
+      "power": {
+        "perfect": {
+          "_tbd": true,
+          "value": 15
+        },
+        "good": {
+          "_tbd": true,
+          "value": 10
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 5
+        }
+      }
+    },
+    {
+      "id": "noite_das_tochas",
+      "kind": "feast",
+      "name_key": "memoria.noite_das_tochas.nome",
+      "description_key": "memoria.noite_das_tochas.descricao",
+      "stroke": {
+        "steps": [
+          "up_right",
+          "down_right",
+          "up_right",
+          "down_right"
+        ],
+        "beat_seconds": {
+          "_tbd": true,
+          "value": 0.45
+        },
+        "zero_score_offset_seconds": {
+          "_tbd": true,
+          "value": 0.22
+        },
+        "lead_in_seconds": {
+          "_tbd": true,
+          "value": 0.9
+        }
+      },
+      "lucidity_cost": {
+        "_tbd": true,
+        "value": 12
+      },
+      "failed_cost_multiplier": {
+        "_tbd": true,
+        "value": 1.5
+      },
+      "effect": "strike",
+      "power": {
+        "perfect": {
+          "_tbd": true,
+          "value": 35
+        },
+        "good": {
+          "_tbd": true,
+          "value": 22
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 8
+        }
+      }
+    },
+    {
+      "id": "mesa_cheia",
+      "kind": "family",
+      "name_key": "memoria.mesa_cheia.nome",
+      "description_key": "memoria.mesa_cheia.descricao",
+      "stroke": {
+        "steps": [
+          "right",
+          "left"
+        ],
+        "beat_seconds": {
+          "_tbd": true,
+          "value": 0.6
+        },
+        "zero_score_offset_seconds": {
+          "_tbd": true,
+          "value": 0.22
+        },
+        "lead_in_seconds": {
+          "_tbd": true,
+          "value": 0.9
+        }
+      },
+      "lucidity_cost": {
+        "_tbd": true,
+        "value": 12
+      },
+      "failed_cost_multiplier": {
+        "_tbd": true,
+        "value": 1.5
+      },
+      "effect": "guard",
+      "power": {
+        "perfect": {
+          "_tbd": true,
+          "value": 0.6
+        },
+        "good": {
+          "_tbd": true,
+          "value": 0.4
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 0.2
+        }
+      }
+    },
+    {
+      "id": "agua_parada",
+      "kind": "mourning",
+      "name_key": "memoria.agua_parada.nome",
+      "description_key": "memoria.agua_parada.descricao",
+      "stroke": {
+        "steps": [
+          "down",
+          "down",
+          "down"
+        ],
+        "beat_seconds": {
+          "_tbd": true,
+          "value": 0.75
+        },
+        "zero_score_offset_seconds": {
+          "_tbd": true,
+          "value": 0.22
+        },
+        "lead_in_seconds": {
+          "_tbd": true,
+          "value": 0.9
+        }
+      },
+      "lucidity_cost": {
+        "_tbd": true,
+        "value": 12
+      },
+      "failed_cost_multiplier": {
+        "_tbd": true,
+        "value": 1.5
+      },
+      "effect": "slow",
+      "power": {
+        "perfect": {
+          "_tbd": true,
+          "value": 1.5
+        },
+        "good": {
+          "_tbd": true,
+          "value": 1.3
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 1.1
+        }
+      }
+    },
+    {
+      "id": "maos_no_barro",
+      "kind": "craft",
+      "name_key": "memoria.maos_no_barro.nome",
+      "description_key": "memoria.maos_no_barro.descricao",
+      "stroke": {
+        "steps": [
+          "right",
+          "right",
+          "right"
+        ],
+        "beat_seconds": {
+          "_tbd": true,
+          "value": 0.5
+        },
+        "zero_score_offset_seconds": {
+          "_tbd": true,
+          "value": 0.22
+        },
+        "lead_in_seconds": {
+          "_tbd": true,
+          "value": 0.9
+        }
+      },
+      "lucidity_cost": {
+        "_tbd": true,
+        "value": 12
+      },
+      "failed_cost_multiplier": {
+        "_tbd": true,
+        "value": 1.5
+      },
+      "effect": "focus",
+      "power": {
+        "perfect": {
+          "_tbd": true,
+          "value": 0.2
+        },
+        "good": {
+          "_tbd": true,
+          "value": 0.12
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 0.05
+        }
+      }
+    }
+  ]
+}

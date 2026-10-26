@@ -46,8 +46,9 @@ public static class GestureData
             TbdNumber.Read(root, "box_height"),
             path.EnumerateArray().Select(p => new System.Numerics.Vector2(TbdNumber.Read(p, "x"), TbdNumber.Read(p, "y"))).ToList(),
             TbdNumber.Read(root, "marker_speed"),
-            TbdNumber.Read(root, "end_radius"),
-            TbdNumber.Read(root, "deviation_to_zero"),
+            TbdNumber.Read(root, "guide_speed"),
+            TbdNumber.Read(root, "gap_to_zero"),
+            TbdNumber.Read(root, "forward_threshold"),
             TbdNumber.Read(root, "max_seconds"));
         var errors = settings.Validate().ToList();
         return errors.Count == 0 ? settings : throw new FormatException(string.Join(" ", errors));

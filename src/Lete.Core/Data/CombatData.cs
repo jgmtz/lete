@@ -32,6 +32,12 @@ public static class CombatData
             throw new FormatException("Campo 'attacks' ausente ou vazio.");
         }
 
+        return ReadAttacks(attacks);
+    }
+
+    /// <summary>Uma lista de golpes (o ciclo da sombra ou o de uma fase).</summary>
+    internal static IReadOnlyList<ShadeAttack> ReadAttacks(JsonElement attacks)
+    {
         return attacks.EnumerateArray()
             .Select(a => new ShadeAttack(
                 String(a, "kind") switch

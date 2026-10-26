@@ -244,7 +244,7 @@ Cada ação pede um gesto com a cara do que representa. São cinco gestos reapro
 | Anel | Um anel fecha sobre um círculo; aperta-se quando coincidem | Atacar; aparar golpes diretos |
 | Traço | Desenhar uma sequência curta de 2 a 4 direções | Memória (padrão por tipo de Lembrança, ver 2.1) |
 | Segurar | Segurar o botão e soltar no ponto certo | Escutar; Presenciar; Suportar |
-| Arrastar | Conduzir um ponto devagar por um caminho, sem pressa | Oferenda; Libertar |
+| Arrastar | Conduzir um ponto devagar por um caminho, sem pressa (a luz anda presa no caminho e acompanha uma luz-guia: o desafio é a calma, não a precisão do dedo) | Oferenda; Libertar |
 | Esquiva | Mover um marcador dentro de um quadro para fugir de padrões | Defesa contra ataques de padrão |
 
 - **Esquiva e leitura são a mesma coisa:** os projéteis do quadro seguem o gesto da sombra (o padeiro lança golpes redondos em onda, a tecelã cruza fios).
@@ -471,30 +471,31 @@ Teclado e mouse **e** controle desde o M0. Um esquema único: direcionais/analó
 
 ---
 
-## 9. Criação do personagem
+## 9. Escolha do personagem (substitui "9. Criação do personagem")
 
-A escolha de aparência é **diegética**: o protagonista não lembra do próprio rosto. No prólogo, em Tênaro, uma poça de água escura mostra um reflexo borrado e o jogador **escolhe "como se lembra"**.
+> Proposta de 25/out/2026. Substitui a seção atual. Gênero e aparência deixam de ser escolhas: cada origem é um **personagem fixo**.
 
-**Opções (versão 1):**
+Na tela de início o jogador escolhe **um dos seis personagens** (cada um é uma origem: Pescador, Sacerdote, Veterano, Artesão, Estrangeiro, Retratista) e o **modo de dificuldade** (travado depois). O gênero é o do personagem, mostrado no sprite.
 
-| Opção | Como é feita |
+**Tela de escolha:** fila de seis retratos com nome, ofício e ambição; ao focar um, sprite animado e um parágrafo curto de "quem foi", sem revelar o ato. Sem criador de personagem na versão 1.
+
+**Prólogo (proposta, a confirmar):** em Tênaro uma poça de água escura mostra o **reflexo borrado do personagem escolhido**. O Lete tirou da memória dele o próprio rosto; o rosto volta aos poucos conforme as Lembranças afloram.
+
+| Elemento | Como é feito |
 |---|---|
-| **Gênero** (escolhido no início) | Tratamento do texto; ver `ARQUITETURA.md` (localização com variação de gênero). Se também altera a silhueta é **decisão pendente** (ver `PENDENCIAS.md`) |
-| Tom de pele, cabelo e olhos | Troca de paleta por shader |
-| Estilo de cabelo | 3 ou 4, como camada |
-| Marca visível (cicatriz, tatuagem, nenhuma) | 3, camada pequena |
-| Roupa | Definida pela **origem** |
-| Corpo | Uma silhueta na primeira versão (a segunda pode entrar depois sem refazer nada) |
+| Personagem | Sprite próprio por personagem (mapa e batalha) |
+| Gênero | Do personagem; define o tratamento do texto (localização com variação de gênero por personagem) |
+| Roupa | Definida pela origem |
+| Marca | Altera a aparência (ver 2.3) como camada ou paleta sobre o sprite |
+| Opções cosméticas (cor de cabelo/pele) | Fora da versão 1 (pendência futura) |
 
-A aparência é só estética. Quem muda diálogos e atritos é a **origem**. A Marca altera a aparência (ver 2.3). Montar o criador **em camadas**, de forma que acrescentar uma opção seja adicionar dados.
-
-Na tela de início o jogador escolhe: **origem, gênero, aparência, modo de dificuldade** (travado depois).
+Quem muda diálogos e atritos é a **origem**.
 
 ---
 
 ## 10. Interface e conteúdo a produzir
 
-**Telas:** menu principal, tela de início (origem, gênero, aparência, modo), Diário, Mosaico, Bolsa/Alforje, equipamento, mapa (que se preenche), opções (controles, acessibilidade, idioma), tela de combate (4.7), tela de julgamento, tela de despedida no portão.
+**Telas:** menu principal, tela de início (escolhe o personagem e o modo), Diário, Mosaico, Bolsa/Alforje, equipamento, mapa (que se preenche), opções (controles, acessibilidade, idioma), tela de combate (4.7), tela de julgamento, tela de despedida no portão.
 
 **Identidade visual da interface: barro e ouro (pedido do João, 25/out/2026).** Vale para todas as telas, atuais e futuras, por um tema central (`src/Lete.Game/UI/UiStyle.cs` + paleta `ui_paleta.tres`; arte gerada por `tools/ui_arte.py` em `art/ui/`, provisória):
 - **Paleta:** barro escuro `#7A3E2B` (bordas, molduras), terracota clara `#B8664A` (destaques e **perigo**, nunca vermelho forte: a romã continua o único), ouro envelhecido `#C9A24B` (filetes, ícones, títulos), ouro escuro `#8C6B2A` (sombra do filete), azul-noite `#1E2430` translúcido (fundo dos painéis), marfim `#E9DFC7` (texto), cinza-barro `#6E5E58` (desativado), azul-lápis só para Lucidez e água.

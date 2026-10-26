@@ -61,10 +61,15 @@ public class BattleSetupTests
             dir = dir.Parent;
         }
 
-        var setup = BattleData.FromJson(File.ReadAllText(Path.Combine(dir!.FullName, "content/battle/teste_batalha.json")));
+        var cast = CastData.FromJson(File.ReadAllText(Path.Combine(dir!.FullName, "content/characters/elenco.json")));
+        var setup = BattleData.FromJson(File.ReadAllText(Path.Combine(dir.FullName, "content/battle/teste_elenco.json")), cast);
 
         Assert.Equal(2, setup.Party.Count);
         Assert.Single(setup.Enemies);
-        Assert.Equal(3, setup.Styles.Count);
+        Assert.Single(setup.Styles);
+        Assert.Equal("lia_34_costas", setup.Party[0].Art);
+        Assert.True(cast["ismena"].FrontFacesRight);
+        Assert.True(cast["aulo"].FrontFacesRight);
+        Assert.False(cast["lia"].FrontFacesRight);
     }
 }

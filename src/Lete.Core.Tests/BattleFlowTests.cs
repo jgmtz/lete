@@ -122,6 +122,17 @@ public class BattleFlowTests
     private sealed class FixedBullets(params Vector2[] bullets) : IDodgePattern
     {
         public IEnumerable<Vector2> BulletsAt(float seconds) => bullets;
+
+        public IDodgePattern Slowed(float factor) => this;
+    }
+
+    [Fact]
+    public void Waves_SlowedMoveLessInTheSameTime()
+    {
+        var waves = new WavesPattern(Box, 1f, 40f, 5, 0f, 0f, 0f);
+        var normal = waves.BulletsAt(1.5f).Min(b => b.X);
+        var slow = waves.Slowed(2f).BulletsAt(1.5f).Min(b => b.X);
+        Assert.True(slow > normal);
     }
 
     [Fact]
@@ -194,7 +205,9 @@ public class BattleFlowTests
     [Fact]
     public void Protagonist_MustStandRightmost()
     {
-        var setup = BattleData.FromJson(File.ReadAllText(Path.Combine(RepoRoot(), "content", "battle", "teste_ataque.json")));
+        var setup = BattleData.FromJson(
+            File.ReadAllText(Path.Combine(RepoRoot(), "content", "battle", "teste_ataque.json")),
+            CastData.FromJson(File.ReadAllText(Path.Combine(RepoRoot(), "content", "characters", "elenco.json"))));
         Assert.Null(setup.ProtagonistSlotError("lia"));
         Assert.Contains("direita", setup.ProtagonistSlotError("aulo"));
         Assert.NotNull(setup.ProtagonistSlotError("ninguem"));

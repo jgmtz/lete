@@ -1,0 +1,143 @@
+{
+  "id": "elenco",
+  "_nota": "Registro único do elenco: batalhas, escolha de personagem e telas citam só o id. Alturas provisórias (_tbd). 'front_faces': para que lado a arte de frente olha (left, o padrão, ou right). 'selectable': aparece na escolha de personagem (provisório: os 6 com arte enquanto os protagonistas fixos não existem).",
+  "cast": [
+    {
+      "id": "lia",
+      "name_key": "personagem.lia.nome",
+      "kind": "protagonist",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 0.95
+      },
+      "battle_front": "lia_34",
+      "battle_back": "lia_34_costas",
+      "portrait": "res://art/sprites/companheiros/lia_sim/parado/lia_parado_frente.png",
+      "map_folder": "res://art/sprites/companheiros/lia_sim",
+      "selectable": true
+    },
+    {
+      "id": "aulo",
+      "name_key": "personagem.aulo.nome",
+      "kind": "companion",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "aulo_f",
+      "front_faces": "right",
+      "battle_back": "aulo_c",
+      "portrait": "res://art/sprites/companheiros/aulo_sim/parado/aulo_parado_frente.png",
+      "map_folder": "res://art/sprites/companheiros/aulo_sim",
+      "selectable": true
+    },
+    {
+      "id": "ismena",
+      "name_key": "personagem.ismena.nome",
+      "kind": "companion",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 0.93
+      },
+      "battle_front": "ismena_f",
+      "front_faces": "right",
+      "battle_back": "ismena_c",
+      "portrait": "res://art/sprites/companheiros/ismena_sim/parado/ismena_parado_frente.png",
+      "map_folder": "res://art/sprites/companheiros/ismena_sim",
+      "selectable": true
+    },
+    {
+      "id": "dimas",
+      "name_key": "personagem.dimas.nome",
+      "kind": "companion",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "dimas_34",
+      "portrait": "res://art/sprites/companheiros/dimas_sim/parado/dimas_parado_frente.png",
+      "map_folder": "res://art/sprites/companheiros/dimas_sim",
+      "selectable": true
+    },
+    {
+      "id": "septimia",
+      "name_key": "personagem.septimia.nome",
+      "kind": "companion",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 0.97
+      },
+      "battle_front": "septimia_34",
+      "battle_back": "septimia_34_costas",
+      "portrait": "res://art/sprites/companheiros/septimia_sim/parado/septimia_parado_frente.png",
+      "map_folder": "res://art/sprites/companheiros/septimia_sim",
+      "selectable": true
+    },
+    {
+      "id": "calias",
+      "name_key": "personagem.calias.nome",
+      "kind": "companion",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "calias_34",
+      "battle_back": "calias_34_costas",
+      "portrait": "res://art/sprites/companheiros/calias_sim/parado/calias_parado_frente.png",
+      "map_folder": "res://art/sprites/companheiros/calias_sim",
+      "selectable": true
+    },
+    {
+      "id": "remador",
+      "name_key": "shade.remador.nome",
+      "kind": "shade",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "remador_34",
+      "map_folder": "res://art/sprites/sombras/remador",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/remador/batalha_flutuar_160/remador_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "tecela",
+      "name_key": "shade.tecela.nome",
+      "kind": "shade",
+      "height": {
+        "_tbd": true,
+        "value": 0.95
+      },
+      "battle_front": "tecela_34",
+      "map_folder": "res://art/sprites/sombras/tecela",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/tecela/batalha_flutuar_160/tecela_flutuar_"
+        }
+      },
+      "selectable": false
+    }
+  ]
+}

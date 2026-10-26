@@ -1,0 +1,81 @@
+{
+  "id": "fuga",
+  "gesture": "dodge",
+  "duration_seconds": {
+    "_tbd": true,
+    "value": 6.0
+  },
+  "box_width": {
+    "_tbd": true,
+    "value": 104
+  },
+  "box_height": {
+    "_tbd": true,
+    "value": 64
+  },
+  "marker_speed": {
+    "_tbd": true,
+    "value": 60
+  },
+  "marker_radius": {
+    "_tbd": true,
+    "value": 2
+  },
+  "bullet_radius": {
+    "_tbd": true,
+    "value": 3
+  },
+  "invulnerable_seconds": {
+    "_tbd": true,
+    "value": 0.6
+  },
+  "hits_to_zero": {
+    "_tbd": true,
+    "value": 4
+  },
+  "pattern": {
+    "id": "ondas",
+    "spawn_interval": {
+      "_tbd": true,
+      "value": 0.9
+    },
+    "speed": {
+      "_tbd": true,
+      "value": 42
+    },
+    "rows": {
+      "_tbd": true,
+      "value": 5
+    },
+    "amplitude": {
+      "_tbd": true,
+      "value": 5
+    },
+    "frequency": {
+      "_tbd": true,
+      "value": 4
+    },
+    "row_phase_step": {
+      "_tbd": true,
+      "value": 0.9
+    }
+  },
+  "exit": {
+    "x": {
+      "_tbd": true,
+      "value": 0.0
+    },
+    "y": {
+      "_tbd": true,
+      "value": 0.35
+    },
+    "w": {
+      "_tbd": true,
+      "value": 0.08
+    },
+    "h": {
+      "_tbd": true,
+      "value": 0.3
+    }
+  }
+}

@@ -11,6 +11,9 @@ namespace Lete.Core.Tests;
 public class ContentTests
 {
     private static readonly string Root = RepoRoot();
+    private static readonly IReadOnlyDictionary<string, CastMember> Cast =
+        CastData.FromJson(File.ReadAllText(Path.Combine(RepoRoot(), "content", "characters", "elenco.json")));
+
     private static string Content(params string[] parts) => Path.Combine(new[] { Root, "content" }.Concat(parts).ToArray());
 
     public static IEnumerable<object[]> BattleFiles() =>
@@ -22,7 +25,7 @@ public class ContentTests
     [MemberData(nameof(BattleFiles))]
     public void Battle_ArtExistsInEveryStyle(string file)
     {
-        var setup = BattleData.FromJson(File.ReadAllText(Content("battle", file)));
+        var setup = BattleData.FromJson(File.ReadAllText(Content("battle", file)), Cast);
         var missing = (
             from style in setup.Styles
             from actor in setup.Party.Concat(setup.Enemies)
@@ -32,6 +35,13 @@ public class ContentTests
         missing.AddRange(setup.Party.Concat(setup.Enemies)
             .Where(a => a.Portrait is not null && !File.Exists(FromRes(a.Portrait)))
             .Select(a => a.Portrait!));
+        missing.AddRange(
+            from idle in setup.Party.Concat(setup.Enemies).Select(a => a.Idle).OfType<IdleAnimation>()
+            from style in idle.PrefixByStyle.Keys
+            from frame in Enumerable.Range(0, idle.Frames)
+            let path = idle.FramePath(style, frame)
+            where !File.Exists(FromRes(path))
+            select path);
 
         Assert.Empty(missing);
     }
@@ -46,13 +56,42 @@ public class ContentTests
             return;
         }
 
-        var setup = BattleData.FromJson(json);
+        var setup = BattleData.FromJson(json, Cast);
         Assert.Null(setup.ProtagonistSlotError(CombatData.ProtagonistFromJson(json).Id));
         if (CombatData.CompanionIdFromJson(json) is { } companion)
         {
             var support = CombatData.CompanionFromJson(File.ReadAllText(Content("companions", companion + ".json")));
             Assert.Contains(setup.Party, p => p.Id == support.CompanionId);
         }
+    }
+
+    [Fact]
+    public void Cast_EveryFileItPointsToExists()
+    {
+        var missing = new List<string>();
+        foreach (var member in Cast.Values)
+        {
+            foreach (var art in new[] { member.FrontArt, member.BackArt }.OfType<string>())
+            {
+                var path = Path.Combine(Root, "art", "sprites", "batalha", "pixel_160", art + ".png");
+                if (!File.Exists(path))
+                {
+                    missing.Add($"{member.Id}: {art}.png");
+                }
+            }
+
+            foreach (var res in new[] { member.Portrait, member.MapFolder }.OfType<string>())
+            {
+                if (!File.Exists(FromRes(res)) && !Directory.Exists(FromRes(res)))
+                {
+                    missing.Add($"{member.Id}: {res}");
+                }
+            }
+        }
+
+        Assert.Empty(missing);
+        Assert.Equal(6, Cast.Values.Count(m => m.Selectable));
+        Assert.Equal(3, Cast.Values.Count(m => m.Selectable && m.Gender == "f"));
     }
 
     [Fact]
@@ -90,6 +129,41 @@ public class ContentTests
             {
                 var echo = ShadeData.AbsorbFromJson(json).Echo;
                 GestureData.RingFromJson(File.ReadAllText(Content("gestures", echo.Gesture + ".json")));
+            }
+        }
+    }
+
+    [Fact]
+    public void Difficulty_BagAndEscapeLoad()
+    {
+        foreach (var file in Directory.GetFiles(Content("difficulty"), "*.json"))
+        {
+            var json = File.ReadAllText(file);
+            BagData.AssistFromDifficulty(json);
+            Assert.InRange(BagData.DefeatTideSteps(json), 0, 2);
+        }
+
+        var bag = BagData.FromJson(File.ReadAllText(Content("items", "bolsa_teste.json")));
+        Assert.True(bag.HasAnyOffering);
+        Assert.True(bag.HasAnyProvision);
+        BagData.EscapeFromJson(File.ReadAllText(Content("gestures", "fuga.json")));
+    }
+
+    [Fact]
+    public void Shades_StoryLoadsAndPhaseGesturesExist()
+    {
+        foreach (var file in Directory.GetFiles(Content("shades"), "*.json"))
+        {
+            var json = File.ReadAllText(file);
+            if (!json.Contains("\"story_keys\""))
+            {
+                continue;
+            }
+
+            var story = ShadeData.StoryFromJson(json);
+            foreach (var attack in story.Phases.SelectMany(p => p.Attacks))
+            {
+                Assert.True(File.Exists(Content("gestures", attack.Gesture + ".json")), $"Gesto '{attack.Gesture}' não existe.");
             }
         }
     }

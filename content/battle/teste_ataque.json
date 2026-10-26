@@ -2,32 +2,60 @@
   "id": "teste_ataque",
   "layout": {
     "party": [
-      { "x": -1.2, "y": -1.0 },
-      { "x": -0.6, "y": -1.15 }
+      {
+        "x": -1.2,
+        "y": -1.0
+      },
+      {
+        "x": -0.6,
+        "y": -1.15
+      }
     ],
     "enemy": [
-      { "x": 0.85, "y": -0.5 }
+      {
+        "x": 0.85,
+        "y": -0.5
+      }
     ],
-    "depth_scale": { "_tbd": true, "value": 0.0 }
+    "depth_scale": {
+      "_tbd": true,
+      "value": 0.0
+    }
   },
   "protagonist": {
     "id": "lia",
-    "breath": { "_tbd": true, "value": 100 },
-    "lucidity": { "_tbd": true, "value": 60 }
+    "breath": {
+      "_tbd": true,
+      "value": 100
+    },
+    "lucidity": {
+      "_tbd": true,
+      "value": 60
+    }
   },
   "companion": "aulo",
   "shade": "remador",
   "party": [
-    { "id": "aulo", "art": "aulo_c", "height": { "_tbd": true, "value": 1.0 },
-      "portrait": "res://art/sprites/companheiros/aulo_sim/parado/aulo_parado_frente.png" },
-    { "id": "lia", "art": "lia_34_costas", "height": { "_tbd": true, "value": 0.95 },
-      "portrait": "res://art/sprites/companheiros/lia_sim/parado/lia_parado_frente.png" }
+    {
+      "id": "aulo",
+      "pose": "back"
+    },
+    {
+      "id": "lia",
+      "pose": "back"
+    }
   ],
   "enemy": [
-    { "id": "remador", "art": "dimas_34", "height": { "_tbd": true, "value": 1.0 }, "flip_h": false,
-      "tint": "#8C9BAD", "name_key": "shade.remador.nome" }
+    {
+      "id": "remador",
+      "pose": "front"
+    }
   ],
   "styles": [
-    { "id": "pixel_160", "folder": "pixel_160", "filter": "nearest" }
+    {
+      "id": "pixel_160",
+      "folder": "pixel_160",
+      "filter": "nearest"
+    }
   ]
 }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://src/Lete.Game/Sandbox/BattleAttackTest.cs" id="1_test"]
 [ext_resource type="Script" path="res://src/Lete.Game/Combat/BattleStage.cs" id="2_stage"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://src/Lete.Game/Combat/Gestures/DodgeGesture.cs" id="10_dodge"]
 [ext_resource type="Script" path="res://src/Lete.Game/Combat/Gestures/HoldGesture.cs" id="11_hold"]
 [ext_resource type="Script" path="res://src/Lete.Game/Combat/Gestures/DragGesture.cs" id="12_drag"]
+[ext_resource type="Script" path="res://src/Lete.Game/Combat/Gestures/StrokeGesture.cs" id="13_stroke"]
 
 [node name="BattleAttackTest" type="Node"]
 script = ExtResource("1_test")
@@ -118,4 +119,15 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("12_drag")
+Style = ExtResource("8_style")
+
+[node name="Stroke" type="Control" parent="ViewportContainer/SubViewport/RingLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("13_stroke")
 Style = ExtResource("8_style")

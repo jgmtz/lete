@@ -1,0 +1,16 @@
+{
+  "id": "aparo_rapido",
+  "gesture": "ring",
+  "shrink_seconds": {
+    "_tbd": true,
+    "value": 0.8
+  },
+  "start_scale": {
+    "_tbd": true,
+    "value": 3.0
+  },
+  "zero_score_offset_seconds": {
+    "_tbd": true,
+    "value": 0.25
+  }
+}

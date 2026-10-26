@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://src/Lete.Game/World/Player.cs" id="1_player"]
-[ext_resource type="Texture2D" path="res://art/sprites/placeholder/sombra_chao.png" id="2_sombra"]
+[ext_resource type="Texture2D" path="res://art/sprites/comum/sombra_chao.png" id="2_sombra"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/WalkSpriteSet.cs" id="3_set"]
 
 [sub_resource type="Resource" id="Set_aulo"]

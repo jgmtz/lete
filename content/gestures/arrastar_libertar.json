@@ -1,18 +1,58 @@
 {
   "id": "arrastar_libertar",
   "gesture": "drag",
-  "box_width": { "_tbd": true, "value": 120 },
-  "box_height": { "_tbd": true, "value": 56 },
+  "box_width": {
+    "_tbd": true,
+    "value": 120
+  },
+  "box_height": {
+    "_tbd": true,
+    "value": 56
+  },
   "path": [
-    { "x": 0.05, "y": 0.5 },
-    { "x": 0.25, "y": 0.25 },
-    { "x": 0.45, "y": 0.7 },
-    { "x": 0.65, "y": 0.3 },
-    { "x": 0.85, "y": 0.6 },
-    { "x": 0.95, "y": 0.5 }
+    {
+      "x": 0.05,
+      "y": 0.5
+    },
+    {
+      "x": 0.25,
+      "y": 0.25
+    },
+    {
+      "x": 0.45,
+      "y": 0.7
+    },
+    {
+      "x": 0.65,
+      "y": 0.3
+    },
+    {
+      "x": 0.85,
+      "y": 0.6
+    },
+    {
+      "x": 0.95,
+      "y": 0.5
+    }
   ],
-  "marker_speed": { "_tbd": true, "value": 22 },
-  "end_radius": { "_tbd": true, "value": 4 },
-  "deviation_to_zero": { "_tbd": true, "value": 8 },
-  "max_seconds": { "_tbd": true, "value": 20 }
+  "marker_speed": {
+    "_tbd": true,
+    "value": 34
+  },
+  "guide_speed": {
+    "_tbd": true,
+    "value": 22
+  },
+  "gap_to_zero": {
+    "_tbd": true,
+    "value": 18
+  },
+  "forward_threshold": {
+    "_tbd": true,
+    "value": 0.3
+  },
+  "max_seconds": {
+    "_tbd": true,
+    "value": 20
+  }
 }

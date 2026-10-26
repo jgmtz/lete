@@ -39,6 +39,9 @@ public sealed record DodgeSettings(
 public interface IDodgePattern
 {
     IEnumerable<Vector2> BulletsAt(float seconds);
+
+    /// <summary>O mesmo padrão, <paramref name="factor"/> vezes mais lento (Memória de Luto); 1 = igual.</summary>
+    IDodgePattern Slowed(float factor);
 }
 
 /// <summary>
@@ -55,6 +58,9 @@ public sealed record WavesPattern(
     float Frequency,
     float RowPhaseStep) : IDodgePattern
 {
+    public IDodgePattern Slowed(float factor) =>
+        this with { Speed = Speed / factor, SpawnInterval = SpawnInterval * factor, Frequency = Frequency / factor };
+
     public IEnumerable<Vector2> BulletsAt(float seconds)
     {
         var rowHeight = Box.BoxHeight / Rows;
@@ -87,6 +93,16 @@ public sealed record WavesPattern(
 }
 
 /// <summary>
+/// Saída do quadro (Fugir): um retângulo em frações do quadro (0 a 1). Chegar nela termina a Esquiva com sucesso.
+/// </summary>
+public readonly record struct EscapeExit(float X, float Y, float Width, float Height)
+{
+    public bool Contains(Vector2 point, DodgeSettings box) =>
+        point.X >= X * box.BoxWidth && point.X <= (X + Width) * box.BoxWidth &&
+        point.Y >= Y * box.BoxHeight && point.Y <= (Y + Height) * box.BoxHeight;
+}
+
+/// <summary>
 /// Uma Esquiva em andamento: move o marcador pela entrada, conta os acertos (com proteção logo depois de cada
 /// um) e, ao fim, dá o valor de 0 a 1 usado por todos os gestos.
 /// </summary>
@@ -96,21 +112,30 @@ public sealed class DodgeRun
     private readonly IDodgePattern _pattern;
     private float _invulnerable;
 
-    public DodgeRun(DodgeSettings settings, IDodgePattern pattern)
+    public DodgeRun(DodgeSettings settings, IDodgePattern pattern, EscapeExit? exit = null)
     {
         _settings = settings;
         _pattern = pattern;
+        Exit = exit;
         Marker = new Vector2(settings.BoxWidth / 2f, settings.BoxHeight / 2f);
     }
+
+    /// <summary>Com saída (Fugir), a Esquiva acaba ao chegar nela; sem chegar até o fim do tempo, falhou.</summary>
+    public EscapeExit? Exit { get; }
+
+    public bool Escaped { get; private set; }
 
     public Vector2 Marker { get; private set; }
     public float Elapsed { get; private set; }
     public int Hits { get; private set; }
     public bool IsInvulnerable => _invulnerable > 0f;
-    public bool IsFinished => Elapsed >= _settings.DurationSeconds;
+    public bool IsFinished => Escaped || Elapsed >= _settings.DurationSeconds;
 
-    /// <summary>1 sem acertos, caindo até 0 em <see cref="DodgeSettings.HitsToZero"/> acertos.</summary>
-    public float Score => Math.Max(0f, 1f - (float)Hits / _settings.HitsToZero);
+    /// <summary>
+    /// 1 sem acertos, caindo até 0 em <see cref="DodgeSettings.HitsToZero"/> acertos. Com saída, só vale se
+    /// chegou nela (fugir sem chegar é 0).
+    /// </summary>
+    public float Score => Exit is not null && !Escaped ? 0f : Math.Max(0f, 1f - (float)Hits / _settings.HitsToZero);
 
     public IEnumerable<Vector2> Bullets => _pattern.BulletsAt(Elapsed);
 
@@ -131,6 +156,12 @@ public sealed class DodgeRun
         var r = _settings.MarkerRadius;
         var moved = Marker + input * _settings.MarkerSpeed * delta;
         Marker = Vector2.Clamp(moved, new Vector2(r, r), new Vector2(_settings.BoxWidth - r, _settings.BoxHeight - r));
+
+        if (Exit is { } exit && exit.Contains(Marker, _settings))
+        {
+            Escaped = true;
+            return false;
+        }
 
         _invulnerable = Math.Max(0f, _invulnerable - delta);
         if (IsInvulnerable)

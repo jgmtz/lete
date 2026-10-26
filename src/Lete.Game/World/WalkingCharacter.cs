@@ -75,6 +75,16 @@ public partial class WalkingCharacter : CharacterBody3D
         }
     }
 
+    /// <summary>Mostra o personagem cujo conjunto de sprites tem este prefixo (ex.: "lia"); sem efeito se não houver.</summary>
+    public void SelectCharacter(string prefix)
+    {
+        var index = System.Array.FindIndex(Characters, c => c.Prefix == prefix);
+        if (index >= 0)
+        {
+            ShowCharacter(index);
+        }
+    }
+
     public void TeleportTo(Vector3 position)
     {
         GlobalPosition = position;

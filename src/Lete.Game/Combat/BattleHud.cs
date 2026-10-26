@@ -47,8 +47,11 @@ public partial class BattleHud : Control
     private Camera3D? _camera;
     private BattleActor? _shade;
     private BattleActor? _activeHero;
+    private bool _shadePanelFrozen;
+    private Tween? _shadePanelFade;
     private Rect2 _gestureArea;
     private Rect2 _descriptionRect;
+    private float? _portraitLeft;
     private bool _showGestureArea;
 
     private static string T(string key) => GameRoot.Instance.Text(key);
@@ -66,11 +69,19 @@ public partial class BattleHud : Control
         BuildPortrait();
         BuildTurnMarkers();
         BuildFade();
+
+        // A legenda fica por cima do escurecer: na derrota, as falas (Trívia, Hécate) aparecem sobre a tela escura.
+        MoveChild(_captionBand, GetChildCount() - 1);
     }
 
     public override void _Process(double delta)
     {
         if (_camera is null || _shade is null)
+        {
+            return;
+        }
+
+        if (_shadePanelFrozen)
         {
             return;
         }
@@ -103,6 +114,26 @@ public partial class BattleHud : Control
         _torch.Modulate = shadeTurn ? Colors.White : Colors.Transparent;
     }
 
+    /// <summary>
+    /// A sombra vai embora (absorvida): os indicadores dela param onde estão e somem aos poucos, em vez de
+    /// acompanhá-la. Também tira o louro e a tocha do turno.
+    /// </summary>
+    public void FadeShadePanel(float seconds)
+    {
+        _shadePanelFrozen = true;
+        _shadePanelFade?.Kill();
+        _shadePanelFade = CreateTween();
+        _shadePanelFade.TweenProperty(_shadePanel, "modulate:a", 0f, seconds);
+    }
+
+    /// <summary>Luta nova: os indicadores voltam a seguir a sombra, visíveis.</summary>
+    public void ResetShadePanel()
+    {
+        _shadePanelFade?.Kill();
+        _shadePanelFrozen = false;
+        _shadePanel.Modulate = Colors.White;
+    }
+
     public void Track(Camera3D camera, BattleActor shade)
     {
         _camera = camera;
@@ -132,6 +163,8 @@ public partial class BattleHud : Control
     {
         var size = _portraitFrame.GetCombinedMinimumSize();
         _portraitFrame.Position = new Vector2(menuRect.Position.X - size.X - Style.PortraitGap, menuRect.End.Y - size.Y).Round();
+        _portraitLeft = _portraitFrame.Position.X;
+        PlaceDescription();
     }
 
     public void SetPortrait(Texture2D texture)
@@ -172,7 +205,16 @@ public partial class BattleHud : Control
         var size = _descriptionBox.GetCombinedMinimumSize();
         var height = Mathf.Max(size.Y, _descriptionRect.Size.Y);
         _descriptionBox.Size = new Vector2(size.X, height);
-        _descriptionBox.Position = new Vector2(_descriptionRect.Position.X, _descriptionRect.End.Y - height).Round();
+
+        // Nunca por baixo do retrato: se o menu alargou (opções mais longas) e o retrato veio para a esquerda,
+        // a caixa anda junto e fica sempre à esquerda dele.
+        var x = _descriptionRect.Position.X;
+        if (_portraitLeft is { } portraitLeft)
+        {
+            x = Mathf.Min(x, portraitLeft - Style.PortraitGap - size.X);
+        }
+
+        _descriptionBox.Position = new Vector2(x, _descriptionRect.End.Y - height).Round();
     }
 
     public void SetShadeName(string text) => _shadeName.Text = text;

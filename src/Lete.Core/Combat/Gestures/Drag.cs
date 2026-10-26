@@ -3,18 +3,23 @@ using System.Numerics;
 namespace Lete.Core.Combat.Gestures;
 
 /// <summary>
-/// Medidas do gesto Arrastar (GDD 4.4: conduzir um ponto devagar por um caminho, sem pressa), em pixels da
-/// arte. O caminho vem em frações do quadro (0 a 1). O marcador é lento de propósito: a pressa não ajuda.
-/// <paramref name="DeviationToZero"/>: distância média do caminho que zera o valor.
-/// <paramref name="MaxSeconds"/>: limite generoso só para o gesto não ficar aberto para sempre.
+/// Medidas do gesto Arrastar (GDD 4.4: conduzir um ponto devagar por um caminho, sem pressa), em pixels da arte.
+/// A luz anda <b>presa no caminho</b> (as curvas são automáticas): qualquer direção que aponte para a frente do trecho
+/// atual a faz avançar a <paramref name="MarkerSpeed"/>; para trás, recua. Uma luz-guia anda à frente a
+/// <paramref name="GuideSpeed"/>, mais devagar: o valor vem de acompanhá-la, sem correr nem ficar para trás.
+/// <paramref name="Path"/>: pontos em frações do quadro (0 a 1).
+/// <paramref name="GapToZero"/>: distância média da guia (ao longo do caminho) que zera o valor.
+/// <paramref name="ForwardThreshold"/>: o quanto a direção precisa apontar para a frente (cosseno, 0 a 1).
+/// <paramref name="MaxSeconds"/>: limite generoso para o gesto não ficar aberto para sempre.
 /// </summary>
 public sealed record DragSettings(
     float BoxWidth,
     float BoxHeight,
     IReadOnlyList<Vector2> Path,
     float MarkerSpeed,
-    float EndRadius,
-    float DeviationToZero,
+    float GuideSpeed,
+    float GapToZero,
+    float ForwardThreshold,
     float MaxSeconds)
 {
     /// <summary>O caminho em pixels do quadro.</summary>
@@ -22,9 +27,19 @@ public sealed record DragSettings(
 
     public IEnumerable<string> Validate()
     {
-        if (BoxWidth <= 0f || BoxHeight <= 0f || MarkerSpeed <= 0f || EndRadius <= 0f || DeviationToZero <= 0f || MaxSeconds <= 0f)
+        if (BoxWidth <= 0f || BoxHeight <= 0f || MarkerSpeed <= 0f || GuideSpeed <= 0f || GapToZero <= 0f || MaxSeconds <= 0f)
         {
-            yield return "Medidas, velocidade, raio do fim, desvio que zera e tempo máximo precisam ser positivos.";
+            yield return "Medidas, velocidades, distância que zera e tempo máximo precisam ser positivos.";
+        }
+
+        if (MarkerSpeed <= GuideSpeed)
+        {
+            yield return "A luz precisa ser mais rápida que a guia (senão nunca alcança quem ficou para trás).";
+        }
+
+        if (ForwardThreshold is < 0f or >= 1f)
+        {
+            yield return "O limiar de 'para a frente' precisa ficar entre 0 e 1.";
         }
 
         if (Path.Count < 2)
@@ -40,34 +55,53 @@ public sealed record DragSettings(
 }
 
 /// <summary>
-/// Um Arrastar em andamento: o marcador começa no início do caminho; o valor cai com o desvio médio
-/// (medido só enquanto o marcador se move). Chegar ao fim termina o gesto; estourar o tempo dá falho.
+/// Um Arrastar em andamento, no trilho: a luz e a guia são posições ao longo do caminho. O valor cai com a distância
+/// média entre as duas; chegar ao fim termina o gesto; estourar o tempo dá falho.
 /// </summary>
 public sealed class DragRun
 {
     private readonly DragSettings _settings;
     private readonly IReadOnlyList<Vector2> _path;
-    private float _deviationTime;
-    private float _movingTime;
+    private readonly float[] _starts;
+    private float _gapTime;
+
+    /// <summary>Recuo mínimo para saber de qual trecho a luz veio quando está exatamente num canto.</summary>
+    private const float CornerEpsilon = 1e-3f;
 
     public DragRun(DragSettings settings)
     {
         _settings = settings;
         _path = settings.PathPixels;
-        Marker = _path[0];
+        _starts = new float[_path.Count];
+        for (var i = 1; i < _path.Count; i++)
+        {
+            _starts[i] = _starts[i - 1] + Vector2.Distance(_path[i - 1], _path[i]);
+        }
+
+        Length = _starts[^1];
     }
 
-    public Vector2 Marker { get; private set; }
+    /// <summary>Comprimento do caminho, em pixels da arte.</summary>
+    public float Length { get; }
+
+    /// <summary>Quanto a luz e a guia já andaram pelo caminho.</summary>
+    public float Progress { get; private set; }
+    public float GuideProgress => Math.Min(Length, _settings.GuideSpeed * Elapsed);
+
     public float Elapsed { get; private set; }
-    public bool ReachedEnd { get; private set; }
+    public bool ReachedEnd => Progress >= Length;
     public bool IsFinished => ReachedEnd || Elapsed >= _settings.MaxSeconds;
 
-    /// <summary>Distância atual do marcador até o caminho.</summary>
-    public float Deviation => DistanceToPath(Marker);
+    /// <summary>Luz menos guia, ao longo do caminho: positivo = à frente (com pressa), negativo = atrás.</summary>
+    public float Gap => Progress - GuideProgress;
 
-    public float Score => !ReachedEnd
-        ? 0f
-        : Math.Max(0f, 1f - (_movingTime > 0f ? _deviationTime / _movingTime : 0f) / _settings.DeviationToZero);
+    public Vector2 Marker => PointAt(Progress);
+    public Vector2 Guide => PointAt(GuideProgress);
+
+    /// <summary>Direção do trecho onde a luz está (para onde é "para a frente").</summary>
+    public Vector2 Tangent => TangentAt(Progress);
+
+    public float Score => !ReachedEnd || Elapsed <= 0f ? 0f : Math.Max(0f, 1f - _gapTime / Elapsed / _settings.GapToZero);
 
     public void Step(float delta, Vector2 input)
     {
@@ -77,37 +111,53 @@ public sealed class DragRun
         }
 
         Elapsed += delta;
-        if (input.LengthSquared() > 1f)
-        {
-            input = Vector2.Normalize(input);
-        }
-
         if (input != Vector2.Zero)
         {
-            var moved = Marker + input * _settings.MarkerSpeed * delta;
-            Marker = Vector2.Clamp(moved, Vector2.Zero, new Vector2(_settings.BoxWidth, _settings.BoxHeight));
-            _movingTime += delta;
-            _deviationTime += DistanceToPath(Marker) * delta;
+            // Para a frente vale o trecho seguinte (no canto, já o novo); para trás, o trecho de onde veio.
+            // Um passo nunca atravessa um canto: a luz para nele e a próxima direção decide o resto.
+            var direction = Vector2.Normalize(input);
+            var ahead = Segment(Progress);
+            var behind = Segment(Math.Max(0f, Progress - CornerEpsilon));
+            if (Vector2.Dot(direction, TangentOf(ahead)) > _settings.ForwardThreshold)
+            {
+                Progress = Math.Min(_starts[ahead + 1], Progress + _settings.MarkerSpeed * delta);
+            }
+            else if (Vector2.Dot(direction, TangentOf(behind)) < -_settings.ForwardThreshold)
+            {
+                Progress = Math.Max(_starts[behind], Progress - _settings.MarkerSpeed * delta);
+            }
         }
 
-        ReachedEnd = Vector2.Distance(Marker, _path[^1]) <= _settings.EndRadius;
+        _gapTime += Math.Abs(Gap) * delta;
     }
 
-    private float DistanceToPath(Vector2 point)
+    private Vector2 PointAt(float distance)
     {
-        var best = float.MaxValue;
-        for (var i = 0; i < _path.Count - 1; i++)
+        var i = Segment(distance);
+        var length = _starts[i + 1] - _starts[i];
+        var t = length == 0f ? 0f : Math.Clamp((distance - _starts[i]) / length, 0f, 1f);
+        return Vector2.Lerp(_path[i], _path[i + 1], t);
+    }
+
+    private Vector2 TangentAt(float distance) => TangentOf(Segment(distance));
+
+    private Vector2 TangentOf(int i)
+    {
+        var segment = _path[i + 1] - _path[i];
+        return segment == Vector2.Zero ? Vector2.UnitX : Vector2.Normalize(segment);
+    }
+
+    private int Segment(float distance)
+    {
+        // No fim de um trecho já vale o próximo (para a curva ser automática ao chegar no canto).
+        for (var i = 0; i < _path.Count - 2; i++)
         {
-            best = Math.Min(best, DistanceToSegment(point, _path[i], _path[i + 1]));
+            if (distance < _starts[i + 1])
+            {
+                return i;
+            }
         }
 
-        return best;
-    }
-
-    private static float DistanceToSegment(Vector2 p, Vector2 a, Vector2 b)
-    {
-        var ab = b - a;
-        var t = ab.LengthSquared() == 0f ? 0f : Math.Clamp(Vector2.Dot(p - a, ab) / ab.LengthSquared(), 0f, 1f);
-        return Vector2.Distance(p, a + ab * t);
+        return _path.Count - 2;
     }
 }

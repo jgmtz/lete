@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Lete"
-run/main_scene="res://src/Lete.Game/Main.tscn"
+run/main_scene="res://src/Lete.Game/Opening/Opening.tscn"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 
 [autoload]
@@ -85,18 +85,6 @@ switch_art={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":4194306)]
 }
-art_style_1={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":49)]
-}
-art_style_2={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":50)]
-}
-art_style_3={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":51)]
-}
 debug_hit={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":72)]
@@ -112,6 +100,16 @@ debug_reveal={
 debug_gesture_area={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":71)]
+}
+assist_toggle={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194333,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+reduce_motion_toggle={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194334,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
 }
 gesture_confirm={
 "deadzone": 0.2,

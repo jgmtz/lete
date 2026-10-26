@@ -3,7 +3,10 @@
   "_rascunho": "Textos e fixação escritos pelo Claude para o João revisar (25/out/2026); ver PENDENCIAS.md.",
   "kind": "named",
   "region": "cabo_tenaro",
-  "resolve": { "_tbd": true, "value": 100 },
+  "resolve": {
+    "_tbd": true,
+    "value": 100
+  },
   "murmur_key": "shade.remador.murmurio",
   "attacks": [
     {
@@ -11,9 +14,18 @@
       "gesture": "aparo_basico",
       "caption_key": "shade.remador.gesto.remo",
       "breath_damage": {
-        "perfect": { "_tbd": true, "value": 0 },
-        "good": { "_tbd": true, "value": 8 },
-        "failed": { "_tbd": true, "value": 20 }
+        "perfect": {
+          "_tbd": true,
+          "value": 0
+        },
+        "good": {
+          "_tbd": true,
+          "value": 8
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 20
+        }
       }
     },
     {
@@ -21,9 +33,18 @@
       "gesture": "esquiva_ondas",
       "caption_key": "shade.remador.gesto.ondas",
       "breath_damage": {
-        "perfect": { "_tbd": true, "value": 0 },
-        "good": { "_tbd": true, "value": 10 },
-        "failed": { "_tbd": true, "value": 22 }
+        "perfect": {
+          "_tbd": true,
+          "value": 0
+        },
+        "good": {
+          "_tbd": true,
+          "value": 10
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 22
+        }
       }
     },
     {
@@ -31,32 +52,82 @@
       "gesture": "aparo_basico",
       "caption_key": "shade.remador.gesto.mao",
       "breath_damage": {
-        "perfect": { "_tbd": true, "value": 0 },
-        "good": { "_tbd": true, "value": 8 },
-        "failed": { "_tbd": true, "value": 20 }
+        "perfect": {
+          "_tbd": true,
+          "value": 0
+        },
+        "good": {
+          "_tbd": true,
+          "value": 8
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 20
+        }
       }
     }
   ],
   "listen": [
-    { "cycle_step": 0, "reveals": "clue", "text_key": "shade.remador.escuta.margem", "partial_key": "shade.remador.escuta.margem.metade" },
-    { "cycle_step": 1, "reveals": "name", "text_key": "shade.remador.escuta.nome", "partial_key": "shade.remador.escuta.nome.metade" },
-    { "cycle_step": 2, "reveals": "fixation", "text_key": "shade.remador.escuta.fixacao", "partial_key": "shade.remador.escuta.fixacao.metade" }
+    {
+      "cycle_step": 0,
+      "reveals": "clue",
+      "text_key": "shade.remador.escuta.margem",
+      "partial_key": "shade.remador.escuta.margem.metade"
+    },
+    {
+      "cycle_step": 1,
+      "reveals": "name",
+      "text_key": "shade.remador.escuta.nome",
+      "partial_key": "shade.remador.escuta.nome.metade"
+    },
+    {
+      "cycle_step": 2,
+      "reveals": "fixation",
+      "text_key": "shade.remador.escuta.fixacao",
+      "partial_key": "shade.remador.escuta.fixacao.metade"
+    }
   ],
   "fixation": {
     "id": "culpa",
     "options": [
-      { "id": "saudade", "label_key": "shade.remador.fixacao.saudade", "wrong_key": "shade.remador.corrige.saudade" },
-      { "id": "medo", "label_key": "shade.remador.fixacao.medo", "wrong_key": "shade.remador.corrige.medo" },
-      { "id": "culpa", "label_key": "shade.remador.fixacao.culpa" }
+      {
+        "id": "saudade",
+        "label_key": "shade.remador.fixacao.saudade",
+        "wrong_key": "shade.remador.corrige.saudade"
+      },
+      {
+        "id": "medo",
+        "label_key": "shade.remador.fixacao.medo",
+        "wrong_key": "shade.remador.corrige.medo"
+      },
+      {
+        "id": "culpa",
+        "label_key": "shade.remador.fixacao.culpa"
+      }
     ]
   },
   "absorb": {
-    "resolve_fraction_max": { "_tbd": true, "value": 0.3 },
-    "weak_fill_factor": { "_tbd": true, "value": 0.6 },
+    "resolve_fraction_max": {
+      "_tbd": true,
+      "value": 0.3
+    },
+    "weak_fill_factor": {
+      "_tbd": true,
+      "value": 0.6
+    },
     "mark_gain": {
-      "perfect": { "_tbd": true, "value": 1 },
-      "good": { "_tbd": true, "value": 1 },
-      "failed": { "_tbd": true, "value": 2 }
+      "perfect": {
+        "_tbd": true,
+        "value": 1
+      },
+      "good": {
+        "_tbd": true,
+        "value": 1
+      },
+      "failed": {
+        "_tbd": true,
+        "value": 2
+      }
     }
   },
   "echo": {
@@ -65,22 +136,153 @@
     "description_key": "shade.remador.eco.descricao",
     "gesture": "eco_remada",
     "resolve_damage": {
-      "perfect": { "_tbd": true, "value": 45 },
-      "good": { "_tbd": true, "value": 30 },
-      "failed": { "_tbd": true, "value": 12 }
+      "perfect": {
+        "_tbd": true,
+        "value": 45
+      },
+      "good": {
+        "_tbd": true,
+        "value": 30
+      },
+      "failed": {
+        "_tbd": true,
+        "value": 12
+      }
     },
-    "mark_on_use": { "_tbd": true, "value": 1 }
+    "mark_on_use": {
+      "_tbd": true,
+      "value": 1
+    }
   },
   "liberation": {
-    "peace": { "_tbd": true, "value": 100 },
-    "peace_gain": {
-      "perfect": { "_tbd": true, "value": 50 },
-      "good": { "_tbd": true, "value": 35 },
-      "failed": { "_tbd": true, "value": 15 }
+    "peace": {
+      "_tbd": true,
+      "value": 100
     },
-    "lucidity_cost": { "_tbd": true, "value": 15 },
-    "enraged_damage_multiplier": { "_tbd": true, "value": 1.5 },
+    "peace_gain": {
+      "perfect": {
+        "_tbd": true,
+        "value": 50
+      },
+      "good": {
+        "_tbd": true,
+        "value": 35
+      },
+      "failed": {
+        "_tbd": true,
+        "value": 15
+      }
+    },
+    "lucidity_cost": {
+      "_tbd": true,
+      "value": 15
+    },
+    "enraged_damage_multiplier": {
+      "_tbd": true,
+      "value": 1.5
+    },
     "progress_key": "shade.remador.libertar.progresso",
     "freed_key": "shade.remador.libertar.parte"
+  },
+  "voices": [
+    {
+      "resolve_fraction_below": {
+        "_tbd": true,
+        "value": 0.75
+      },
+      "text_key": "shade.remador.voz.1"
+    },
+    {
+      "resolve_fraction_below": {
+        "_tbd": true,
+        "value": 0.5
+      },
+      "text_key": "shade.remador.voz.2"
+    },
+    {
+      "resolve_fraction_below": {
+        "_tbd": true,
+        "value": 0.25
+      },
+      "text_key": "shade.remador.voz.3"
+    }
+  ],
+  "phases": [
+    {
+      "resolve_fraction_below": {
+        "_tbd": true,
+        "value": 0.5
+      },
+      "caption_key": "shade.remador.fase2",
+      "reveals": "fixation",
+      "attacks": [
+        {
+          "kind": "direct",
+          "gesture": "aparo_rapido",
+          "caption_key": "shade.remador.gesto.agarra",
+          "breath_damage": {
+            "perfect": {
+              "_tbd": true,
+              "value": 0
+            },
+            "good": {
+              "_tbd": true,
+              "value": 10
+            },
+            "failed": {
+              "_tbd": true,
+              "value": 24
+            }
+          }
+        },
+        {
+          "kind": "pattern",
+          "gesture": "esquiva_redemoinho",
+          "caption_key": "shade.remador.gesto.redemoinho",
+          "breath_damage": {
+            "perfect": {
+              "_tbd": true,
+              "value": 0
+            },
+            "good": {
+              "_tbd": true,
+              "value": 12
+            },
+            "failed": {
+              "_tbd": true,
+              "value": 26
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "story_keys": [
+    "shade.remador.historia.1",
+    "shade.remador.historia.2",
+    "shade.remador.historia.3",
+    "shade.remador.historia.4"
+  ],
+  "flee_clue_key": "shade.remador.fuga",
+  "yield": {
+    "lucidity_cost": {
+      "_tbd": true,
+      "value": 10
+    },
+    "text_keys": [
+      "shade.remador.ceder.1",
+      "shade.remador.ceder.2",
+      "shade.remador.ceder.3"
+    ]
+  },
+  "defeat_clue_keys": [
+    "shade.remador.hecate.1",
+    "shade.remador.hecate.2"
+  ],
+  "spare_key": "shade.remador.poupar",
+  "offering": {
+    "accepts": "agua",
+    "accept_key": "shade.remador.oferenda.aceita",
+    "refuse_key": "shade.remador.oferenda.recusa"
   }
 }

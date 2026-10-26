@@ -1,21 +1,26 @@
+using System.Collections.Generic;
 using Godot;
+using Lete.Core.Data;
 using Lete.Game.Combat;
 
 namespace Lete.Game.Sandbox;
 
 /// <summary>
-/// Teste de estilo da batalha (BATALHA_TESTE.md): grupo embaixo à esquerda, sombra em cima à direita,
-/// alternando entre as versões de arte (liso, pixel_128, pixel_160) com a mesma altura na tela.
-/// <c>switch_art</c> (Tab) e <c>art_style_1..3</c> (1/2/3) trocam a arte; <c>debug_hit</c> (H) testa as animações.
+/// Teste de elenco da batalha: grupo embaixo à esquerda, sombra em cima à direita, na arte escolhida (pixel_160).
+/// <c>switch_art</c> (Tab) passa pelo elenco (<c>cast_cycle</c> de <c>content/battle/teste_elenco.json</c>): quem tem
+/// arte de costas entra no grupo, e a arte de frente aparece no lugar da sombra. <c>debug_hit</c> (H) testa as animações.
 /// </summary>
 public partial class BattleTest : BattleStage
 {
     private int _hits;
     private bool _busy;
+    private IReadOnlyList<string> _cycle = new List<string>();
+    private int _current;
 
     public override void _Ready()
     {
         base._Ready();
+        _cycle = CastData.CycleFromJson(FileAccess.GetFileAsString(SetupPath));
 
         if (System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--demo") >= 0)
         {
@@ -23,7 +28,7 @@ public partial class BattleTest : BattleStage
         }
     }
 
-    /// <summary>Com <c>-- --demo</c>: repete o teste do H sozinho, para gravar vídeo sem jogar.</summary>
+    /// <summary>Com <c>-- --demo</c>: passa pelo elenco e repete o teste do H, para gravar vídeo sem jogar.</summary>
     private async void RunDemo()
     {
         while (IsInsideTree())
@@ -31,6 +36,7 @@ public partial class BattleTest : BattleStage
             await ToSignal(GetTree().CreateTimer(1.2f), SceneTreeTimer.SignalName.Timeout);
             if (!_busy)
             {
+                ShowNext();
                 PlayHitTest();
             }
         }
@@ -40,19 +46,7 @@ public partial class BattleTest : BattleStage
     {
         if (@event.IsActionPressed("switch_art"))
         {
-            ApplyStyle((Style + 1) % Setup.Styles.Count);
-        }
-        else if (@event.IsActionPressed("art_style_1"))
-        {
-            ApplyStyle(0);
-        }
-        else if (@event.IsActionPressed("art_style_2"))
-        {
-            ApplyStyle(1);
-        }
-        else if (@event.IsActionPressed("art_style_3"))
-        {
-            ApplyStyle(2);
+            ShowNext();
         }
         else if (@event.IsActionPressed("debug_hit"))
         {
@@ -64,6 +58,25 @@ public partial class BattleTest : BattleStage
         }
 
         GetViewport().SetInputAsHandled();
+    }
+
+    /// <summary>A próxima pessoa do elenco: de costas no grupo (se tiver essa arte) e de frente no lugar da sombra.</summary>
+    private void ShowNext()
+    {
+        if (_cycle.Count == 0)
+        {
+            return;
+        }
+
+        _current = (_current + 1) % _cycle.Count;
+        var member = Cast[_cycle[_current]];
+        if (member.BackArt is not null)
+        {
+            Replace(enemy: false, 0, member.AsActor(back: true));
+        }
+
+        Replace(enemy: true, 0, member.AsActor(back: false));
+        GD.Print($"Elenco: {member.Id}");
     }
 
     /// <summary>H: o primeiro do grupo avança e a sombra sente o golpe; a cada terceiro golpe, ela é derrotada.</summary>

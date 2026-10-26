@@ -8,12 +8,15 @@ using Lete.Game.World;
 namespace Lete.Game.Combat;
 
 /// <summary>
-/// Palco da batalha: lê a configuração (<c>content/battle</c>), põe grupo e sombras nas posições do layout,
-/// ajusta a câmera para a altura na tela e aplica uma versão de arte. Precisa de um filho "CameraRig".
+/// Palco da batalha: lê a configuração (<c>content/battle</c>) e o elenco (<c>content/characters/elenco.json</c>),
+/// põe grupo e sombras nas posições do layout, ajusta a câmera para a altura na tela e aplica a arte.
+/// Precisa de um filho "CameraRig".
 /// </summary>
 public partial class BattleStage : Node3D
 {
-    [Export(PropertyHint.File, "*.json")] public string SetupPath { get; set; } = "res://content/battle/teste_batalha.json";
+    public const string CastPath = "res://content/characters/elenco.json";
+
+    [Export(PropertyHint.File, "*.json")] public string SetupPath { get; set; } = "res://content/battle/teste_elenco.json";
     [Export] public string ArtRoot { get; set; } = "res://art/sprites/batalha";
 
     /// <summary>
@@ -25,6 +28,7 @@ public partial class BattleStage : Node3D
     [Export] public BattleAnimTuning Tuning { get; set; } = null!;
 
     public BattleSetup Setup { get; private set; } = null!;
+    public IReadOnlyDictionary<string, CastMember> Cast { get; private set; } = null!;
     public List<(BattleActor Node, BattleActorArt Art)> Party { get; } = new();
     public List<(BattleActor Node, BattleActorArt Art)> Enemies { get; } = new();
     public Camera3D Camera { get; private set; } = null!;
@@ -32,14 +36,15 @@ public partial class BattleStage : Node3D
 
     public override void _Ready()
     {
-        // -- --setup=<id> troca a configuração (ex.: teste_septimia), sem mexer na cena.
+        // -- --setup=<id> troca a configuração (ex.: teste_ataque), sem mexer na cena.
         var setupArg = System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--setup="));
         if (setupArg is not null)
         {
             SetupPath = $"{SetupPath.GetBaseDir()}/{setupArg["--setup=".Length..]}.json";
         }
 
-        Setup = BattleData.FromJson(FileAccess.GetFileAsString(SetupPath));
+        Cast = CastData.FromJson(FileAccess.GetFileAsString(CastPath));
+        Setup = BattleData.FromJson(FileAccess.GetFileAsString(SetupPath), Cast);
 
         var rig = GetNode<CameraRig>("CameraRig");
         Camera = rig.Camera;
@@ -93,14 +98,38 @@ public partial class BattleStage : Node3D
         var style = Setup.Styles[index];
         foreach (var (node, art) in Party.Concat(Enemies))
         {
-            var texture = GD.Load<Texture2D>($"{ArtRoot}/{style.Folder}/{art.Art}.png");
-            var tint = art.Tint is { } hex ? new Color(hex) : Colors.White;
-            node.SetArt(texture, art.Height, style.Smooth, art.FlipH, tint);
+            ApplyArt(node, art);
         }
 
         // Quantos pixels de tela cada pixel da arte ocupa (inteiro = pixels todos iguais).
         var reference = GD.Load<Texture2D>($"{ArtRoot}/{style.Folder}/{Party[0].Art.Art}.png");
         var scale = ScreenHeightPx * Party[0].Art.Height / reference.GetHeight();
         GD.Print($"Arte '{style.Id}': {reference.GetHeight()} px de altura, {scale:0.##} px de tela por px de arte");
+    }
+
+    /// <summary>Troca quem ocupa uma posição do grupo (ou da sombra), mantendo o nó e o lugar no palco.</summary>
+    public void Replace(bool enemy, int index, BattleActorArt art)
+    {
+        var list = enemy ? Enemies : Party;
+        list[index] = (list[index].Node, art);
+        ApplyArt(list[index].Node, art);
+    }
+
+    /// <summary>Arte, tinta e animação parada desenhada (o flutuar das sombras) de um participante, na versão atual.</summary>
+    private void ApplyArt(BattleActor node, BattleActorArt art)
+    {
+        var style = Setup.Styles[Style];
+        var texture = GD.Load<Texture2D>($"{ArtRoot}/{style.Folder}/{art.Art}.png");
+        var tint = art.Tint is { } hex ? new Color(hex) : Colors.White;
+        node.SetArt(texture, art.Height, style.Smooth, art.FlipH, tint);
+
+        var idle = art.Idle is { } animation && animation.PrefixByStyle.ContainsKey(style.Id)
+            ? Enumerable.Range(0, animation.Frames).Select(f => GD.Load<Texture2D>(animation.FramePath(style.Id, f))).ToArray()
+            : null;
+        node.SetIdleFrames(idle, art.Idle?.Fps ?? 0f);
+        if (node.IdleRunning)
+        {
+            node.StartIdle();
+        }
     }
 }

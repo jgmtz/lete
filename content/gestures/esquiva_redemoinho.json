@@ -1,0 +1,63 @@
+{
+  "id": "esquiva_redemoinho",
+  "gesture": "dodge",
+  "duration_seconds": {
+    "_tbd": true,
+    "value": 5.0
+  },
+  "box_width": {
+    "_tbd": true,
+    "value": 104
+  },
+  "box_height": {
+    "_tbd": true,
+    "value": 64
+  },
+  "marker_speed": {
+    "_tbd": true,
+    "value": 60
+  },
+  "marker_radius": {
+    "_tbd": true,
+    "value": 2
+  },
+  "bullet_radius": {
+    "_tbd": true,
+    "value": 3
+  },
+  "invulnerable_seconds": {
+    "_tbd": true,
+    "value": 0.6
+  },
+  "hits_to_zero": {
+    "_tbd": true,
+    "value": 4
+  },
+  "pattern": {
+    "id": "ondas",
+    "spawn_interval": {
+      "_tbd": true,
+      "value": 0.7
+    },
+    "speed": {
+      "_tbd": true,
+      "value": 52
+    },
+    "rows": {
+      "_tbd": true,
+      "value": 5
+    },
+    "amplitude": {
+      "_tbd": true,
+      "value": 8
+    },
+    "frequency": {
+      "_tbd": true,
+      "value": 4
+    },
+    "row_phase_step": {
+      "_tbd": true,
+      "value": 0.9
+    }
+  }
+}

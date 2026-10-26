@@ -36,42 +36,70 @@ public class ListenAndFreeTests
         Assert.NotEmpty(new HoldTiming(1f, 1.2f, 0.25f, 3f).Validate());
     }
 
+    // Caminho em L: 60 px para a direita, depois 40 px para baixo (100 px no total).
+    private static readonly DragSettings Rail = new(
+        100f, 40f, new[] { new Vector2(0f, 0f), new Vector2(0.6f, 0f), new Vector2(0.6f, 1f) }, 30f, 20f, 15f, 0.3f, 30f);
+
     [Fact]
-    public void Drag_FollowingThePathScoresHigh_CuttingAcrossScoresLow()
+    public void Drag_StaysOnTheRailAndTurnsTheCornerByItself()
     {
-        var settings = new DragSettings(100f, 40f, new[] { new Vector2(0f, 0.5f), new Vector2(1f, 0.5f) }, 20f, 2f, 8f, 30f);
+        var run = new DragRun(Rail);
+        Assert.Equal(100f, run.Length, 3);
 
-        var straight = new DragRun(settings);
-        while (!straight.IsFinished)
+        // Segurando "direita" chega ao canto; depois "direita" já não aponta para a frente e a luz para.
+        for (var i = 0; i < 30; i++)
         {
-            straight.Step(0.1f, Vector2.UnitX);
+            run.Step(0.1f, Vector2.UnitX);
         }
 
-        Assert.True(straight.ReachedEnd);
-        Assert.Equal(1f, straight.Score, 3);
+        Assert.Equal(60f, run.Progress, 1);
+        Assert.Equal(0f, run.Marker.Y, 3);
 
-        var wobbly = new DragRun(settings);
-        for (var i = 0; i < 20; i++)
+        // Para trás pela curva: "esquerda" volta pelo primeiro trecho.
+        run.Step(0.5f, -Vector2.UnitX);
+        Assert.True(run.Progress < 60f);
+        run.Step(0.5f, Vector2.UnitX);
+
+        // "Baixo" segue o segundo trecho, sempre em cima da linha.
+        run.Step(0.5f, Vector2.UnitY);
+        Assert.Equal(60f, run.Marker.X, 3);
+        Assert.True(run.Marker.Y > 0f);
+    }
+
+    [Fact]
+    public void Drag_KeepingPaceWithTheGuideScoresHigh_RushingScoresLow()
+    {
+        var calm = new DragRun(Rail);
+        while (!calm.IsFinished)
         {
-            wobbly.Step(0.1f, new Vector2(0f, -1f));
+            // Como o demo: empurra só quando está atrás da guia.
+            calm.Step(0.02f, calm.Gap < 0f ? calm.Tangent : Vector2.Zero);
         }
 
-        while (!wobbly.IsFinished)
+        var rushed = new DragRun(Rail);
+        while (!rushed.IsFinished)
         {
-            wobbly.Step(0.1f, Vector2.Normalize(new Vector2(1f, wobbly.Marker.Y < 20f ? 0.2f : 0f)));
+            rushed.Step(0.02f, rushed.Tangent);
         }
 
-        Assert.True(wobbly.Score < straight.Score);
+        Assert.True(calm.ReachedEnd && rushed.ReachedEnd);
+        Assert.True(calm.Score > 0.9f, $"calmo: {calm.Score}");
+        Assert.True(rushed.Score < calm.Score, $"com pressa: {rushed.Score}");
     }
 
     [Fact]
     public void Drag_TimeoutIsFailed()
     {
-        var settings = new DragSettings(100f, 40f, new[] { new Vector2(0f, 0.5f), new Vector2(1f, 0.5f) }, 20f, 2f, 8f, 1f);
-        var run = new DragRun(settings);
+        var run = new DragRun(Rail with { MaxSeconds = 1f });
         run.Step(2f, Vector2.Zero);
         Assert.True(run.IsFinished);
         Assert.Equal(0f, run.Score);
+    }
+
+    [Fact]
+    public void Drag_RejectsAMarkerSlowerThanTheGuide()
+    {
+        Assert.NotEmpty((Rail with { MarkerSpeed = 10f }).Validate());
     }
 
     [Fact]
