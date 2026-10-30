@@ -15,7 +15,9 @@ public static class MarkData
             (int)TbdNumber.Read(root, "mid_from"),
             (int)TbdNumber.Read(root, "high_from"),
             (int)TbdNumber.Read(root, "faced_to_return_face"),
-            (int)TbdNumber.Read(root, "perjury"));
+            (int)TbdNumber.Read(root, "perjury"),
+            root.GetProperty("offering_mark").EnumerateObject()
+                .ToDictionary(o => o.Name, o => (int)TbdNumber.Read(root.GetProperty("offering_mark"), o.Name)));
 
         var errors = rules.Validate().ToList();
         return errors.Count == 0 ? rules : throw new FormatException(string.Join(" ", errors));

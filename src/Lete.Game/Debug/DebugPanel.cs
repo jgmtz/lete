@@ -29,6 +29,7 @@ public partial class DebugPanel : CanvasLayer
     private Label _pathState = null!;
     private Label _oathState = null!;
     private Label _dialogueState = null!;
+    private Label _bagState = null!;
     private Button _companionButton = null!;
     private Label _mosaicState = null!;
     private OptionButton _sourcePicker = null!;
@@ -142,6 +143,23 @@ public partial class DebugPanel : CanvasLayer
         AddButton(tideRow, "debug.mare.viagem", () => GameRoot.Instance.Tide.Travel());
         AddButton(tideRow, "debug.mare.derrota", () => GameRoot.Instance.Tide.Defeat(1));
         column.AddChild(tideRow);
+
+        column.AddChild(UiStyle.MakeLabel(T("debug.bolsa")));
+        _bagState = UiStyle.MakeLabel("");
+        _bagState.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        column.AddChild(_bagState);
+        var bagRow = new HFlowContainer();
+        AddButton(bagRow, "debug.bolsa.encher", () =>
+            Lete.Core.Data.BagData.FillFromJson(Godot.FileAccess.GetFileAsString(GameRoot.TestBagPath), GameRoot.Instance.State.Inventory));
+        AddButton(bagRow, "debug.bolsa.sangue", () => GameRoot.Instance.Offerings.Pick("sangue", 1));
+        AddButton(bagRow, "debug.bolsa.cansar", () =>
+        {
+            var vitals = GameRoot.Instance.State.Vitals;
+            vitals.BreathSpent += 30f;
+            vitals.LuciditySpent += 20f;
+        });
+        AddButton(bagRow, "debug.bolsa.descansar", () => GameRoot.Instance.Healing.Rest());
+        column.AddChild(bagRow);
 
         column.AddChild(UiStyle.MakeLabel(T("debug.dialogo")));
         _dialogueState = UiStyle.MakeLabel("");
@@ -278,6 +296,12 @@ public partial class DebugPanel : CanvasLayer
         RefreshProfile();
         RefreshPath();
         RefreshOaths();
+        var inventory = GameRoot.Instance.State.Inventory;
+        var vitalsState = GameRoot.Instance.State.Vitals;
+        _bagState.Text = string.Format(T("debug.bolsa.estado"), inventory.Obols,
+            string.Join(", ", inventory.Offerings.Where(o => o.Value > 0).Select(o => $"{o.Key} {o.Value}")),
+            string.Join(", ", inventory.Provisions.Where(o => o.Value > 0).Select(o => $"{o.Key} {o.Value}")),
+            vitalsState.BreathSpent, vitalsState.LuciditySpent);
         var dialogue = GameRoot.Instance.State.Dialogue;
         _dialogueState.Text = string.Format(T("debug.dialogo.estado"),
             dialogue.Awakened.Count == 0 ? "-" : string.Join(", ", dialogue.Awakened), dialogue.Chosen.Count, dialogue.CommentsSeen.Count);

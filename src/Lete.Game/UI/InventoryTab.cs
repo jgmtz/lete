@@ -29,6 +29,7 @@ public partial class InventoryTab : HBoxContainer, IMenuTab
     private Label _bodyName = null!;
     private Label _originName = null!;
     private Label _craft = null!;
+    private Label _bag = null!;
 
     public string TitleKey => "ui.inventario.titulo";
 
@@ -75,6 +76,11 @@ public partial class InventoryTab : HBoxContainer, IMenuTab
         names.AddChild(_craft);
         seal.AddChild(names);
         column.AddChild(seal);
+
+        column.AddChild(UiStyle.MakeLabel(GameRoot.Instance.Text("ui.inventario.bolsa"), UiStyle.TitleFontSize));
+        _bag = UiStyle.MakeLabel("");
+        _bag.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        column.AddChild(_bag);
     }
 
     public void Refresh()
@@ -92,5 +98,20 @@ public partial class InventoryTab : HBoxContainer, IMenuTab
         _symbol.CustomMinimumSize = _symbol.Texture is { } symbol ? symbol.GetSize() * SymbolScale : Vector2.Zero;
         _originName.Text = origin is null ? GameRoot.Instance.Text("ui.inventario.sem_origem") : GameRoot.Instance.Text(origin.NameKey);
         _craft.Text = origin is null ? "" : $"{GameRoot.Instance.Text("origem.oficio")}: {GameRoot.Instance.Text(origin.CraftKey)}";
+        _bag.Text = BagText();
+    }
+
+    /// <summary>Oferendas e provisões com a quantidade, e os óbolos (itens contados são da Bolsa, não progresso).</summary>
+    private static string BagText()
+    {
+        var root = GameRoot.Instance;
+        var inventory = root.State.Inventory;
+        var lines = root.Offerings.Carried
+            .Select(k => string.Format(root.Text("ui.inventario.item"), root.Text($"oferenda.{k}"), root.Offerings.Count(k)))
+            .Concat(root.Provisions.Where(p => inventory.Provisions.GetValueOrDefault(p.Id) > 0)
+                .Select(p => string.Format(root.Text("ui.inventario.item"), root.Text(p.NameKey), inventory.Provisions[p.Id])))
+            .Append(string.Format(root.Text("ui.inventario.obolos"), inventory.Obols))
+            .ToList();
+        return string.Join("\n", lines);
     }
 }

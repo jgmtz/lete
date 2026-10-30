@@ -67,7 +67,7 @@ public class DialogueTests
         _facts = new WorldFacts(_state, new MarkRules(4, 8, 4), mosaic, new Profile(_state, _bus, ProfileTests.Rules));
         var graph = DialogueData.FromJson(Padeiro);
         _dialogues = new Dialogues(_state, _bus, new Dictionary<string, DialogueGraph> { [graph.Id] = graph }, _facts, new Effects(this),
-            id => id == "maos" ? RecollectionKind.Craft : null);
+            id => id == "maos" ? RecollectionKind.Craft : null, new Offerings(_state, _bus, OfferingTests.Rules));
         _mosaic = mosaic;
     }
 

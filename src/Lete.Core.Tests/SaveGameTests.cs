@@ -32,6 +32,12 @@ public class SaveGameTests
         state.JournalEntries.Add("obj.estela.examinar");
         state.Flags.Add("viu_o_rio");
         state.PathKeys["aqueronte"] = "obolo";
+        state.Inventory.Obols = 7;
+        state.Inventory.Offerings["mel"] = 2;
+        state.Inventory.Provisions["pao"] = 1;
+        state.Vitals.BreathSpent = 12.5f;
+        state.Vitals.LuciditySpent = 4f;
+        state.Vitals.HealUses["fogo_asfodelos"] = 2;
         state.Dialogue.Chosen.Add("padeiro/dlg.padeiro.vago.escutar");
         state.Dialogue.CommentsSeen.Add("padeiro_mulher");
         state.Dialogue.Awakened.Add("padeiro");
@@ -71,6 +77,11 @@ public class SaveGameTests
         Assert.Equal(original.JournalEntries, loaded.JournalEntries);
         Assert.Equal(original.Flags, loaded.Flags);
         Assert.Equal(original.PathKeys, loaded.PathKeys);
+        Assert.Equal(7, loaded.Inventory.Obols);
+        Assert.Equal(original.Inventory.Offerings, loaded.Inventory.Offerings);
+        Assert.Equal(original.Inventory.Provisions, loaded.Inventory.Provisions);
+        Assert.Equal((12.5f, 4f), (loaded.Vitals.BreathSpent, loaded.Vitals.LuciditySpent));
+        Assert.Equal(original.Vitals.HealUses, loaded.Vitals.HealUses);
         Assert.Equal(original.Dialogue.Chosen, loaded.Dialogue.Chosen);
         Assert.Equal(original.Dialogue.CommentsSeen, loaded.Dialogue.CommentsSeen);
         Assert.Equal(original.Dialogue.Awakened, loaded.Dialogue.Awakened);

@@ -6,7 +6,12 @@
   "shade": "padeiro",
   "lucidity": {
     "base": "vaga",
-    "offering": "farinha"
+    "offering": "farinha",
+    "share_effects": [
+      {
+        "journal_key": "diario.padeiro.partilha"
+      }
+    ]
   },
   "start": [
     "desperto_inicio",

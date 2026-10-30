@@ -1,4 +1,5 @@
 using Lete.Core.Combat.Gestures;
+using Lete.Core.State;
 
 namespace Lete.Core.Combat;
 
@@ -9,31 +10,44 @@ namespace Lete.Core.Combat;
 public sealed record ProvisionDefinition(string Id, string NameKey, string DescriptionKey, float BreathRestore, int MarkGain);
 
 /// <summary>
-/// O que o protagonista carrega para a luta (rascunho de teste até o inventário do M2): óbolos, oferendas por tipo
-/// e provisões. Na derrota, óbolos e oferendas ficam com a sombra (<see cref="ShadeHoard"/>).
+/// O que o protagonista carrega para a luta: a Bolsa do <see cref="WorldState"/> (óbolos, oferendas por tipo e
+/// provisões), vista pela luta. Na derrota, óbolos e oferendas ficam com a sombra (<see cref="ShadeHoard"/>).
 /// </summary>
 public sealed class BattleBag
 {
-    private readonly Dictionary<string, int> _offerings = new();
-    private readonly Dictionary<string, int> _provisions = new();
+    private readonly InventoryState _inventory;
+    private readonly Dictionary<string, int> _offerings;
+    private readonly Dictionary<string, int> _provisions;
 
+    public BattleBag(InventoryState inventory, IReadOnlyList<ProvisionDefinition> provisions)
+    {
+        _inventory = inventory;
+        _offerings = inventory.Offerings;
+        _provisions = inventory.Provisions;
+        Provisions = provisions;
+    }
+
+    /// <summary>Uma bolsa solta (testes).</summary>
     public BattleBag(int obols, IReadOnlyDictionary<string, int> offerings, IReadOnlyList<ProvisionDefinition> provisions,
         IReadOnlyDictionary<string, int> provisionCounts)
+        : this(new InventoryState { Obols = obols }, provisions)
     {
-        Obols = obols;
         foreach (var (kind, count) in offerings)
         {
             _offerings[kind] = count;
         }
 
-        Provisions = provisions;
         foreach (var (id, count) in provisionCounts)
         {
             _provisions[id] = count;
         }
     }
 
-    public int Obols { get; private set; }
+    public int Obols
+    {
+        get => _inventory.Obols;
+        private set => _inventory.Obols = value;
+    }
     public IReadOnlyList<ProvisionDefinition> Provisions { get; }
     public IReadOnlyDictionary<string, int> Offerings => _offerings;
 

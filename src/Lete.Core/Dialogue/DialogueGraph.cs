@@ -49,9 +49,11 @@ public sealed record DialogueGraph(
 /// <summary>
 /// Como a lucidez da sombra é decidida (decisão do João, 30/out/2026): o estado base do arquivo, subido pela primeira
 /// condição de <see cref="Raises"/> que vale; a oferenda certa (<see cref="OfferingKind"/>, dada ou partilhada; nula =
-/// qualquer uma) a deixa desperta até o fim da conversa seguinte.
+/// qualquer uma; o sangue acorda qualquer sombra) a deixa desperta até o fim da conversa seguinte. Partilhar a certa
+/// também aplica <see cref="ShareEffects"/> (GDD 5.1: a sombra lembra com mais calor; uma pista ou um fragmento dela).
 /// </summary>
-public sealed record LucidityRules(ShadeLucidity Base, IReadOnlyList<LucidityRaise> Raises, string? OfferingKind);
+public sealed record LucidityRules(ShadeLucidity Base, IReadOnlyList<LucidityRaise> Raises, string? OfferingKind,
+    IReadOnlyList<DialogueEffect> ShareEffects);
 
 public sealed record LucidityRaise(ShadeLucidity To, Condition When);
 
@@ -101,3 +103,6 @@ public sealed record SwearOath(string OathId) : DialogueEffect;
 
 /// <summary>Perjúrio por um ato que não é via (ex.: revelar o nome confiado).</summary>
 public sealed record BreakOath(string OathId) : DialogueEffect;
+
+/// <summary>A sombra oferece pão ou leito (cura leve, uma vez por degrau da Maré).</summary>
+public sealed record OfferHospitality(string ShadeId) : DialogueEffect;

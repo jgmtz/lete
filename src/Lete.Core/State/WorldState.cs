@@ -44,6 +44,12 @@ public sealed class WorldState
     /// <summary>Perfil: vias e tipos de Memória contados, e os encontros recentes (ver <c>Systems.Profile</c>).</summary>
     public ProfileState Profile { get; } = new();
 
+    /// <summary>A Bolsa: óbolos, oferendas e provisões.</summary>
+    public InventoryState Inventory { get; } = new();
+
+    /// <summary>Fôlego e Lucidez gastos desde o último descanso, e as fontes de cura já usadas.</summary>
+    public VitalsState Vitals { get; } = new();
+
     /// <summary>Conversas: opções já escolhidas, comentários do companheiro feitos, sombras despertas.</summary>
     public DialogueState Dialogue { get; } = new();
 

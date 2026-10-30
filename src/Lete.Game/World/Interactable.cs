@@ -24,6 +24,9 @@ public partial class Interactable : Area3D
         BodyExited += body => (body as Player)?.RemoveNearby(this);
     }
 
+    /// <summary>Mostra uma frase na tela (sem ir para o Diário): o resultado de descansar, acender um fogo...</summary>
+    protected static void Announce(string key) => Examined?.Invoke(key);
+
     public virtual void Examine()
     {
         GameRoot.Instance.Journal.Add(JournalKey);

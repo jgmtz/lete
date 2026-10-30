@@ -9,7 +9,8 @@ namespace Lete.Game.UI;
 /// Tela provisória de conversa (GDD 5.2), até haver arte própria: quem fala, a fala e as opções por postura. Opções já
 /// escolhidas antes aparecem esmaecidas; bloqueadas, em cinza com a dica vaga no lugar do texto; o rótulo entre
 /// colchetes vem do que a opção exige (origem, Memória, Marca, oferenda). O comentário do companheiro aparece antes das
-/// opções, com Concordar, Discordar ou Ignorar. Nó sem opções: Continuar.
+/// opções, com Concordar, Discordar ou Ignorar. Nó sem opções: Continuar. Com uma sombra, "Oferenda" escolhe o tipo e
+/// Dar ou Partilhar (decisão do João, 30/out/2026); depois a conversa recomeça, já com a lucidez nova.
 /// </summary>
 public partial class DialogueScreen : CanvasLayer
 {
@@ -20,6 +21,7 @@ public partial class DialogueScreen : CanvasLayer
     private Label _line = null!;
     private VBoxContainer _buttons = null!;
     private DialogueRunner? _runner;
+    private string? _caption;
 
     public bool IsOpen => _panel.Visible;
 
@@ -74,7 +76,8 @@ public partial class DialogueScreen : CanvasLayer
             return;
         }
 
-        _line.Text = T(node.LineKey);
+        _line.Text = (_caption is { } caption ? T(caption) + "\n\n" : "") + T(node.LineKey);
+        _caption = null;
         Clear();
         if (_runner.PendingCommentKey is { } comment)
         {
@@ -104,8 +107,50 @@ public partial class DialogueScreen : CanvasLayer
                 button.AddThemeColorOverride("font_color", color);
                 button.AddThemeColorOverride("font_disabled_color", UiStyle.Palette.ClayGray);
             }
+
+            if (_runner.Graph.Mode == DialogueMode.Shade && GameRoot.Instance.Offerings.Carried.Any())
+            {
+                AddButton(T("dialogo.oferenda"), ShowOfferingKinds);
+            }
         }
 
+        FocusFirst();
+    }
+
+    private void ShowOfferingKinds()
+    {
+        Clear();
+        var offerings = GameRoot.Instance.Offerings;
+        foreach (var kind in offerings.Carried)
+        {
+            AddButton(string.Format(T("dialogo.oferenda.tipo"), T($"oferenda.{kind}"), offerings.Count(kind)), () => ShowGiveOrShare(kind));
+        }
+
+        AddButton(T("combate.acao.voltar"), ShowNode);
+        FocusFirst();
+    }
+
+    private void ShowGiveOrShare(string kind)
+    {
+        Clear();
+        AddButton(T("dialogo.oferenda.dar"), () => Offer(kind, share: false));
+        AddButton(T("dialogo.oferenda.partilhar"), () => Offer(kind, share: true));
+        AddButton(T("combate.acao.voltar"), ShowOfferingKinds);
+        FocusFirst();
+    }
+
+    private void Offer(string kind, bool share)
+    {
+        var dialogues = GameRoot.Instance.Dialogues;
+        var id = _runner!.Graph.Id;
+        var awakened = dialogues.Offer(id, kind, share);
+        _caption = awakened ? share ? "dialogo.oferenda.partilhou" : "dialogo.oferenda.deu" : "dialogo.oferenda.nada";
+        _runner = dialogues.Open(id);
+        ShowNode();
+    }
+
+    private void FocusFirst()
+    {
         var first = _buttons.GetChildren().OfType<Button>().FirstOrDefault(b => !b.Disabled);
         Callable.From(() =>
         {

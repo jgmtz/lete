@@ -49,7 +49,6 @@ public partial class BattleAttackTest : Node
     private const string AbsorbPath = "res://content/gestures/absorver.json";
     private const string WitnessPath = "res://content/gestures/presenciar.json";
     private const string FleePath = "res://content/gestures/fuga.json";
-    private const string BagPath = "res://content/items/bolsa_teste.json";
     private const string WitnessId = "presenciar";
     private const string KeepWitnessingId = "presenciar_continuar";
     private const string StopWitnessingId = "presenciar_parar";
@@ -139,8 +138,7 @@ public partial class BattleAttackTest : Node
     // já está no WorldState (GameRoot): absorver aqui aparece no inventário.
     private static readonly EchoSlots Echoes = new();
 
-    // Bolsa, espólio da sombra e derrotas: também duram a sessão do teste (no jogo, WorldState no M2). A Maré já
-    // está no WorldState (GameRoot.Tide).
+    // Espólio da sombra e derrotas duram a sessão do teste. A Bolsa, o Fôlego, a Lucidez e a Maré estão no WorldState.
     private static BattleBag? _bag;
     private static readonly ShadeHoard Hoard = new();
     private static int _defeats;
@@ -266,7 +264,14 @@ public partial class BattleAttackTest : Node
         var difficulty = FileAccess.GetFileAsString(DifficultyPath);
         _assistSettings = BagData.AssistFromDifficulty(difficulty);
         _defeatTideSteps = BagData.DefeatTideSteps(difficulty);
-        _bag ??= BagData.FromJson(FileAccess.GetFileAsString(BagPath));
+        // A Bolsa é a do estado; vazia (o teste aberto direto), recebe a bolsa de teste.
+        var inventory = GameRoot.Instance.State.Inventory;
+        if (inventory.Obols == 0 && inventory.Offerings.Values.All(c => c == 0) && inventory.Provisions.Values.All(c => c == 0))
+        {
+            BagData.FillFromJson(FileAccess.GetFileAsString(GameRoot.TestBagPath), inventory);
+        }
+
+        _bag = new BattleBag(inventory, GameRoot.Instance.Provisions);
         _gestures[_absorbRules.Echo.Gesture] = FileAccess.GetFileAsString($"{GesturesFolder}/{_absorbRules.Echo.Gesture}.json");
         foreach (var gesture in _shadeAttacks.Select(a => a.Gesture).Distinct())
         {
@@ -352,16 +357,39 @@ public partial class BattleAttackTest : Node
         }
     }
 
+    /// <summary>O Fôlego que sobrou da luta anterior (GDD 4.8: só volta nas fontes de cura).</summary>
+    private Gauge Breath()
+    {
+        var gauge = new Gauge(_protagonistStats.Breath);
+        gauge.Reduce(System.Math.Min(GameRoot.Instance.State.Vitals.BreathSpent, gauge.Max - 1f));
+        return gauge;
+    }
+
+    /// <summary>A Lucidez que sobrou; a Leveza das Pesadas deixadas e a bênção dos juramentos aumentam o máximo (GDD 2.2, 7.1).</summary>
+    private Gauge Lucidity()
+    {
+        var gauge = new Gauge(_protagonistStats.Lucidity + GameRoot.Instance.HeavyMemories.Lightness.LucidityMax
+            + GameRoot.Instance.Oaths.Effects.LucidityMax);
+        gauge.Reduce(System.Math.Min(GameRoot.Instance.State.Vitals.LuciditySpent, gauge.Max));
+        return gauge;
+    }
+
+    /// <summary>Fim da luta sem derrota: o que foi gasto fica para a próxima.</summary>
+    private void KeepVitals()
+    {
+        var vitals = GameRoot.Instance.State.Vitals;
+        vitals.BreathSpent = _flow.Breath.Max - _flow.Breath.Current;
+        vitals.LuciditySpent = _flow.Lucidity.Max - _flow.Lucidity.Current;
+    }
+
     private void NewBattle()
     {
         _understanding = new ShadeUnderstanding();
         _listening = new ShadeListening(_listenEntries, _murmurKey, _understanding);
         _flow = new BattleFlow(
-            new Gauge(_protagonistStats.Breath),
+            Breath(),
             // A Leveza das Pesadas deixadas aumenta a Lucidez máxima (GDD 2.2).
-            // A Leveza das Pesadas deixadas e a bênção dos juramentos ativos aumentam a Lucidez máxima (GDD 2.2, 7.1).
-            new Gauge(_protagonistStats.Lucidity + GameRoot.Instance.HeavyMemories.Lightness.LucidityMax
-                + GameRoot.Instance.Oaths.Effects.LucidityMax),
+            Lucidity(),
             new ShadeResolve(_shadeMaxResolve),
             _shadeAttacks,
             _support,
@@ -895,7 +923,7 @@ public partial class BattleAttackTest : Node
         _menu.ShowMenu(false);
         _hud.SetGestureActive(true, T("combate.gesto.libertar"));
         await RunDrag();
-        Bag.SpendOffering(kind);
+        GameRoot.Instance.Offerings.Give(_shadeId, kind);
         if (_story.Offering is { } offering && offering.AcceptsKind == kind)
         {
             _understanding.RevealName();
@@ -1112,6 +1140,7 @@ public partial class BattleAttackTest : Node
         }
 
         PublishOutcome();
+        KeepVitals();
 
         // Vencida (por qualquer via), a sombra devolve o que guardava de uma derrota anterior.
         if (_flow.Outcome is not (BattleOutcome.Spared or BattleOutcome.Fled or BattleOutcome.Yielded) && Hoard.ReturnTo(Bag))
@@ -1151,6 +1180,7 @@ public partial class BattleAttackTest : Node
         // Hécate dá uma pista nova. O Diário mantém o que viu.
         _defeats++;
         GameRoot.Instance.Events.Publish(new PlayerDefeated(_shadeId));
+        GameRoot.Instance.Healing.Rest();
         await ShowLine(T("combate.derrota.trivia"), LineSeconds);
         var lostObols = Hoard.TakeFrom(Bag);
         if (lostObols > 0 || !Hoard.IsEmpty)
@@ -1169,7 +1199,10 @@ public partial class BattleAttackTest : Node
         await Restart();
     }
 
-    /// <summary>Teste: tudo volta ao início para lutar de novo (o custo real da derrota vem com as Trívias).</summary>
+    /// <summary>
+    /// Teste: a luta recomeça (depois da derrota, o protagonista acordou descansado na Trívia; depois de uma vitória,
+    /// segue com o Fôlego e a Lucidez que sobraram).
+    /// </summary>
     private async Task Restart()
     {
         Shade.Revive();

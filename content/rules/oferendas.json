@@ -1,0 +1,17 @@
+{
+  "id": "oferendas",
+  "_nota": "Oferendas (GDD 5.1 e 2.1): os tipos, o limite pequeno por tipo (rascunho do GDD: 5 de cada) e qual é o sangue (acorda qualquer sombra; a Marca que sobe está em marca.json, 'offering_mark').",
+  "kinds": [
+    "mel",
+    "vinho",
+    "leite",
+    "agua",
+    "farinha",
+    "sangue"
+  ],
+  "capacity": {
+    "_tbd": true,
+    "value": 5
+  },
+  "blood": "sangue"
+}

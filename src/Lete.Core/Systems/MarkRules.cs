@@ -10,10 +10,14 @@ public enum MarkBand
 
 /// <summary>
 /// Números da Marca (<c>content/rules/marca.json</c>, todos provisórios): onde começam as faixas média e alta e
-/// quantas Memórias Pesadas encaradas devolvem o rosto pela regra C (PENDÊNCIAS 44); quanto sobe por perjúrio.
+/// quantas Memórias Pesadas encaradas devolvem o rosto pela regra C (PENDÊNCIAS 44); quanto sobe por perjúrio e por
+/// oferenda (o sangue, GDD 5.1).
 /// </summary>
-public sealed record MarkRules(int MidFrom, int HighFrom, int FacedToReturnFace, int PerjuryMark = 0)
+public sealed record MarkRules(int MidFrom, int HighFrom, int FacedToReturnFace, int PerjuryMark = 0,
+    IReadOnlyDictionary<string, int>? OfferingMark = null)
 {
+    public int MarkOfOffering(string kind) => OfferingMark?.GetValueOrDefault(kind) ?? 0;
+
     public MarkBand BandOf(int mark) => mark >= HighFrom ? MarkBand.High : mark >= MidFrom ? MarkBand.Mid : MarkBand.Low;
 
     public IEnumerable<string> Validate()

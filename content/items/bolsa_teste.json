@@ -1,6 +1,6 @@
 {
   "id": "bolsa_teste",
-  "_rascunho": "Bolsa provisória para o teste de batalha até o inventário do M2.",
+  "_rascunho": "Bolsa de TESTE: o teste de batalha a põe na Bolsa quando ela está vazia, e o F1 enche com ela. As provisões são definidas em provisoes.json.",
   "obols": {
     "_tbd": true,
     "value": 12
@@ -19,40 +19,14 @@
       "value": 1
     }
   },
-  "provisions": [
-    {
-      "id": "pao",
-      "name_key": "provisao.pao.nome",
-      "description_key": "provisao.pao.descricao",
-      "breath_restore": {
-        "_tbd": true,
-        "value": 30
-      },
-      "mark_gain": {
-        "_tbd": true,
-        "value": 0
-      },
-      "count": {
-        "_tbd": true,
-        "value": 2
-      }
+  "provisions": {
+    "pao": {
+      "_tbd": true,
+      "value": 2
     },
-    {
-      "id": "sementes_roma",
-      "name_key": "provisao.sementes_roma.nome",
-      "description_key": "provisao.sementes_roma.descricao",
-      "breath_restore": {
-        "_tbd": true,
-        "value": 30
-      },
-      "mark_gain": {
-        "_tbd": true,
-        "value": 1
-      },
-      "count": {
-        "_tbd": true,
-        "value": 2
-      }
+    "sementes_roma": {
+      "_tbd": true,
+      "value": 2
     }
-  ]
+  }
 }

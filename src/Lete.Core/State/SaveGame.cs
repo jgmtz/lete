@@ -53,6 +53,18 @@ public static class SaveGame
                     ["tipos"] = Array(e.Kinds.Select(ConditionParser.SnakeCase)),
                 }).ToArray()),
             },
+            ["bolsa"] = new JsonObject
+            {
+                ["obolos"] = state.Inventory.Obols,
+                ["oferendas"] = Ints(state.Inventory.Offerings),
+                ["provisoes"] = Ints(state.Inventory.Provisions),
+            },
+            ["vitais"] = new JsonObject
+            {
+                ["folego_gasto"] = state.Vitals.BreathSpent,
+                ["lucidez_gasta"] = state.Vitals.LuciditySpent,
+                ["curas"] = Ints(state.Vitals.HealUses),
+            },
             ["dialogo"] = new JsonObject
             {
                 ["escolhidas"] = Array(state.Dialogue.Chosen.OrderBy(c => c, StringComparer.Ordinal)),
@@ -164,6 +176,20 @@ public static class SaveGame
             }
         }
 
+        if (json["bolsa"] is JsonObject bag)
+        {
+            state.Inventory.Obols = bag["obolos"]?.GetValue<int>() ?? 0;
+            ReadInts(bag, "oferendas", state.Inventory.Offerings);
+            ReadInts(bag, "provisoes", state.Inventory.Provisions);
+        }
+
+        if (json["vitais"] is JsonObject vitals)
+        {
+            state.Vitals.BreathSpent = vitals["folego_gasto"]?.GetValue<float>() ?? 0f;
+            state.Vitals.LuciditySpent = vitals["lucidez_gasta"]?.GetValue<float>() ?? 0f;
+            ReadInts(vitals, "curas", state.Vitals.HealUses);
+        }
+
         if (json["dialogo"] is JsonObject dialogue)
         {
             state.Dialogue.Chosen.UnionWith(Strings(dialogue, "escolhidas"));
@@ -212,6 +238,21 @@ public static class SaveGame
         FinalFace.Covered => "coberto",
         _ => null,
     };
+
+    private static JsonObject Ints(Dictionary<string, int> values) => new(values
+        .OrderBy(p => p.Key, StringComparer.Ordinal)
+        .Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value)));
+
+    private static void ReadInts(JsonObject json, string key, Dictionary<string, int> into)
+    {
+        if (json[key] is JsonObject values)
+        {
+            foreach (var (name, value) in values)
+            {
+                into[name] = value?.GetValue<int>() ?? 0;
+            }
+        }
+    }
 
     private static JsonObject Counts<T>(Dictionary<T, int> counts) where T : struct, Enum => new(counts
         .OrderBy(p => p.Key)

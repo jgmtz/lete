@@ -75,6 +75,12 @@ public sealed record OfferingGiven(string ShadeId, string Kind);
 /// <summary>Oferenda partilhada com uma sombra (comer junto).</summary>
 public sealed record OfferingShared(string ShadeId, string Kind);
 
+/// <summary>O protagonista descansou numa Trívia (Fôlego e Lucidez cheios).</summary>
+public sealed record Rested;
+
+/// <summary>Uma fonte limitada (Fogo do Lar, hospitalidade) devolveu <paramref name="Breath"/> de Fôlego.</summary>
+public sealed record Healed(string SourceId, float Breath);
+
 public sealed record OathSworn(string OathId);
 
 /// <summary>Perjúrio: a Marca sobe e a bênção some (DADOS.md 8).</summary>

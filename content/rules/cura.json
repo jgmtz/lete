@@ -1,0 +1,12 @@
+{
+  "id": "cura",
+  "_nota": "Cura fora da luta (GDD 4.8): a Trívia devolve tudo; o Fogo do Lar (parcial) e a hospitalidade (leve) devolvem Fôlego, cada fonte uma vez por degrau da Maré (decisão do João, 30/out/2026).",
+  "hearth_breath": {
+    "_tbd": true,
+    "value": 40
+  },
+  "hospitality_breath": {
+    "_tbd": true,
+    "value": 20
+  }
+}

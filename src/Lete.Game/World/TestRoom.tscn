@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://src/Lete.Game/World/CameraRig.cs" id="1_cam"]
 [ext_resource type="PackedScene" path="res://src/Lete.Game/World/Player.tscn" id="2_player"]
@@ -11,6 +11,9 @@
 [ext_resource type="Script" path="res://src/Lete.Game/World/Talkable.cs" id="9_conversa"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/MapSprite.cs" id="10_sprite"]
 [ext_resource type="Texture2D" path="res://art/sprites/sombras/padeiro/parado/padeiro_parado_frente.png" id="11_padeiro"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/TriviaRest.cs" id="12_descanso"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/HearthFire.cs" id="13_fogo"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/OfferingAltar.cs" id="14_altar"]
 
 [sub_resource type="Environment" id="Environment_nevoa"]
 background_mode = 1
@@ -232,7 +235,7 @@ shadow_enabled = true
 omni_range = 5.0
 
 [node name="Examine" type="Area3D" parent="Trivia"]
-script = ExtResource("3_inter")
+script = ExtResource("12_descanso")
 JournalKey = "obj.trivia.examinar"
 
 [node name="Reach" type="CollisionShape3D" parent="Trivia/Examine"]
@@ -294,6 +297,29 @@ MemoryId = "pesada_teste_2"
 [node name="Reach" type="CollisionShape3D" parent="PesadaTeste2"]
 shape = SubResource("Shape_pesada")
 
+[node name="FogoDoLar" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 7, 0, 5)
+script = ExtResource("13_fogo")
+FireId = "fogo_teste"
+
+[node name="Reach" type="CollisionShape3D" parent="FogoDoLar"]
+shape = SubResource("Shape_alcance")
+
+[node name="Brasa" type="OmniLight3D" parent="FogoDoLar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 0, 0.4, 0)
+light_color = Color(1, 0.55, 0.25, 1)
+light_energy = 0.8
+omni_range = 2.5
+
+[node name="Altar" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -7, 0, 7)
+script = ExtResource("14_altar")
+Kind = "farinha"
+Amount = 3
+
+[node name="Reach" type="CollisionShape3D" parent="Altar"]
+shape = SubResource("Shape_alcance")
+
 [node name="Padeiro" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 3, 0, 3)
 script = ExtResource("9_conversa")
@@ -340,6 +366,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -1, 0, -2.5)
 
 [node name="Padeiro" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 2, 0, 4)
+
+[node name="FogoDoLar" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 6, 0, 5)
+
+[node name="Altar" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -6, 0, 7)
 
 [node name="Pesada1" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -1, 0, -7)

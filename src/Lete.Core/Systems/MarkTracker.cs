@@ -20,6 +20,8 @@ public sealed class MarkTracker : IDisposable
     private readonly MarkRules _rules;
     private readonly IDisposable _absorbed;
     private readonly IDisposable _perjury;
+    private readonly IDisposable _given;
+    private readonly IDisposable _shared;
 
     public MarkTracker(WorldState state, EventBus events, MarkRules rules)
     {
@@ -28,6 +30,8 @@ public sealed class MarkTracker : IDisposable
         _rules = rules;
         _absorbed = events.Subscribe<ShadeAbsorbed>(_ => RaiseStage(AbsorbedStage));
         _perjury = events.Subscribe<OathBroken>(_ => Add(_rules.PerjuryMark));
+        _given = events.Subscribe<OfferingGiven>(e => Add(_rules.MarkOfOffering(e.Kind)));
+        _shared = events.Subscribe<OfferingShared>(e => Add(_rules.MarkOfOffering(e.Kind)));
     }
 
     public MarkBand Band => _rules.BandOf(_state.Mark);
@@ -70,6 +74,8 @@ public sealed class MarkTracker : IDisposable
     {
         _absorbed.Dispose();
         _perjury.Dispose();
+        _given.Dispose();
+        _shared.Dispose();
     }
 
     private void RaiseStage(int stage)

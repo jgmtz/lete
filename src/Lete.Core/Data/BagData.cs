@@ -1,35 +1,65 @@
 using System.Text.Json;
 using Lete.Core.Combat;
 using Lete.Core.Combat.Gestures;
+using Lete.Core.State;
+using Lete.Core.Systems;
 
 namespace Lete.Core.Data;
 
 /// <summary>Bolsa de teste (<c>content/battle/bolsa_*.json</c>) e as regras do modo de dificuldade usadas no combate.</summary>
 public static class BagData
 {
-    /// <summary>Campos <c>obols</c>, <c>offerings</c> (tipo → quantidade) e <c>provisions</c>.</summary>
-    public static BattleBag FromJson(string json)
+    /// <summary>As provisões do jogo (<c>content/items/provisoes.json</c>, campo <c>provisions</c>).</summary>
+    public static IReadOnlyList<ProvisionDefinition> ProvisionsFromJson(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        return Required(doc.RootElement, "provisions").EnumerateArray().Select(p => new ProvisionDefinition(
+            String(p, "id"),
+            String(p, "name_key"),
+            String(p, "description_key"),
+            TbdNumber.Read(p, "breath_restore"),
+            (int)TbdNumber.Read(p, "mark_gain"))).ToList();
+    }
+
+    /// <summary>
+    /// Bolsa de teste (<c>content/items/bolsa_teste.json</c>): soma <c>obols</c>, <c>offerings</c> (tipo → quantidade) e
+    /// <c>provisions</c> (id → quantidade) à Bolsa do estado. Só o teste de batalha e o F1 a usam.
+    /// </summary>
+    public static void FillFromJson(string json, InventoryState inventory)
     {
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
-        var offerings = Required(root, "offerings").EnumerateObject()
-            .ToDictionary(o => o.Name, o => (int)TbdNumber.Read(root.GetProperty("offerings"), o.Name));
-
-        var provisions = new List<ProvisionDefinition>();
-        var counts = new Dictionary<string, int>();
-        foreach (var p in Required(root, "provisions").EnumerateArray())
+        inventory.Obols += (int)TbdNumber.Read(root, "obols");
+        foreach (var (field, into) in new[] { ("offerings", inventory.Offerings), ("provisions", inventory.Provisions) })
         {
-            var definition = new ProvisionDefinition(
-                String(p, "id"),
-                String(p, "name_key"),
-                String(p, "description_key"),
-                TbdNumber.Read(p, "breath_restore"),
-                (int)TbdNumber.Read(p, "mark_gain"));
-            provisions.Add(definition);
-            counts[definition.Id] = (int)TbdNumber.Read(p, "count");
+            var counts = Required(root, field);
+            foreach (var entry in counts.EnumerateObject())
+            {
+                into[entry.Name] = into.GetValueOrDefault(entry.Name) + (int)TbdNumber.Read(counts, entry.Name);
+            }
         }
+    }
 
-        return new BattleBag((int)TbdNumber.Read(root, "obols"), offerings, provisions, counts);
+    /// <summary>Regras das oferendas (<c>content/rules/oferendas.json</c>): <c>kinds</c>, <c>capacity</c>, <c>blood</c>.</summary>
+    public static OfferingRules OfferingRulesFromJson(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        var rules = new OfferingRules(
+            Required(root, "kinds").EnumerateArray().Select(k => k.GetString()!).ToList(),
+            (int)TbdNumber.Read(root, "capacity"),
+            String(root, "blood"));
+        var errors = rules.Validate().ToList();
+        return errors.Count == 0 ? rules : throw new FormatException(string.Join(" ", errors));
+    }
+
+    /// <summary>Regras da cura (<c>content/rules/cura.json</c>): <c>hearth_breath</c> e <c>hospitality_breath</c>.</summary>
+    public static HealingRules HealingRulesFromJson(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var rules = new HealingRules(TbdNumber.Read(doc.RootElement, "hearth_breath"), TbdNumber.Read(doc.RootElement, "hospitality_breath"));
+        var errors = rules.Validate().ToList();
+        return errors.Count == 0 ? rules : throw new FormatException(string.Join(" ", errors));
     }
 
     /// <summary>Assistência de gestos do modo (<c>assist</c>), validada contra as janelas do mesmo modo.</summary>

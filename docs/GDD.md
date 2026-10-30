@@ -363,6 +363,7 @@ Vêm do mundo dos vivos (caem no Altar das Oferendas) e das provisões. Tipos: m
 - **Dilema:** algumas sombras pedem para não lembrar; despertá-las mesmo assim tem custo.
 - **Capacidade:** limite pequeno por tipo (rascunho: 5 de cada), para forçar escolhas.
 - Gesto da oferenda: **Arrastar** (suave, sem pressão de tempo).
+- **Regras fechadas (João, 30/out/2026):** fora da luta, dar ou partilhar acontece **na conversa com a sombra** (opção "Oferenda"); na luta continua só Dar. **Fôlego e Lucidez continuam de uma luta para outra** e só voltam nas fontes de cura. **Cada Fogo do Lar e cada sombra que hospeda curam uma vez por degrau da Maré.**
 
 ### 5.2 Diálogo
 

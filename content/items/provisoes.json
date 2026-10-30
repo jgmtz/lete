@@ -1,0 +1,32 @@
+{
+  "id": "provisoes",
+  "_nota": "Provisões (GDD 4.8): as dos vivos não sobem a Marca; as do Além curam barato e sobem a Marca. Números provisórios.",
+  "provisions": [
+    {
+      "id": "pao",
+      "name_key": "provisao.pao.nome",
+      "description_key": "provisao.pao.descricao",
+      "breath_restore": {
+        "_tbd": true,
+        "value": 30
+      },
+      "mark_gain": {
+        "_tbd": true,
+        "value": 0
+      }
+    },
+    {
+      "id": "sementes_roma",
+      "name_key": "provisao.sementes_roma.nome",
+      "description_key": "provisao.sementes_roma.descricao",
+      "breath_restore": {
+        "_tbd": true,
+        "value": 30
+      },
+      "mark_gain": {
+        "_tbd": true,
+        "value": 1
+      }
+    }
+  ]
+}

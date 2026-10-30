@@ -26,6 +26,10 @@ public partial class GameRoot : Node
     private const string PathFolder = "res://content/path";
     private const string OathsFolder = "res://content/oaths";
     private const string DialogueFolder = "res://content/dialogue";
+    private const string OfferingRulesPath = "res://content/rules/oferendas.json";
+    private const string HealingRulesPath = "res://content/rules/cura.json";
+    public const string ProvisionsPath = "res://content/items/provisoes.json";
+    public const string TestBagPath = "res://content/items/bolsa_teste.json";
     private const string OriginsPath = "res://content/characters/origens.json";
     private const string OathRulesPath = "res://content/rules/juramentos.json";
     private const string MosaicRulesPath = "res://content/rules/mosaico.json";
@@ -57,6 +61,11 @@ public partial class GameRoot : Node
     public PathKeys PathKeys { get; private set; } = null!;
     public Oaths Oaths { get; private set; } = null!;
     public Dialogues Dialogues { get; private set; } = null!;
+    public Offerings Offerings { get; private set; } = null!;
+    public Healing Healing { get; private set; } = null!;
+
+    /// <summary>As provisões do jogo (definições; as quantidades estão na Bolsa do estado).</summary>
+    public System.Collections.Generic.IReadOnlyList<Lete.Core.Combat.ProvisionDefinition> Provisions { get; private set; } = null!;
 
     /// <summary>Chave do nome de uma origem (para o rótulo <c>[Artesão]</c> das conversas).</summary>
     public string OriginNameKey(string originId) => _originNames.TryGetValue(originId, out var key) ? key : originId;
@@ -78,6 +87,7 @@ public partial class GameRoot : Node
                 case HearRecollectionSource e: _root.Mosaic.Hear(e.RecollectionId, e.SourceId); break;
                 case SwearOath e: _root.Oaths.Swear(e.OathId); break;
                 case BreakOath e: _root.Oaths.Break(e.OathId); break;
+                case OfferHospitality e: _root.Healing.Hospitality(e.ShadeId); break;
             }
         }
     }
@@ -105,6 +115,8 @@ public partial class GameRoot : Node
     private System.Collections.Generic.Dictionary<string, Oath> _oaths = null!;
     private OathRules _oathRules = null!;
     private System.Collections.Generic.Dictionary<string, DialogueGraph> _dialogues = null!;
+    private OfferingRules _offeringRules = null!;
+    private HealingRules _healingRules = null!;
     private System.Collections.Generic.Dictionary<string, string> _originNames = null!;
 
     public override void _EnterTree()
@@ -135,6 +147,9 @@ public partial class GameRoot : Node
         _oaths = LoadFolder(OathsFolder, OathData.FromJson, o => o.Id);
         _oathRules = OathData.RulesFromJson(FileAccess.GetFileAsString(OathRulesPath));
         _dialogues = LoadFolder(DialogueFolder, DialogueData.FromJson, d => d.Id);
+        _offeringRules = BagData.OfferingRulesFromJson(FileAccess.GetFileAsString(OfferingRulesPath));
+        _healingRules = BagData.HealingRulesFromJson(FileAccess.GetFileAsString(HealingRulesPath));
+        Provisions = BagData.ProvisionsFromJson(FileAccess.GetFileAsString(ProvisionsPath));
         _originNames = OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath))
             .ToDictionary(o => o.Id, o => o.NameKey, StringComparer.Ordinal);
 
@@ -209,8 +224,10 @@ public partial class GameRoot : Node
         Profile = new Profile(State, Events, _profileRules);
         Facts = new WorldFacts(State, _markRules, Mosaic, Profile);
         Oaths = new Oaths(State, Events, _oaths, _oathRules, () => Facts);
+        Offerings = new Offerings(State, Events, _offeringRules);
+        Healing = new Healing(State, Events, _healingRules, Offerings, () => Tide.Step);
         Dialogues = new Dialogues(State, Events, _dialogues, Facts, new GameDialogueEffects(this),
-            id => _recollections.TryGetValue(id, out var recollection) ? recollection.Kind : null);
+            id => _recollections.TryGetValue(id, out var recollection) ? recollection.Kind : null, Offerings);
         PathKeys = new PathKeys(State, Events, _pathKeys, () => Facts);
         PathKeys.Refresh();
     }

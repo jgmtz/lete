@@ -260,9 +260,17 @@ public class ContentTests
             Assert.InRange(BagData.DefeatTideSteps(json), 0, 2);
         }
 
-        var bag = BagData.FromJson(File.ReadAllText(Content("items", "bolsa_teste.json")));
+        // A bolsa de teste só cita provisões que existem, e as regras de oferendas e de cura carregam.
+        var inventory = new InventoryState();
+        BagData.FillFromJson(File.ReadAllText(Content("items", "bolsa_teste.json")), inventory);
+        var bag = new BattleBag(inventory, BagData.ProvisionsFromJson(File.ReadAllText(Content("items", "provisoes.json"))));
         Assert.True(bag.HasAnyOffering);
         Assert.True(bag.HasAnyProvision);
+        Assert.All(inventory.Provisions.Keys, id => Assert.Contains(bag.Provisions, p => p.Id == id));
+        var offerings = BagData.OfferingRulesFromJson(File.ReadAllText(Content("rules", "oferendas.json")));
+        Assert.All(inventory.Offerings.Keys, k => Assert.Contains(k, offerings.Kinds));
+        BagData.HealingRulesFromJson(File.ReadAllText(Content("rules", "cura.json")));
+        Assert.True(MarkData.FromJson(File.ReadAllText(Content("rules", "marca.json"))).MarkOfOffering(offerings.BloodKind) > 0);
         BagData.EscapeFromJson(File.ReadAllText(Content("gestures", "fuga.json")));
     }
 

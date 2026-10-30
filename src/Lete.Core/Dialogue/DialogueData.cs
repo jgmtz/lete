@@ -49,7 +49,8 @@ public static class DialogueData
         var root = doc.RootElement;
         var id = String(root, "id");
         var mode = Lookup(Modes, String(root, "mode"), id, "mode");
-        var nodes = root.GetProperty("nodes").EnumerateArray().Select(n => Node(id, n)).ToList();
+        var shade = Optional(root, "shade");
+        var nodes = root.GetProperty("nodes").EnumerateArray().Select(n => Node(id, shade, n)).ToList();
         if (nodes.Select(n => n.Id).Distinct().Count() != nodes.Count)
         {
             throw new FormatException($"Diálogo '{id}': ids de nó repetidos.");
@@ -74,25 +75,28 @@ public static class DialogueData
             throw new FormatException($"Diálogo '{id}': uma cena não tem opções.");
         }
 
-        var lucidity = root.TryGetProperty("lucidity", out var l) ? Lucidity(id, l) : null;
+        var lucidity = root.TryGetProperty("lucidity", out var l) ? Lucidity(id, shade, l) : null;
         if ((mode == DialogueMode.Shade) != (lucidity is not null))
         {
             throw new FormatException($"Diálogo '{id}': 'lucidity' é só (e sempre) do modo 'shade'.");
         }
 
-        return new DialogueGraph(id, mode, String(root, "speaker_key"), Optional(root, "shade"), lucidity, start, byId);
+        return new DialogueGraph(id, mode, String(root, "speaker_key"), shade, lucidity, start, byId);
     }
 
-    private static LucidityRules Lucidity(string id, JsonElement l) => new(
+    private static LucidityRules Lucidity(string id, string? shade, JsonElement l) => new(
         Lookup(Lucidities, String(l, "base"), id, "lucidity.base"),
         l.TryGetProperty("raise", out var raises)
             ? raises.EnumerateArray().Select((r, i) => new LucidityRaise(
                 Lookup(Lucidities, String(r, "to"), id, $"lucidity.raise[{i}].to"),
                 ConditionParser.Parse(r.GetProperty("when"), $"{id}.lucidity.raise[{i}].when"))).ToList()
             : new List<LucidityRaise>(),
-        Optional(l, "offering"));
+        Optional(l, "offering"),
+        l.TryGetProperty("share_effects", out var share)
+            ? share.EnumerateArray().Select(e => Effect($"{id}.lucidity.share_effects", shade, e)).ToList()
+            : new List<DialogueEffect>());
 
-    private static DialogueNode Node(string dialogue, JsonElement n)
+    private static DialogueNode Node(string dialogue, string? shade, JsonElement n)
     {
         var id = String(n, "id");
         var at = $"{dialogue}.{id}";
@@ -117,7 +121,7 @@ public static class DialogueData
             String(n, "line_key"),
             options,
             Next(n),
-            n.TryGetProperty("effects", out var effects) ? effects.EnumerateArray().Select(e => Effect(at, e)).ToList() : new List<DialogueEffect>(),
+            n.TryGetProperty("effects", out var effects) ? effects.EnumerateArray().Select(e => Effect(at, shade, e)).ToList() : new List<DialogueEffect>(),
             n.TryGetProperty("comment", out var comment) ? Comment(comment) : null);
     }
 
@@ -125,8 +129,11 @@ public static class DialogueData
         String(c, "id"),
         c.GetProperty("lines").EnumerateArray().ToDictionary(l => String(l, "companion"), l => String(l, "line_key"), StringComparer.Ordinal));
 
-    /// <summary>Efeito: um objeto de uma chave só (<c>journal_key</c>, <c>flag</c>, <c>origin_fragment</c>, <c>hear</c>, <c>swear_oath</c>, <c>break_oath</c>).</summary>
-    private static DialogueEffect Effect(string at, JsonElement e)
+    /// <summary>
+    /// Efeito: um objeto de uma chave só (<c>journal_key</c>, <c>flag</c>, <c>origin_fragment</c>, <c>hear</c>,
+    /// <c>swear_oath</c>, <c>break_oath</c>, <c>hospitality</c>: true, que precisa de <c>shade</c> no diálogo).
+    /// </summary>
+    private static DialogueEffect Effect(string at, string? shade, JsonElement e)
     {
         var property = e.EnumerateObject().Single();
         return property.Name switch
@@ -137,6 +144,7 @@ public static class DialogueData
             "hear" => new HearRecollectionSource(String(property.Value, "recollection"), String(property.Value, "source")),
             "swear_oath" => new SwearOath(property.Value.GetString()!),
             "break_oath" => new BreakOath(property.Value.GetString()!),
+            "hospitality" => new OfferHospitality(shade ?? throw new FormatException($"{at}: 'hospitality' precisa de 'shade' no diálogo.")),
             var other => throw new FormatException($"{at}: efeito '{other}' desconhecido."),
         };
     }
