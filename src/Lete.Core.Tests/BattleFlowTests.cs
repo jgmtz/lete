@@ -186,7 +186,7 @@ public class BattleFlowTests
         Assert.Equal("postura", aulo.SupportId);
 
         var protagonist = CombatData.ProtagonistFromJson(File.ReadAllText(Path.Combine(root, "battle", "teste_ataque.json")));
-        Assert.Equal("lia", protagonist.Id);
+        Assert.Equal("sombra_f", protagonist.Id);
 
         foreach (var attack in attacks)
         {
@@ -208,7 +208,7 @@ public class BattleFlowTests
         var setup = BattleData.FromJson(
             File.ReadAllText(Path.Combine(RepoRoot(), "content", "battle", "teste_ataque.json")),
             CastData.FromJson(File.ReadAllText(Path.Combine(RepoRoot(), "content", "characters", "elenco.json"))));
-        Assert.Null(setup.ProtagonistSlotError("lia"));
+        Assert.Null(setup.ProtagonistSlotError("sombra_f"));
         Assert.Contains("direita", setup.ProtagonistSlotError("aulo"));
         Assert.NotNull(setup.ProtagonistSlotError("ninguem"));
     }

@@ -1,0 +1,104 @@
+{
+  "id": "culpas_teste",
+  "_rascunho": "Duas Culpas de TESTE (Claude, 30/out/2026), das Pesadas de teste: fortes e caras (GDD 2.2). Números provisórios.",
+  "memories": [
+    {
+      "id": "culpa_teste_1",
+      "kind": "family",
+      "name_key": "memoria.culpa_teste_1.nome",
+      "description_key": "memoria.culpa_teste_1.descricao",
+      "stroke": {
+        "steps": [
+          "down",
+          "down",
+          "up",
+          "up"
+        ],
+        "beat_seconds": {
+          "_tbd": true,
+          "value": 0.5
+        },
+        "zero_score_offset_seconds": {
+          "_tbd": true,
+          "value": 0.2
+        },
+        "lead_in_seconds": {
+          "_tbd": true,
+          "value": 0.9
+        }
+      },
+      "lucidity_cost": {
+        "_tbd": true,
+        "value": 30
+      },
+      "failed_cost_multiplier": {
+        "_tbd": true,
+        "value": 1.5
+      },
+      "effect": "strike",
+      "power": {
+        "perfect": {
+          "_tbd": true,
+          "value": 70
+        },
+        "good": {
+          "_tbd": true,
+          "value": 50
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 20
+        }
+      }
+    },
+    {
+      "id": "culpa_teste_2",
+      "kind": "family",
+      "name_key": "memoria.culpa_teste_2.nome",
+      "description_key": "memoria.culpa_teste_2.descricao",
+      "stroke": {
+        "steps": [
+          "left",
+          "down_left",
+          "down",
+          "down_right"
+        ],
+        "beat_seconds": {
+          "_tbd": true,
+          "value": 0.5
+        },
+        "zero_score_offset_seconds": {
+          "_tbd": true,
+          "value": 0.2
+        },
+        "lead_in_seconds": {
+          "_tbd": true,
+          "value": 0.9
+        }
+      },
+      "lucidity_cost": {
+        "_tbd": true,
+        "value": 30
+      },
+      "failed_cost_multiplier": {
+        "_tbd": true,
+        "value": 1.5
+      },
+      "effect": "strike",
+      "power": {
+        "perfect": {
+          "_tbd": true,
+          "value": 70
+        },
+        "good": {
+          "_tbd": true,
+          "value": 50
+        },
+        "failed": {
+          "_tbd": true,
+          "value": 20
+        }
+      }
+    }
+  ]
+}

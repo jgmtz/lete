@@ -22,8 +22,14 @@ Usadas em diálogos, revelação de névoa, estoque de mercadores, missões, eve
 ```
 
 - **Combinadores:** `all`, `any`, `not`.
-- **Predicados previstos:** `origin`, `gender` (só para texto), `recollection` (`id`, `min_stage`, `state`: certain/uncertain/false), `recollection_kind_full_count` (nº de tipos com Memória plena), `heavy_memory` (`id`, `state`: face/leave/pending), `mark_band`, `tide_min`, `flag`, `path_key`, `oath_active`, `oath_broken`, `offering_shared` (`shade`, `kind`), `shade_state` (freed/destroyed/spared/seen), `companion`, `bond_min`, `difficulty`, `profile` (via mais usada, tipo predominante), `item_owned`, `trivia_lit`, `region_visited`, `quest_stage`.
+- **Predicados previstos:** `origin`, `gender` (só para texto), `recollection` (`id`, `min_stage`, `state`: certain/uncertain/false), `recollection_kind_full_count` (nº de tipos com Memória plena), `heavy_memory` (`id`, `state`: face/leave/pending), `mark_band`, `tide_min`, `flag`, `path_key`, `oath_active`, `oath_broken`, `offering_shared` (`shade`, `kind`), `shade_state` (freed/destroyed/spared/seen/absorbed/fled/yielded), `companion`, `bond_min`, `difficulty`, `profile` (via mais usada, tipo predominante), `item_owned`, `trivia_lit`, `region_visited`, `quest_stage`.
 - O avaliador devolve `Pass`, `Fail` ou `NearMiss` (falha em exatamente um predicado marcado `soft`). **Opções de diálogo bloqueadas** ficam visíveis em cinza com `hint_if_blocked` (chave de texto com dica vaga).
+- **Implementado (29/out/2026, `Lete.Core/Conditions`):** um predicado é um objeto com **uma chave só** (o nome) e, se for o caso, `"soft": true` (ex.: `{ "flag": "x", "soft": true }`; não vale dentro de `not`). Formatos:
+  - texto (id): `origin`, `gender` (`m`/`f`), `flag`, `path_key`, `oath_active`, `oath_broken`, `companion`, `difficulty`, `item_owned`, `trivia_lit`, `region_visited`, `shade_lucidity` (só em diálogo);
+  - número inteiro: `tide_min`, `bond_min`;
+  - objeto: `recollection` {`id`, `min_stage`?: fragment/recalled/full, `state`?: certain/uncertain/false}, `recollection_kind_full_count` {`min`}, `heavy_memory` {`id`, `state`: face/leave/pending}, `mark_band` {`min`? e/ou `max`?: low/mid/high}, `offering_shared` {`shade`, `kind`?}, `shade_state` {`id`, `state`: freed/destroyed/spared/seen/absorbed/fled/yielded}, `profile` {`top_via`?: fight/free/absorb/witness/spare/flee/yield e/ou `top_kind`?: tipo de Lembrança; lê o Perfil **recente** e falha quando ele está neutro}, `quest_stage` {`id`, `min`: índice em `stages`}.
+  - `NearMiss` = a condição falha, mas passaria se um único predicado `soft` que falhou fosse cumprido. O resultado diz qual foi.
+  - Campos que guardam condição: `requires`, `when`, `gate`, `hook`, `condition`.
 
 ---
 
@@ -124,7 +130,11 @@ Sombras **comuns** referenciam um `base_body` (um dos 6 corpos-base) e um conjun
 }
 ```
 
+**Implementado (29/out/2026, `Lete.Core/Recollections`):** as regras de subida são fixas (GDD 2.1), então no lugar de `upgrade_rules`, `uncertain_if_single_source` e `contradicted_by` cada fonte diz o seu papel: `sources[]` = {`id`, `type`: free_shade | shared_offering | anchor | dream | mnemosyne | dialogue, `shade` (obrigatório nos dois primeiros), `kind` (oferenda, opcional), `reliable` (padrão true), `contradicts` (padrão false)}. `full_by`: ids dos atos que levam a Recordação à Memória plena (âncora com item/oferenda, ou missão). `skill` (na raiz, no lugar de `stages.*.skill`): o id da Memória de combate (`content/memories`) que a Lembrança dá, uma só com 3 níveis (GDD 2.1); a força é multiplicada por `stage_power` de `content/rules/mosaico.json` conforme o estágio. Libertar uma sombra e partilhar oferenda chegam sozinhos pelos eventos; as outras fontes pelo código da cena. Uma fonte que contradiz só age sobre uma Lembrança incerta. Cores das pedras e a Chave (3 tipos) em `content/rules/mosaico.json`. No save: `lembrancas` {id: {`fontes`, `ato_pleno`, `falsa`}}.
+
 **Memória pesada:** `scope: "heavy"`, ordem fixa (`order`), `gate`: condição para aflorar, `choice`: `{ "face": { "skill": "culpa_x", "profile_effect": {...} }, "leave": { "lightness": {...} } }`. Decisão **definitiva** (sem campo de reversão).
+
+**Implementado (30/out/2026, `Lete.Core/Systems/HeavyMemories.cs`):** no lugar de `choice`, a Pesada traz `order` (1, 2, 3... sem buracos), `gate` (opcional), `warning_key` (aviso de Hécate ou do companheiro), `surface_key` (o aflorar), `stages.full.text_key` (a verdade, mostrada ao Encarar), `skill` na raiz (a **Culpa**, dada só ao Encarar; Memória normal de `content/memories`, forte e cara) e `leave` {`text_key` (a fala ao Deixar), `lucidity_max`, `protections`} (a **Leveza**). Sem `sources` nem `full_by`: encarada, é plena; deixada, a pedra fica escura e coberta. `profile_effect` fica para o Perfil. O lugar onde aflora é um nó `HeavyMemoryPlace` (Area3D, `MemoryId`) na cena da região.
 
 **Batalha (`content/battle/<id>.json`), participante:** além de `id`, `art`, `height`, `flip_h`, `tint`, `portrait` e `name_key`, pode ter `idle_frames` (`frames`, `fps`, `by_style`: id da versão de arte → caminho dos quadros sem o número, ex. `.../remador_flutuar_` + `01.png`); versões sem quadros usam a imagem única com o balanço por código.
 
@@ -156,6 +166,8 @@ Sombras **comuns** referenciam um `base_body` (um dos 6 corpos-base) e um conjun
   "icon": "items/remo"
 }
 ```
+
+**Chave do Caminho (`content/path/<id>.json`, implementado em 30/out/2026, `Lete.Core/Systems/PathKeys.cs`):** `id` (uma por passagem: `aqueronte`, `vale_do_lete`...), `journal_key` (frase do Diário ao obter) e `ways` [{`id`, `condition`}]: a primeira forma cuja condição vale dá a chave, conferida a cada evento. A condição `path_key` cita o `id`. Uma forma que usa um sistema que ainda não existe é pulada (aparece no F1). No save: `caminho` {chave: forma}.
 
 **Relíquia:** `category: "relic"`, `path_key` (a chave que abre), `hint_key`, `lesson` (`blessing` + `burden`); não equipável; no alforje.
 **Modificadores** são declarativos (ex.: `dodge_frame_size`, `parry_window`, `mist_resistance`, `rule_passive`) e aplicados pelo sistema de equipamento, nunca por código específico do item.
@@ -234,6 +246,7 @@ Modos: `asfodelo` (janelas largas; derrota perde parte das oferendas, Maré +0; 
 - **Origem** (`origins/`): `id`, `ambition_key`, `betrayed_key`, `alternative` (efeito mecânico poupado), `friction` (efeito mecânico cobrado), `outfit`, `exclusive_recollections` (3 ids), `chain` (4 capítulos com `act`, `quest_id`).
 - **Companheiro** (`companions/`): `id`, `meet_region`, `support` (`id`, `effect`, `interval_turns`, `window_widening` na Postura), `approval` (mapa via→ aprova/tolera/reprova), `chapters` (0 a 4 com `quest_id`), `gate_offer` (`id`, `scene_id`), `portrait` (3 a 4 expressões).
 - **Juramento** (`oaths/`): `id`, `blessing`, `heel`, `condition` (como condição DSL avaliável ao longo do tempo), `giver`, `conflicts_with`. Perjúrio publica `OathBroken` (Marca sobe, bênção some).
+  - **Implementado (30/out/2026, `Lete.Core/Systems/Oaths.cs`):** `name_key`, `promise_key`, `blessing_key`, `heel_key` (textos), `breaks_on` (vias que quebram: fight/free/absorb/witness/spare/flee/yield), `kept_when` (condição que cumpre; opcional) e `expires_when` (condição que vence o prazo antes de cumprir = perjúrio; opcional), `blessing`/`heel` {`lucidity_max`, `echoes_blocked`} (só os efeitos que a batalha já lê). Atos que não são vias (revelar um nome) chegam pela cena (`Oaths.Break`). Máximo ativo em `content/rules/juramentos.json`; Marca do perjúrio em `marca.json` (`perjury`). `giver` e `conflicts_with` ainda não existem. No save: `juramentos` {id: ativo | quebrado | cumprido}.
 - **Julgamento** (`trials/`): `id`, `judge`, `shade`, `evidence_slots`, `verdicts` (destinos e consequências), `perjury_if` (Lembrança incerta/falsa como prova).
 - **Missão** (`missions/`): `id`, `type` (region | offering | origin | companion), `hook` (condição de aparecer), `stages` (lista com condição de avanço), `consequences`, `closed_by_fight` (bool). Sem campo de marcador de mapa.
 
@@ -248,3 +261,5 @@ O carregador deve falhar de forma clara (arquivo, campo, mensagem) quando:
 - um chefe não tem pelo menos uma saída sem dano total;
 - uma sombra comum não tem `base_body`;
 - um valor `_tbd` é usado em build de release (apenas aviso em desenvolvimento).
+
+**Implementado (29/out/2026):** `Lete.Core/Data/ContentValidator.cs`, chamado pelo `GameRoot` ao abrir o jogo (erros no console do Godot, com arquivo → campo: mensagem) e pelo teste `ContentTests.Content_PassesLoadValidation`. Confere JSON, chaves de texto (`*_key`, `*_keys`), condições (formato e ids citados) e as referências `battle.shade`, `battle.companion` e `shades.*.gesture`. As regras de chefe e de `base_body` entram quando esses dados existirem.

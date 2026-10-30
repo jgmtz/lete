@@ -1,0 +1,25 @@
+{
+  "id": "maos_no_barro",
+  "_rascunho": "Lembrança de TESTE (Claude, 29/out/2026), a mesma da Memória de teste de combate; fontes e ato são de teste, para o Mosaico ter o que mostrar.",
+  "kind": "craft",
+  "scope": "common",
+  "title_key": "memoria.maos_no_barro.nome",
+  "skill": "maos_no_barro",
+  "sources": [
+    {
+      "id": "fonte_teste_a",
+      "type": "anchor"
+    },
+    {
+      "id": "fonte_teste_b",
+      "type": "dialogue"
+    }
+  ],
+  "full_by": [
+    "ato_teste"
+  ],
+  "mosaic_position": {
+    "x": 6,
+    "y": 4
+  }
+}

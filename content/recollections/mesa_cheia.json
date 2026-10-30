@@ -1,0 +1,25 @@
+{
+  "id": "mesa_cheia",
+  "_rascunho": "Lembrança de TESTE (Claude, 29/out/2026), a mesma da Memória de teste de combate; fontes e ato são de teste, para o Mosaico ter o que mostrar.",
+  "kind": "family",
+  "scope": "common",
+  "title_key": "memoria.mesa_cheia.nome",
+  "skill": "mesa_cheia",
+  "sources": [
+    {
+      "id": "fonte_teste_a",
+      "type": "anchor"
+    },
+    {
+      "id": "fonte_teste_b",
+      "type": "dialogue"
+    }
+  ],
+  "full_by": [
+    "ato_teste"
+  ],
+  "mosaic_position": {
+    "x": 8,
+    "y": 0
+  }
+}

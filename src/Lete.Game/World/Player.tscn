@@ -1,8 +1,18 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://src/Lete.Game/World/Player.cs" id="1_player"]
 [ext_resource type="Texture2D" path="res://art/sprites/comum/sombra_chao.png" id="2_sombra"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/WalkSpriteSet.cs" id="3_set"]
+
+[sub_resource type="Resource" id="Set_sombra_m"]
+script = ExtResource("3_set")
+Folder = "res://art/sprites/protagonista/sombra_m"
+Prefix = "sombra_m"
+
+[sub_resource type="Resource" id="Set_sombra_f"]
+script = ExtResource("3_set")
+Folder = "res://art/sprites/protagonista/sombra_f"
+Prefix = "sombra_f"
 
 [sub_resource type="Resource" id="Set_aulo"]
 script = ExtResource("3_set")
@@ -50,7 +60,7 @@ size = Vector2(0.9, 0.45)
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_player")
-Characters = [SubResource("Set_aulo"), SubResource("Set_ismena"), SubResource("Set_dimas"), SubResource("Set_septimia"), SubResource("Set_calias"), SubResource("Set_lia")]
+Characters = [SubResource("Set_sombra_m"), SubResource("Set_sombra_f"), SubResource("Set_aulo"), SubResource("Set_ismena"), SubResource("Set_dimas"), SubResource("Set_septimia"), SubResource("Set_calias"), SubResource("Set_lia")]
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)

@@ -19,7 +19,7 @@ public static class MemoryData
         ["up_left"] = StrokeDirection.UpLeft,
     };
 
-    private static readonly Dictionary<string, RecollectionKind> Kinds = new()
+    internal static readonly Dictionary<string, RecollectionKind> Kinds = new()
     {
         ["childhood"] = RecollectionKind.Childhood,
         ["feast"] = RecollectionKind.Feast,

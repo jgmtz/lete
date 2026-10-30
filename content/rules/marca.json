@@ -1,0 +1,28 @@
+{
+  "id": "marca",
+  "_nota": "Marca dos Mortos (GDD 2.3, docs/PROTAGONISTA_SOMBRA.md 6 e 7). Contador interno, nunca exibido. 'mid_from'/'high_from': onde começam as faixas média e alta (etapas 2 e 3 no corpo; a etapa 1 é o primeiro Eco absorvido). 'faced_to_return_face': Memórias Pesadas encaradas (de 6) para o rosto voltar pela regra C; abaixo disso a romã o cobre (meio-termo em aberto, PENDENCIAS 44). 'desaturation_mid'/'desaturation_high': quanto de cor o sprite de mapa e de batalha perde nas faixas média e alta (0 = nada, 1 = cinza; shader, proposta). Na faixa alta ele também não projeta sombra. 'perjury': quanto a Marca sobe ao quebrar um juramento (GDD 7.1).",
+  "mid_from": {
+    "_tbd": true,
+    "value": 4
+  },
+  "high_from": {
+    "_tbd": true,
+    "value": 8
+  },
+  "faced_to_return_face": {
+    "_tbd": true,
+    "value": 4
+  },
+  "desaturation_mid": {
+    "_tbd": true,
+    "value": 0.35
+  },
+  "desaturation_high": {
+    "_tbd": true,
+    "value": 0.7
+  },
+  "perjury": {
+    "_tbd": true,
+    "value": 2
+  }
+}

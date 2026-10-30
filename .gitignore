@@ -1,5 +1,7 @@
 # Godot 4
 .godot/
+# Save e opções quando o jogo roda pelo editor (GameRoot.UserPath)
+.dados_dev/
 .import/
 export/
 *.translation
@@ -16,6 +18,9 @@ TestResults/
 # IDEs
 .vscode/
 .idea/
+
+# Dependências do render3d (npm install em tools/render3d)
+node_modules/
 
 # Python (tools/)
 __pycache__/

@@ -1,0 +1,16 @@
+{
+  "id": "perfil",
+  "_nota": "Perfil (GDD 2.5; decisões do João, 30/out/2026). Cada encontro soma 1 na via que o encerrou; o tipo predominante vem das Memórias usadas em combate. 'recent_window': quantos encontros recentes contam para o comportamento recente (mercadores, companheiro, NPCs). 'min_encounters' e 'min_memory_uses': abaixo disso na janela, ou com empate, o Perfil fica neutro (nenhuma via ou tipo predominante).",
+  "recent_window": {
+    "_tbd": true,
+    "value": 8
+  },
+  "min_encounters": {
+    "_tbd": true,
+    "value": 3
+  },
+  "min_memory_uses": {
+    "_tbd": true,
+    "value": 3
+  }
+}

@@ -21,6 +21,8 @@ uniform float wave_scale = 3.0;
 // A mancha negra precisa se destacar da água escura: um halo pálido em volta da silhueta.
 uniform vec4 halo : source_color = vec4(0.32, 0.40, 0.46, 1.0);
 uniform float halo_spread = 2.5;
+// O halo também fica na escolha: o corpo da sombra é escuro como a água e sumiria sem ele.
+uniform float halo_keep : hint_range(0.0, 1.0) = 0.0;
 // Bordas que se dissolvem na água: lados e alto (fração da imagem) e o corte dos ombros embaixo, mais longo.
 uniform float edge_fade = 0.12;
 uniform float bottom_fade = 0.35;
@@ -64,7 +66,7 @@ void fragment() {
 	vec3 water = mix(water_deep.rgb, water_shine.rgb, pow(w, 8.0) * 0.6);
 	rgb = mix(rgb, water, murk) + water_shine.rgb * pow(w, 12.0) * murk * 0.5;
 
-	// Halo: o contorno borrado mais largo, só enquanto é mancha negra.
+	// Halo: o contorno borrado mais largo, forte enquanto é mancha negra e mais fraco na escolha ("halo_keep").
 	float wide = 0.0;
 	for (int x = -1; x <= 1; x++) {
 		for (int y = -1; y <= 1; y++) {
@@ -72,7 +74,7 @@ void fragment() {
 		}
 	}
 	wide /= 9.0;
-	float ring = clamp(wide - c.a, 0.0, 1.0) * black;
+	float ring = clamp(wide - c.a, 0.0, 1.0) * max(black, halo_keep);
 	ALBEDO = mix(rgb, halo.rgb, ring);
 	// Nas bordas o reflexo se dissolve na água, sem recorte duro (o corte dos ombros some aos poucos).
 	float fade = smoothstep(0.0, edge_fade, UV.x) * smoothstep(0.0, edge_fade, 1.0 - UV.x)

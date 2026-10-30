@@ -62,7 +62,8 @@ public sealed record MemoryUse(MemorySkill Skill, GestureGrade Grade, float Powe
 
 /// <summary>
 /// As Memórias do protagonista em combate. Contam quantas vezes cada uma foi usada; quando a Lucidez zera (por
-/// qualquer gasto), a mais usada fica <b>esquecida</b> (indisponível) até a próxima Trívia (GDD 4.2).
+/// qualquer gasto), a mais usada fica <b>esquecida</b> (indisponível) até a próxima Trívia (GDD 4.2). A Leveza das
+/// Pesadas deixadas dá proteções: cada uma segura um esquecimento, e todas voltam na Trívia (GDD 2.2).
 /// </summary>
 public sealed class MemoryBook
 {
@@ -70,7 +71,18 @@ public sealed class MemoryBook
     private readonly List<string> _useOrder = new();
     private readonly HashSet<string> _forgotten = new();
 
-    public MemoryBook(IReadOnlyList<MemorySkill> skills) => Skills = skills;
+    private readonly int _protections;
+
+    public MemoryBook(IReadOnlyList<MemorySkill> skills, int protections = 0)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(protections);
+        Skills = skills;
+        _protections = protections;
+        ProtectionsLeft = protections;
+    }
+
+    /// <summary>Proteções da Leveza que ainda restam até a próxima Trívia.</summary>
+    public int ProtectionsLeft { get; private set; }
 
     public IReadOnlyList<MemorySkill> Skills { get; }
     public IReadOnlyCollection<string> Forgotten => _forgotten;
@@ -99,9 +111,10 @@ public sealed class MemoryBook
 
     /// <summary>
     /// Chamar depois de qualquer gasto de Lucidez: zerada, esquece a Memória mais usada (no empate, a usada por
-    /// último). Devolve a que foi esquecida agora, ou nulo.
+    /// último), a não ser que reste uma proteção da Leveza, que é gasta no lugar (<see cref="Forgetting.Resisted"/>).
+    /// Devolve o que aconteceu agora, ou nulo.
     /// </summary>
-    public MemorySkill? CheckForgetting(Gauge lucidity)
+    public Forgetting? CheckForgetting(Gauge lucidity)
     {
         if (!lucidity.IsEmpty || _uses.Count == 0)
         {
@@ -116,8 +129,14 @@ public sealed class MemoryBook
 
         var most = candidates.Max(u => u.Value);
         var id = _useOrder.Last(i => candidates.Any(c => c.Key == i && c.Value == most));
+        if (ProtectionsLeft > 0)
+        {
+            ProtectionsLeft--;
+            return new Forgetting(Skills.First(s => s.Id == id), Resisted: true);
+        }
+
         _forgotten.Add(id);
-        return Skills.First(s => s.Id == id);
+        return new Forgetting(Skills.First(s => s.Id == id), Resisted: false);
     }
 
     /// <summary>Descanso numa Trívia: nada fica esquecido.</summary>
@@ -126,5 +145,9 @@ public sealed class MemoryBook
         _forgotten.Clear();
         _uses.Clear();
         _useOrder.Clear();
+        ProtectionsLeft = _protections;
     }
 }
+
+/// <summary>A Lucidez zerou: <see cref="Skill"/> foi esquecida, ou quase (a Leveza a segurou).</summary>
+public sealed record Forgetting(MemorySkill Skill, bool Resisted);

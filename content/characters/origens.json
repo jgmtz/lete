@@ -1,0 +1,42 @@
+{
+  "id": "origens",
+  "_nota": "As 4 origens do protagonista-sombra (decisão de 26/out/2026, docs/PROTAGONISTA_SOMBRA.md), na ordem das cartas da escolha. 'companions': os 3 companheiros ligados a cada origem (cada companheiro tem um par de origens; só dá história, nunca poder). Textos de 'quem foi' em rascunho (PENDENCIAS 48).",
+  "origins": [
+    {
+      "id": "pescador",
+      "name_key": "origem.pescador.nome",
+      "craft_key": "origem.pescador.oficio",
+      "ambition_key": "origem.pescador.ambicao",
+      "who_key": "origem.pescador.quem_foi",
+      "symbol": "res://art/ui/origens/simbolo_pescador.png",
+      "companions": ["ismena", "calias", "lia"]
+    },
+    {
+      "id": "sacerdote",
+      "name_key": "origem.sacerdote.nome",
+      "craft_key": "origem.sacerdote.oficio",
+      "ambition_key": "origem.sacerdote.ambicao",
+      "who_key": "origem.sacerdote.quem_foi",
+      "symbol": "res://art/ui/origens/simbolo_sacerdote.png",
+      "companions": ["aulo", "ismena", "septimia"]
+    },
+    {
+      "id": "veterano",
+      "name_key": "origem.veterano.nome",
+      "craft_key": "origem.veterano.oficio",
+      "ambition_key": "origem.veterano.ambicao",
+      "who_key": "origem.veterano.quem_foi",
+      "symbol": "res://art/ui/origens/simbolo_veterano.png",
+      "companions": ["aulo", "calias", "dimas"]
+    },
+    {
+      "id": "artesao",
+      "name_key": "origem.artesao.nome",
+      "craft_key": "origem.artesao.oficio",
+      "ambition_key": "origem.artesao.ambicao",
+      "who_key": "origem.artesao.quem_foi",
+      "symbol": "res://art/ui/origens/simbolo_artesao.png",
+      "companions": ["lia", "dimas", "septimia"]
+    }
+  ]
+}

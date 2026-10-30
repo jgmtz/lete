@@ -1,0 +1,23 @@
+{
+  "id": "mao_aberta",
+  "_rascunho": "Exemplo de rascunho do GDD 7.1 (tabela). Os efeitos que a batalha ainda não lê ficam só no texto; os números são provisórios (Claude, 30/out/2026). 'Até o Lete': cumpre ao visitar o Vale do Lete (espera o sistema de regiões). 'Resiste à névoa' ainda não existe.",
+  "name_key": "juramento.mao_aberta.nome",
+  "promise_key": "juramento.mao_aberta.promessa",
+  "blessing_key": "juramento.mao_aberta.bencao",
+  "heel_key": "juramento.mao_aberta.calcanhar",
+  "breaks_on": [
+    "absorb"
+  ],
+  "kept_when": {
+    "region_visited": "vale_do_lete"
+  },
+  "blessing": {
+    "lucidity_max": {
+      "_tbd": true,
+      "value": 10
+    }
+  },
+  "heel": {
+    "echoes_blocked": true
+  }
+}

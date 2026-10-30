@@ -101,22 +101,3 @@ public sealed class EchoSlots
 
     public void NewBattle() => _usedThisBattle.Clear();
 }
-
-/// <summary>
-/// Marca dos Mortos, só como contador por enquanto (o sistema inteiro é do M2). Nunca aparece como número para o
-/// jogador (princípio 1); só no debug.
-/// </summary>
-public sealed class MarkCounter
-{
-    public int Value { get; private set; }
-
-    public void Add(int amount)
-    {
-        if (amount < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(amount), "A Marca não desce (é irreversível).");
-        }
-
-        Value += amount;
-    }
-}

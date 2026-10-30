@@ -1,5 +1,5 @@
 // Sprite de batalha: textura lisa (linear + mipmaps) ou pixelizada (nearest), tinta, piscada branca, fade
-// e desintegração (some pixel a pixel de cima para baixo, com uma borda clara onde está se desfazendo).
+// perda de cor da Marca (só no protagonista) e desintegração (some pixel a pixel de cima para baixo, com uma borda clara onde está se desfazendo).
 shader_type spatial;
 render_mode blend_mix, cull_disabled, depth_prepass_alpha;
 
@@ -7,6 +7,7 @@ uniform sampler2D tex_nearest : source_color, filter_nearest;
 uniform sampler2D tex_linear : source_color, filter_linear_mipmap;
 uniform bool smooth_filter = false;
 uniform vec4 tint : source_color = vec4(1.0);
+uniform float desaturation : hint_range(0.0, 1.0) = 0.0;
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 uniform float fade : hint_range(0.0, 1.0) = 1.0;
 uniform float dissolve : hint_range(0.0, 1.0) = 0.0;
@@ -20,6 +21,7 @@ float hash(vec2 p) {
 void fragment() {
 	vec4 color = smooth_filter ? texture(tex_linear, UV) : texture(tex_nearest, UV);
 	color *= tint;
+	color.rgb = mix(color.rgb, vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114))), desaturation);
 	ALBEDO = mix(color.rgb, vec3(1.0), flash);
 	EMISSION = vec3(flash);
 	ALPHA = color.a * fade;

@@ -1,0 +1,9 @@
+{
+  "id": "do_silencio",
+  "_rascunho": "Exemplo de rascunho do GDD 7.1 (tabela). Os efeitos que a batalha ainda não lê ficam só no texto; os números são provisórios (Claude, 30/out/2026). Quebra quando o jogador revela o nome confiado: a cena chama o perjúrio (o diálogo ainda não existe). Bênção e calcanhar ainda não têm efeito no jogo.",
+  "name_key": "juramento.do_silencio.nome",
+  "promise_key": "juramento.do_silencio.promessa",
+  "blessing_key": "juramento.do_silencio.bencao",
+  "heel_key": "juramento.do_silencio.calcanhar",
+  "breaks_on": []
+}

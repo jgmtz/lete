@@ -5,6 +5,9 @@ using Godot;
 using Lete.Core.Combat;
 using Lete.Core.Combat.Gestures;
 using Lete.Core.Data;
+using Lete.Core.Events;
+using Lete.Core.Presentation;
+using Lete.Core.State;
 using Lete.Game.Combat;
 using Lete.Game.Combat.Gestures;
 
@@ -42,7 +45,7 @@ public partial class BattleAttackTest : Node
     private const string EchoPrefix = "eco:";
     private const string MemoryId = "memoria";
     private const string MemoryPrefix = "memoria:";
-    private const string MemoriesPath = "res://content/memories/teste.json";
+    private const string MemoriesDir = "res://content/memories";
     private const string AbsorbPath = "res://content/gestures/absorver.json";
     private const string WitnessPath = "res://content/gestures/presenciar.json";
     private const string FleePath = "res://content/gestures/fuga.json";
@@ -87,7 +90,10 @@ public partial class BattleAttackTest : Node
     private string _murmurKey = "";
     private LiberationRules _liberationRules = null!;
     private AbsorbRules _absorbRules = null!;
+    private string _shadeId = "";
     private MemoryBook _memories = null!;
+    private IReadOnlyList<MemorySkill> _allMemories = null!;
+    private HashSet<string> _guiltIds = new();
     private ShadeStory _story = null!;
     private ShadeNarration _narration = null!;
     private HoldTiming _witnessHold = null!;
@@ -129,20 +135,66 @@ public partial class BattleAttackTest : Node
         Witness,
     }
 
-    // Ecos e Marca duram a sessão inteira do teste (entre uma luta e outra); no jogo, vão para o WorldState (M2).
+    // Ecos duram a sessão inteira do teste (entre uma luta e outra); no jogo, vão para o WorldState (M2). A Marca
+    // já está no WorldState (GameRoot): absorver aqui aparece no inventário.
     private static readonly EchoSlots Echoes = new();
-    private static readonly MarkCounter Mark = new();
 
-    // Bolsa, espólio da sombra, Maré e derrotas: também duram a sessão do teste (no jogo, WorldState no M2).
+    // Bolsa, espólio da sombra e derrotas: também duram a sessão do teste (no jogo, WorldState no M2). A Maré já
+    // está no WorldState (GameRoot.Tide).
     private static BattleBag? _bag;
     private static readonly ShadeHoard Hoard = new();
-    private static int _tide;
     private static int _defeats;
     private static GestureAssist _assist = GestureAssist.Off;
 
     private static BattleBag Bag => _bag!;
 
     private static string T(string key) => GameRoot.Instance.Text(key);
+
+    /// <summary>
+    /// Sem nada no Mosaico (o teste aberto direto, sem save), dá as Lembranças de teste em estágios variados, para a
+    /// batalha ter Memórias fracas, médias e plenas. A "Água parada" fica em Fragmento confiável: libertar o Remador
+    /// a leva à Recordação. Encara a primeira Pesada de teste e deixa a segunda (Culpa e Leveza). Com
+    /// <c>-- --carregar</c>, usa o Mosaico do save.
+    /// </summary>
+    private static void SeedTestMosaic()
+    {
+        var mosaic = GameRoot.Instance.Mosaic;
+        void Hear(string id, params string[] sources)
+        {
+            foreach (var source in sources)
+            {
+                if (mosaic.Definitions.TryGetValue(id, out var recollection) && recollection.Sources.Any(s => s.Id == source))
+                {
+                    mosaic.Hear(id, source);
+                }
+            }
+        }
+
+        Hear("colo_da_avo", "fonte_teste_a", "fonte_teste_b");
+        Hear("noite_das_tochas", "fonte_teste_a", "fonte_teste_b");
+        Hear("mesa_cheia", "fonte_teste_a");
+        Hear("agua_parada", "fonte_teste_b");
+        Hear("maos_no_barro", "fonte_teste_a", "fonte_teste_b");
+        foreach (var id in new[] { "colo_da_avo", "maos_no_barro" })
+        {
+            if (mosaic.Definitions.TryGetValue(id, out var recollection) && recollection.FullBy.Count > 0)
+            {
+                mosaic.CompleteAct(id, recollection.FullBy[0]);
+            }
+        }
+
+        // Pesadas de teste: a primeira encarada (a Culpa aparece no menu Memória), a segunda deixada (Leveza).
+        var heavy = GameRoot.Instance.HeavyMemories;
+        foreach (var choice in new[] { HeavyMemoryChoice.Face, HeavyMemoryChoice.Leave })
+        {
+            if (heavy.Next is { } next)
+            {
+                heavy.Choose(next.Id, choice);
+            }
+        }
+
+        GD.Print("[debug] Mosaico de teste: plena, Recordação, Fragmento e as Pesadas (uma encarada, uma deixada).");
+    }
 
     public override void _Ready()
     {
@@ -176,9 +228,9 @@ public partial class BattleAttackTest : Node
             _support = CombatData.CompanionFromJson(FileAccess.GetFileAsString($"{CompanionsFolder}/{companionId}.json"));
         }
 
-        var shadeId = CombatData.ShadeIdFromJson(battle)
+        _shadeId = CombatData.ShadeIdFromJson(battle)
             ?? throw new System.FormatException("A batalha precisa do campo 'shade'.");
-        var shade = FileAccess.GetFileAsString($"{ShadesFolder}/{shadeId}.json");
+        var shade = FileAccess.GetFileAsString($"{ShadesFolder}/{_shadeId}.json");
         _shadeMaxResolve = CombatData.ShadeResolveFromJson(shade);
         _shadeAttacks = CombatData.ShadeAttacksFromJson(shade);
         (_listenEntries, _murmurKey) = ShadeData.ListeningFromJson(shade);
@@ -190,7 +242,25 @@ public partial class BattleAttackTest : Node
             _gestures[gesture] = FileAccess.GetFileAsString($"{GesturesFolder}/{gesture}.json");
         }
         _absorbHold = GestureData.HoldFromJson(FileAccess.GetFileAsString(AbsorbPath));
-        _memories = new MemoryBook(MemoryData.FromJson(FileAccess.GetFileAsString(MemoriesPath)));
+        _allMemories = DirAccess.GetFilesAt(MemoriesDir)
+            .Where(f => f.EndsWith(".json", System.StringComparison.Ordinal))
+            .SelectMany(f => MemoryData.FromJson(FileAccess.GetFileAsString($"{MemoriesDir}/{f}")))
+            .ToList();
+        if (OS.GetCmdlineUserArgs().Contains("--carregar"))
+        {
+            GD.Print($"carregar: {GameRoot.Instance.Load()}");
+        }
+        else if (!GameRoot.Instance.Mosaic.Known.Any())
+        {
+            SeedTestMosaic();
+        }
+
+        // Teste: -- --jurar=mao_aberta começa com o juramento ativo (a opção avisa; absorver é perjúrio).
+        if (System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--jurar=")) is { } oathArg)
+        {
+            GD.Print($"jurar: {GameRoot.Instance.Oaths.Swear(oathArg["--jurar=".Length..])}");
+        }
+
         _witnessHold = GestureData.HoldFromJson(FileAccess.GetFileAsString(WitnessPath));
         _flee = BagData.EscapeFromJson(FileAccess.GetFileAsString(FleePath));
         var difficulty = FileAccess.GetFileAsString(DifficultyPath);
@@ -229,6 +299,7 @@ public partial class BattleAttackTest : Node
         ApplyLayout();
 
         NewBattle();
+        ApplyMarkLook();
         RunBattle();
 
         if (System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--demo")) is { } demo)
@@ -287,7 +358,10 @@ public partial class BattleAttackTest : Node
         _listening = new ShadeListening(_listenEntries, _murmurKey, _understanding);
         _flow = new BattleFlow(
             new Gauge(_protagonistStats.Breath),
-            new Gauge(_protagonistStats.Lucidity),
+            // A Leveza das Pesadas deixadas aumenta a Lucidez máxima (GDD 2.2).
+            // A Leveza das Pesadas deixadas e a bênção dos juramentos ativos aumentam a Lucidez máxima (GDD 2.2, 7.1).
+            new Gauge(_protagonistStats.Lucidity + GameRoot.Instance.HeavyMemories.Lightness.LucidityMax
+                + GameRoot.Instance.Oaths.Effects.LucidityMax),
             new ShadeResolve(_shadeMaxResolve),
             _shadeAttacks,
             _support,
@@ -314,7 +388,14 @@ public partial class BattleAttackTest : Node
         _hud.ResetShadePanel();
         _mainFocus = AttackId;
         Echoes.NewBattle();
-        _memories.Rest();
+        // As Memórias vêm do Mosaico (GDD 2.1): uma por Lembrança, com a força do estágio, e a Culpa de cada Pesada
+        // encarada. Recomeçar a luta é descansar na Trívia: nada fica esquecido e as proteções da Leveza voltam.
+        var combatMemories = GameRoot.Instance.Mosaic.CombatMemories(_allMemories);
+        _guiltIds = combatMemories.Where(m => m.Guilt).Select(m => m.Skill.Id).ToHashSet();
+        _memories = new MemoryBook(
+            combatMemories.Select(m => m.Skill).ToList(), GameRoot.Instance.HeavyMemories.Lightness.Protections);
+        GD.Print($"[debug] Memórias: {string.Join(", ", combatMemories.Select(m => m.Guilt ? $"{m.Skill.Id} (Culpa)" : m.Skill.Id))}; " +
+            $"Lucidez máxima {_flow.Lucidity.Max}; proteções da Leveza {_memories.ProtectionsLeft}");
         _narration = new ShadeNarration(_story);
         RefreshShadeKnowledge();
         RefreshSupport();
@@ -400,6 +481,8 @@ public partial class BattleAttackTest : Node
 
         if (_narration.NewPhase(_flow.Resolve.Fraction) is { } phase)
         {
+            // A luta começa na fase 1; cada limiar de ShadeStory.Phases leva à seguinte.
+            GameRoot.Instance.Events.Publish(new BossPhaseChanged(_shadeId, _story.Phases.ToList().IndexOf(phase) + 2));
             _flow.ChangeCycle(phase.Attacks);
             if (phase.Reveals == ListenReveal.Fixation)
             {
@@ -420,7 +503,7 @@ public partial class BattleAttackTest : Node
         _page = MenuPage.Main;
         var entries = new List<MenuEntry>
         {
-            new(AttackId, "combate.acao.atacar", "combate.acao.atacar.descricao"),
+            new(AttackId, "combate.acao.atacar", OathWarning(Via.Fight, "combate.acao.atacar.descricao")),
             new(MemoryId, "combate.acao.memoria", "combate.acao.memoria.descricao",
                 Available: _memories.Skills.Any(s => _memories.CanUse(s.Id, _flow.Lucidity))),
             new(ApproachId, "combate.acao.aproximar", "combate.acao.aproximar.descricao"),
@@ -429,18 +512,27 @@ public partial class BattleAttackTest : Node
         // Absorver só aparece com a Firmeza baixa (escolha do João: no menu principal, 25/out/2026).
         if (_absorbRules.CanAbsorb(_flow.Resolve))
         {
-            entries.Add(new MenuEntry(AbsorbId, "combate.acao.absorver", "combate.acao.absorver.descricao"));
+            entries.Add(new MenuEntry(AbsorbId, "combate.acao.absorver", OathWarning(Via.Absorb, "combate.acao.absorver.descricao")));
         }
 
-        var echoDescription = Echoes.Echoes.Count == 0 ? "combate.acao.eco.indisponivel"
+        var echoesBlocked = GameRoot.Instance.Oaths.Effects.EchoesBlocked;
+        var echoDescription = echoesBlocked ? "combate.acao.eco.juramento"
+            : Echoes.Echoes.Count == 0 ? "combate.acao.eco.indisponivel"
             : Echoes.HasUsable ? "combate.acao.eco.descricao"
             : "combate.acao.eco.usado";
-        entries.Add(new MenuEntry(EchoId, "combate.acao.eco", echoDescription, Available: Echoes.HasUsable));
+        entries.Add(new MenuEntry(EchoId, "combate.acao.eco", echoDescription, Available: Echoes.HasUsable && !echoesBlocked));
         entries.Add(new MenuEntry(BagId, "combate.acao.bolsa",
             Bag.HasAnyProvision ? "combate.acao.bolsa.descricao" : "combate.bolsa.vazia", Available: Bag.HasAnyProvision));
-        entries.Add(new MenuEntry(FleeId, "combate.acao.fugir", "combate.acao.fugir.descricao", SeparatorBefore: true));
+        entries.Add(new MenuEntry(FleeId, "combate.acao.fugir", OathWarning(Via.Flee, "combate.acao.fugir.descricao"), SeparatorBefore: true));
         _menu.ShowPage(entries, _mainFocus);
     }
+
+    /// <summary>
+    /// Antes do ato, a opção avisa que ele quebra um juramento ativo (decisão do João, 30/out/2026): escolher já é o
+    /// perjúrio, sem caixa de confirmação.
+    /// </summary>
+    private static string OathWarning(Via via, string descriptionKey) =>
+        GameRoot.Instance.Oaths.WouldBreak(via).Count > 0 ? "combate.juramento.quebra" : descriptionKey;
 
     /// <summary>Aproximar (GDD 4.7) agrupa os outros caminhos; Libertar fica aqui, indisponível até a Compreensão completa.</summary>
     private void ShowApproachPage(string? focus = null)
@@ -448,17 +540,17 @@ public partial class BattleAttackTest : Node
         _page = MenuPage.Approach;
         var freeDescription = !_understanding.IsComplete ? "combate.acao.libertar.indisponivel"
             : !Liberation.CanAttempt(_understanding, _flow.Lucidity) ? "combate.acao.libertar.sem_lucidez"
-            : "combate.acao.libertar.descricao";
+            : OathWarning(Via.Free, "combate.acao.libertar.descricao");
         _menu.ShowPage(new[]
         {
             new MenuEntry(ListenId, "combate.acao.escutar", "combate.acao.escutar.descricao"),
             new MenuEntry(FreeId, "combate.acao.libertar", freeDescription, Available: Liberation.CanAttempt(_understanding, _flow.Lucidity)),
             new MenuEntry(OfferingId, "combate.acao.oferenda",
                 Bag.HasAnyOffering ? "combate.acao.oferenda.descricao" : "combate.acao.oferenda.vazia", Available: Bag.HasAnyOffering),
-            new MenuEntry(WitnessId, "combate.acao.presenciar", "combate.acao.presenciar.descricao"),
-            new MenuEntry(SpareId, "combate.acao.poupar", "combate.acao.poupar.descricao"),
+            new MenuEntry(WitnessId, "combate.acao.presenciar", OathWarning(Via.Witness, "combate.acao.presenciar.descricao")),
+            new MenuEntry(SpareId, "combate.acao.poupar", OathWarning(Via.Spare, "combate.acao.poupar.descricao")),
             new MenuEntry(YieldId, "combate.acao.ceder",
-                _flow.Lucidity.Current >= _story.YieldLucidityCost ? "combate.acao.ceder.descricao" : "combate.acao.ceder.sem_lucidez",
+                _flow.Lucidity.Current >= _story.YieldLucidityCost ? OathWarning(Via.Yield, "combate.acao.ceder.descricao") : "combate.acao.ceder.sem_lucidez",
                 Available: _flow.Lucidity.Current >= _story.YieldLucidityCost),
             new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true),
         }, focus);
@@ -486,7 +578,8 @@ public partial class BattleAttackTest : Node
                 _memories.IsForgotten(s.Id) ? "combate.memoria.esquecida"
                     : !_memories.CanUse(s.Id, _flow.Lucidity) ? "combate.memoria.sem_lucidez"
                     : s.DescriptionKey,
-                Available: _memories.CanUse(s.Id, _flow.Lucidity)))
+                Available: _memories.CanUse(s.Id, _flow.Lucidity),
+                Guilt: _guiltIds.Contains(s.Id)))
             .Append(new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true))
             .ToList();
         _menu.ShowPage(entries);
@@ -709,6 +802,7 @@ public partial class BattleAttackTest : Node
         var skill = _memories.Skills.First(s => s.Id == id);
         var grade = Windows.Grade(await RunStroke(skill.Stroke));
         var use = _memories.Use(id, grade, _flow.Lucidity);
+        GameRoot.Instance.Events.Publish(new MemoryUsed(use.Skill.Id, use.Skill.Kind));
         _hud.SetLucidity(_flow.Lucidity.Fraction);
 
         switch (skill.Effect)
@@ -736,12 +830,13 @@ public partial class BattleAttackTest : Node
         _playerAction?.TrySetResult();
     }
 
-    /// <summary>Lucidez zerada: a Memória mais usada fica esquecida (GDD 4.2), e a legenda conta.</summary>
+    /// <summary>Lucidez zerada: a Memória mais usada fica esquecida (GDD 4.2), ou a Leveza a segura; a legenda conta.</summary>
     private async Task CheckForgetting()
     {
-        if (_memories.CheckForgetting(_flow.Lucidity) is { } forgotten)
+        if (_memories.CheckForgetting(_flow.Lucidity) is { } forgetting)
         {
-            await ShowLine(string.Format(T("combate.memoria.esqueceu"), T(forgotten.NameKey)), LineSeconds);
+            var key = forgetting.Resisted ? "combate.memoria.leveza" : "combate.memoria.esqueceu";
+            await ShowLine(string.Format(T(key), T(forgetting.Skill.NameKey)), LineSeconds);
         }
     }
 
@@ -762,6 +857,7 @@ public partial class BattleAttackTest : Node
             : Echoes.Add(echo) ? string.Format(T("combate.eco.obtido"), T(echo.NameKey))
             : T("combate.eco.cheio");
         _flow.AbsorbShade();
+        GameRoot.Instance.Events.Publish(new ShadeAbsorbed(_shadeId));
         await ShowLine(line, LineSeconds);
         _playerAction?.TrySetResult();
     }
@@ -900,10 +996,18 @@ public partial class BattleAttackTest : Node
     }
 
     /// <summary>A Marca nunca aparece como número para o jogador (princípio 1): só no console de debug.</summary>
-    private static void AddMark(int amount)
+    private void AddMark(int amount)
     {
-        Mark.Add(amount);
-        GD.Print($"[debug] Marca: {Mark.Value}");
+        GameRoot.Instance.Mark.Add(amount);
+        GD.Print($"[debug] Marca: {GameRoot.Instance.State.Mark} (etapa {GameRoot.Instance.State.MarkStage})");
+        ApplyMarkLook();
+    }
+
+    /// <summary>A Marca no sprite do protagonista: perde cor por faixa e, na alta, fica sem sombra no chão.</summary>
+    private void ApplyMarkLook()
+    {
+        var band = GameRoot.Instance.Mark.Band;
+        Protagonist.SetMarkLook(GameRoot.Instance.MarkLook.DesaturationOf(band), MarkLook.CastsShadow(band));
     }
 
     // ---- Apoio e vez da sombra ------------------------------------------------------------------------
@@ -1007,6 +1111,8 @@ public partial class BattleAttackTest : Node
             await Shade.PlayDisintegrate();
         }
 
+        PublishOutcome();
+
         // Vencida (por qualquer via), a sombra devolve o que guardava de uma derrota anterior.
         if (_flow.Outcome is not (BattleOutcome.Spared or BattleOutcome.Fled or BattleOutcome.Yielded) && Hoard.ReturnTo(Bag))
         {
@@ -1015,6 +1121,23 @@ public partial class BattleAttackTest : Node
 
         await Wait(DefeatHoldSeconds);
         await Restart();
+    }
+
+    /// <summary>
+    /// O fim da luta como evento (ARQUITETURA 4.2). Absorver já publica na hora da absorção, junto com a Marca.
+    /// </summary>
+    private void PublishOutcome()
+    {
+        var events = GameRoot.Instance.Events;
+        switch (_flow.Outcome)
+        {
+            case BattleOutcome.Freed: events.Publish(new ShadeFreed(_shadeId)); break;
+            case BattleOutcome.Destroyed: events.Publish(new ShadeDestroyed(_shadeId)); break;
+            case BattleOutcome.Witnessed: events.Publish(new ShadeWitnessed(_shadeId)); break;
+            case BattleOutcome.Spared: events.Publish(new ShadeSpared(_shadeId)); break;
+            case BattleOutcome.Fled: events.Publish(new ShadeFled(_shadeId)); break;
+            case BattleOutcome.Yielded: events.Publish(new ShadeYielded(_shadeId)); break;
+        }
     }
 
     private async Task Defeat()
@@ -1027,6 +1150,7 @@ public partial class BattleAttackTest : Node
         // Derrota com custo (GDD 4.9): acorda na Trívia, perde óbolos e oferendas (ficam com ela), a Maré sobe e
         // Hécate dá uma pista nova. O Diário mantém o que viu.
         _defeats++;
+        GameRoot.Instance.Events.Publish(new PlayerDefeated(_shadeId));
         await ShowLine(T("combate.derrota.trivia"), LineSeconds);
         var lostObols = Hoard.TakeFrom(Bag);
         if (lostObols > 0 || !Hoard.IsEmpty)
@@ -1036,8 +1160,8 @@ public partial class BattleAttackTest : Node
 
         if (_defeatTideSteps > 0)
         {
-            _tide += _defeatTideSteps;
-            GD.Print($"[debug] Maré: {_tide}");
+            GameRoot.Instance.Tide.Defeat(_defeatTideSteps);
+            GD.Print($"[debug] Maré: {GameRoot.Instance.State.Tide}");
             await ShowLine(T("combate.derrota.mare"), LineSeconds);
         }
 

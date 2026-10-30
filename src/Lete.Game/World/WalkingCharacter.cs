@@ -22,10 +22,20 @@ public partial class WalkingCharacter : CharacterBody3D
 
     [Export] public WalkSpriteSet[] Characters { get; set; } = System.Array.Empty<WalkSpriteSet>();
 
+    private static readonly Shader MarkedShader = GD.Load<Shader>("res://src/Lete.Game/World/marked_sprite.gdshader");
+
     private List<SpriteFrames> _frames = new();
     private AnimatedSprite3D _sprite = null!;
     private int _current;
     private ScreenDirection _direction = ScreenDirection.Down;
+    private ShaderMaterial? _marked;
+    private Node3D? _groundShadow;
+
+    /// <summary>Prefixo do conjunto de sprites mostrado agora (ex.: "sombra_f").</summary>
+    public string? CurrentPrefix => Characters.Length > 0 ? Characters[_current].Prefix : null;
+
+    /// <summary>Trocou o conjunto de sprites mostrado (<c>switch_character</c> ou <see cref="SelectCharacter"/>).</summary>
+    public event System.Action? CharacterChanged;
 
     /// <summary>Quando falso, ignora a entrada (por exemplo, com um painel aberto).</summary>
     public bool InputEnabled { get; set; } = true;
@@ -39,6 +49,7 @@ public partial class WalkingCharacter : CharacterBody3D
     public override void _Ready()
     {
         _sprite = GetNode<AnimatedSprite3D>("Sprite");
+        _groundShadow = GetNodeOrNull<Node3D>("GroundShadow");
         _frames = Characters.Select(c => c.BuildFrames()).ToList();
         _sprite.FrameChanged += AlignToPixelGrid;
         _sprite.AnimationChanged += AlignToPixelGrid;
@@ -85,6 +96,31 @@ public partial class WalkingCharacter : CharacterBody3D
         }
     }
 
+    /// <summary>
+    /// A Marca no sprite (<c>Lete.Core.Presentation.MarkLook</c>): com perda de cor, o sprite passa para o shader
+    /// <c>marked_sprite</c>; sem ela, volta ao material padrão. Sem sombra, some o disco no chão.
+    /// </summary>
+    public void SetMarkLook(float desaturation, bool castsShadow)
+    {
+        if (desaturation > 0f)
+        {
+            _marked ??= new ShaderMaterial { Shader = MarkedShader };
+            _marked.SetShaderParameter("desaturation", desaturation);
+            _sprite.MaterialOverride = _marked;
+        }
+        else
+        {
+            _sprite.MaterialOverride = null;
+        }
+
+        if (_groundShadow is not null)
+        {
+            _groundShadow.Visible = castsShadow;
+        }
+
+        AlignToPixelGrid();
+    }
+
     public void TeleportTo(Vector3 position)
     {
         GlobalPosition = position;
@@ -114,6 +150,7 @@ public partial class WalkingCharacter : CharacterBody3D
         }
 
         AlignToPixelGrid();
+        CharacterChanged?.Invoke();
     }
 
     /// <summary>
@@ -129,6 +166,9 @@ public partial class WalkingCharacter : CharacterBody3D
         }
 
         _sprite.Offset = new Vector2(texture.GetWidth() % 2 / 2f, texture.GetHeight() / 2f);
+
+        // O shader da Marca não recebe a textura do quadro sozinho (o material próprio do sprite é que recebe).
+        _marked?.SetShaderParameter("sprite_texture", texture);
     }
 
     /// <summary>Converte a entrada da tela (y para baixo) numa direção no chão, segundo a câmera atual.</summary>

@@ -81,6 +81,8 @@ Cores de pedra: ocre para Infância, vermelho para Festa; as demais são TBD (a 
 
 **Lembranças incertas e falsas.** Algumas fontes não são confiáveis (sombras com fixação, a paz de Elísios, sonhos). Uma Lembrança que vem de **uma só fonte** aparece com uma rachadura no mosaico (*incerta*): funciona como Fragmento, mas **não pode virar plena** até ser confirmada. Se a confirmação a contradiz, a pedra se parte e some (*falsa*). Apresentar uma incerta ou falsa como prova no Tribunal pode virar **perjúrio**.
 
+**Regras fechadas (João, 29/out/2026):** a incerteza vem da **fonte**: cada fonte pode ser não confiável, e a Lembrança que só tem fontes não confiáveis fica incerta (funciona como Fragmento e não avança); uma fonte confiável que conte o mesmo a confirma. Uma incerta contradita vira **falsa**: a pedra some e a Memória (habilidade) dela some do combate; o jogo guarda que ela existiu (Tribunal). As **Memórias Pesadas não contam** para a Chave de Memória.
+
 **Quantidade por partida:** cerca de 30 Lembranças comuns (6 por tipo), 3 da origem escolhida, 6 Memórias Pesadas, mais algumas incertas ou falsas; total em torno de 40 a 45. Cada Lembrança tem uma Memória (habilidade) com 3 níveis, reaproveitando os 5 gestos-base.
 
 **Chave de Memória.** Para entrar no Vale do Lete é preciso **Memória plena em pelo menos 3 dos 5 tipos** (qualquer combinação). O jogador não vê o número; o portão aparece "mudo" ou "desperto". Há mais Lembranças do que o mínimo. Se faltar, o jogador nunca fica preso: pode voltar a explorar ou beber do Lete (final *Ficar*). A Chave só abre a porta; o final ainda depende do Caminho, da Marca, das Lembranças e das Pesadas.
@@ -96,6 +98,8 @@ Seis pedras escuras de borda partida no Mosaico, que guardam o que o protagonist
 
 Não existe medidor de "vontade de voltar": o jogo infere isso de quantas Pesadas foram encaradas ou deixadas, o que muda as falas de Hécate e de Anquises e dá peso ao final *Ficar*. Há também a opção de diálogo "prefiro não saber" e NPCs que notam quando o jogador foge do próprio passado.
 
+**Regras fechadas (João, 30/out/2026):** o aviso vem ao chegar no lugar e o jogador pode responder **"agora não"**; o aviso volta na próxima vez que ele chegar ali (depois de "seguir", a escolha é obrigatória). A **Culpa** é uma Memória do menu Memória, marcada em terracota. A **Leveza** dá Lucidez máxima a mais e **proteções**: cada Pesada deixada dá uma, que se renova na Trívia; ao zerar a Lucidez, gasta-se uma proteção em vez de esquecer a Memória. No Mosaico, a Pesada **encarada** é um trecho de pedra escura com a borda partida; a **deixada** fica no lugar, escura e coberta pela água (o jogador vê a perda); as pendentes não aparecem.
+
 As seis Pesadas e onde afloram estão em `HISTORIA.md`.
 
 ### 2.3 Marca dos Mortos (romã)
@@ -103,7 +107,8 @@ As seis Pesadas e onde afloram estão em `HISTORIA.md`.
 Representa o quanto o protagonista passou a "pertencer" ao Além. **Irreversível.**
 
 - Internamente é um contador. **Nunca aparece como número.** O jogador vê uma romã que se abre: a romã aparece rachada na mão do protagonista no **primeiro Eco absorvido**, e cada absorção seguinte revela mais grãos.
-- **O corpo mostra o efeito:** dedos e lábios manchados de vermelho, o sprite perde cor e, nas faixas altas, o protagonista deixa de projetar sombra e de deixar pegadas.
+- **O corpo mostra o efeito (ordem do corpo, 26/out/2026):** dedos e mãos manchados primeiro, depois antebraços e tronco; o sprite perde cor e, nas faixas altas, o protagonista deixa de projetar sombra e de deixar pegadas. **O rosto (inclusive os lábios) é a última parte a mudar** (regra C, seção 9). No mapa e na batalha o sprite não troca de imagem: a Marca age por shader (perda de cor por faixa) *(proposta)*.
+- **Tela de inventário (nova):** a silhueta do corpo escolhido, trocando de imagem pela etapa da Marca: 0 início; 1 primeiro Eco absorvido (romã rachada na mão); 2 Marca média (mãos e antebraços manchados, cor mais fraca); 3 Marca alta (mancha pelo tronco, sem sombra); por fim o rosto pela regra C.
 - **Três faixas:** baixa (nada acontece), média (NPCs vivos e algumas almas reagem diferente), alta (certas portas, travessias e a saída final deixam de reconhecê-lo).
 - **Os mortos confiam mais em quem tem a Marca; os seres ligados aos vivos desconfiam.**
 - **Cada faixa tem ganhos próprios**, não só perdas: Marca alta fecha o portão dos vivos, mas abre portas que só os mortos abrem (sombras de confiança, travessias que o reconhecem).
@@ -123,9 +128,13 @@ Mede se o jogador sabe **como sair**: itens, nomes, promessas e aliados. Cada ri
 
 Relíquias de heróis (ver 2.8) são chaves de pontos do Caminho. O Caminho decide **se existe saída**.
 
+**Regras fechadas (João, 30/out/2026):** **uma chave por passagem**, com várias formas de obter (cada forma é uma condição); o jogo guarda qual forma deu a chave. Obtida, a chave **fica para sempre**, mesmo que a condição deixe de valer depois. **Atravessar não gasta a chave**: a passagem fica aberta. Ao obter, uma frase entra no **Diário** (sem contagem nem lista de chaves).
+
 ### 2.5 Perfil
 
 Variável central que agrega **como o jogador jogou**: vias usadas em combate, tipo de Lembrança predominante, Marca, Pesadas encaradas ou deixadas e o comportamento **recente** (o jogador pode mudar de caminho). Quem lê o Perfil: mercadores, companheiro, reação de NPCs, a Sombra do Esquecido e o final composto. Com um único conjunto de variáveis, as mecânicas se explicam entre si.
+
+**Regras fechadas (João, 30/out/2026):** cada encontro soma 1 na **via que o encerrou** (Misturar não conta à parte; a derrota encerra sem via). O **tipo predominante** vem das Memórias usadas em combate. O **recente** é a janela dos **últimos N encontros**; os totais desde o começo ficam guardados para o final. **Empate**, ou poucos encontros/usos na janela, deixa o Perfil **neutro** (caminho ainda indefinido). Números em `content/rules/perfil.json` (provisórios).
 
 ### 2.6 Maré do Lete
 
@@ -133,7 +142,7 @@ O Lete é um rio e o esquecimento dele **sobe** conforme o jogador avança. Narr
 
 **Marcos de degrau:** (1) cruzar o Aqueronte, (2) escolher o companheiro, (3) cruzar o Estige, (4) passar pela bifurcação (Tártaro/Elísios), (5) entrar no Vale do Lete.
 
-**Outras fontes de avanço:** viajar entre Trívias (avanço pequeno, ver 3.6) e a derrota em combate (avança por modo de dificuldade, ver 4.9). Ver `PENDENCIAS.md` item "Maré: granularidade".
+**Outras fontes de avanço:** viajar entre Trívias (avanço pequeno, ver 3.6) e a derrota em combate (avança por modo de dificuldade, ver 4.9). **Unidade (decidido em 29/out/2026):** a Maré é um número; marco = 1 degrau (conta uma vez), derrota = 0, 1 ou 2 degraus pelo modo, viagem = uma fração de degrau (provisório). O mundo reage quando ela cruza um degrau inteiro.
 
 **Efeito em regiões deixadas para trás:**
 - Sombras **libertadas** continuam livres.
@@ -327,7 +336,7 @@ A derrota tem custo real, nunca é um "game over" seco:
 - Age **a cada 2 turnos**; quanto maior o vínculo, mais curto o intervalo.
 - Se o jogador usa uma via que ele reprova, o apoio fica mais fraco naquele turno e ele comenta (versão *relutante*). Nada além disso. **Discordar e conversar aprofunda o vínculo.**
 - Segunda leitura da luta: comenta a sombra à sua maneira (um diz "ele só quer descansar", outro "ele tem nome"). Ambos podem estar certos ou errados.
-- **Apoios:** Postura (Aulo), Lamento (Ismena), Surrupio (Dimas), Brasa (Septímia), Canto (Cálias). Ver `HISTORIA.md`.
+- **Apoios:** Postura (Aulo), Lamento (Ismena), Surrupio (Dimas), Brasa (Septímia), Canto (Cálias); o da **Lia** (sexta companheira, 26/out/2026) está pendente. Ver `HISTORIA.md`.
 - O vínculo cresce ao partilhar oferendas com ele, lutar juntos e conversar nas Trívias.
 
 ### 4.11 Chefes
@@ -409,7 +418,7 @@ Cada uma conta como um herói desceu e saiu, ou falhou. Cerca de 6 a 7, **invent
 
 ### 6.4 Economia e mercadores
 
-- **Moeda:** o **óbolo**, escasso. Vem de sombras libertadas, objetos examinados, missões e bens funerários de sombras combatidas. Alguns mercadores aceitam **trabalho ou um nome** no lugar de óbolos (bom para Artesão e Estrangeiro).
+- **Moeda:** o **óbolo**, escasso. Vem de sombras libertadas, objetos examinados, missões e bens funerários de sombras combatidas. Alguns mercadores aceitam **trabalho ou um nome** no lugar de óbolos (bom para o Artesão).
 - **Mercadores** são sombras comerciantes que negociam bens funerários. **O estoque segue o Perfil** (comportamento recente): no começo, itens fracos e neutros; conforme o jogador define o caminho, oferecem o que combina com ele, e itens e atributos mudam. Cada região tem o seu, com personalidade própria.
 - **Travas contra beco sem saída:** sempre há um mercador neutro com o básico; o estoque segue o comportamento **recente** (dá para mudar de caminho); itens de outros caminhos existem, mais caros, como tentação.
 - **Exemplos (rascunho):** O Coveiro (Asfódelos; básico, neutro, sempre disponível), A Viúva do Cocito (Campos do Luto; itens de luto e Compreensão: nomes, tabuinhas), O Intendente dos Guerreiros (Campo dos Guerreiros; instrumentos e vestes pesadas, itens de Combater).
@@ -425,6 +434,7 @@ Cada juramento é um pacto com três partes: **bênção** (benefício real enqu
 - Máximo **3 ao mesmo tempo**; cada um aparece como **um anel de água escura no braço**.
 - **Perjúrio** (quebrar): a bênção some para sempre, a Marca sobe e os deuses reagem. **Irreversível.**
 - **O primeiro juramento é obrigatório** para cruzar o Estige. Total de 8 a 10, vindos de deuses, guardiões e sombras.
+- **Regras fechadas (João, 30/out/2026):** quebra **por ato** (as vias que o juramento proíbe) ou **pelo prazo** (uma condição que cumpre e outra que vence antes); a opção que quebraria **avisa na descrição** (escolher já é o perjúrio, sem caixa de confirmação); **cumprido, termina**: bênção e calcanhar acabam e o espaço fica livre, e o jogo guarda que foi cumprido.
 - **Juramentos conflitantes** são o drama: a promessa a Hades e a promessa a Perséfone podem pedir coisas opostas. O jogo explica as condições com clareza, sem pegadinha escondida.
 - **Exemplos (rascunho):**
 
@@ -471,25 +481,32 @@ Teclado e mouse **e** controle desde o M0. Um esquema único: direcionais/analó
 
 ---
 
-## 9. Escolha do personagem (substitui "9. Criação do personagem")
+## 9. Começo do jogo: o protagonista-sombra (decisão do João, 26/out/2026)
 
-> Proposta de 25/out/2026. Substitui a seção atual. Gênero e aparência deixam de ser escolhas: cada origem é um **personagem fixo**.
+> Substitui as versões anteriores ("Criação do personagem" e, depois, os 6 protagonistas fixos de 25/out). Fonte: `docs/PROTAGONISTA_SOMBRA.md`. O que está marcado *(proposta)* foi sugerido pelo Claude e aceito pelo João, com detalhes ainda abertos.
 
-Na tela de início o jogador escolhe **um dos seis personagens** (cada um é uma origem: Pescador, Sacerdote, Veterano, Artesão, Estrangeiro, Retratista) e o **modo de dificuldade** (travado depois). O gênero é o do personagem, mostrado no sprite.
+O protagonista é uma **sombra sem aparência**: corpo de silhueta escura, o rosto uma mancha lisa, sem traços (o Lete tirou dele o próprio rosto). Só há **dois corpos**, masculino e feminino; o gênero se lê pela silhueta. **Não há criador de personagem**, nem cor de pele, cabelo, olhos ou estilo de cabelo.
 
-**Tela de escolha:** fila de seis retratos com nome, ofício e ambição; ao focar um, sprite animado e um parágrafo curto de "quem foi", sem revelar o ato. Sem criador de personagem na versão 1.
+**Fluxo de um jogo novo:**
+1. **Cutscene em primeira pessoa:** anda desorientado, piscando; vê o rio, ajoelha, e o reflexo **não tem rosto**.
+2. **Escolha do corpo:** dois reflexos (homem e mulher); o jogador alterna para os lados e confirma.
+3. **Escolha da origem** (tela própria, logo depois do reflexo): **4 cartas lado a lado**, cada uma com o **símbolo** da origem, ofício, ambição e 2 a 3 linhas de "quem foi", sem revelar o ato.
+4. **Modo de dificuldade** (travado depois, ver 8.1).
+5. Prólogo em Tênaro (a poça é substituída pelo rio da cutscene; continuidade pendente).
 
-**Prólogo (proposta, a confirmar):** em Tênaro uma poça de água escura mostra o **reflexo borrado do personagem escolhido**. O Lete tirou da memória dele o próprio rosto; o rosto volta aos poucos conforme as Lembranças afloram.
+**Origens: 4** (Pescador, Sacerdote, Veterano, Artesão; o **Estrangeiro saiu**). A origem **não muda o sprite**: aparece no texto, nas falas, nas alternativas e atritos (`HISTORIA.md` 4) e num **símbolo** (vara de pesca, cesto de oferendas com fita, ombreira de bronze, pote de barro com espátula), que também aparece como selo no inventário e no Diário.
 
 | Elemento | Como é feito |
 |---|---|
-| Personagem | Sprite próprio por personagem (mapa e batalha) |
-| Gênero | Do personagem; define o tratamento do texto (localização com variação de gênero por personagem) |
-| Roupa | Definida pela origem |
-| Marca | Altera a aparência (ver 2.3) como camada ou paleta sobre o sprite |
-| Opções cosméticas (cor de cabelo/pele) | Fora da versão 1 (pendência futura) |
+| Corpo | Um sprite por corpo (M e F), mapa e batalha, sem roupa de origem |
+| Gênero | Vem do corpo; define a variação de gênero dos textos (`ARQUITETURA.md` 7) |
+| Origem | Texto, falas, alternativa e atrito, símbolo |
+| Marca | Shader no mapa e na batalha; imagens por etapa no inventário (ver 2.3) |
+| Rosto | Só no fim, pela regra C |
 
-Quem muda diálogos e atritos é a **origem**.
+**Fragmentos de origem (mecânica nova):** quando o jogador encontra, conversa, liberta ou viaja com um **espírito nomeado ou companheiro ligado à sua origem**, ganha **um fragmento extra de memória sobre si mesmo** (ofício, ambição, um lugar, um rosto). É conteúdo narrativo no Diário/Mosaico, **nunca poder**. Cada origem tem as mesmas ligações (3 companheiros e 2 espíritos nomeados), então o total é igual para todas. Quantidade e eventos exatos: pendência.
+
+**Regra C, o rosto no fim:** depende das Memórias Pesadas (2.2). Se o jogador **encarou** a maioria, o rosto **volta** (os traços verdadeiros, com a vergonha junto); se **deixou** a maioria, a **romã cobre o rosto**. Meio-termo (limiar e versão mista): pendência. O rosto aparece no inventário e na **cena final diante da água**, que fecha a abertura.
 
 ---
 
@@ -518,7 +535,7 @@ Quem muda diálogos e atritos é a **origem**.
 
 ## 11. Escopo e plano de cortes
 
-O jogo é grande para uma pessoa só. Ordem de construção: **fatias verticais** (ver `BACKLOG.md`). **Ordem de cortes, se faltar tempo** (a confirmar): (1) O Sem-Nome opcional, (2) a Barca de Caronte, (3) o modo Tártaro, (4) duas das cinco origens, (5) companheiros do meio (Dimas e Septímia), (6) segunda silhueta de corpo. Sugestão do plano: começar com **duas origens e um companheiro** e acrescentar o resto depois.
+O jogo é grande para uma pessoa só. Ordem de construção: **fatias verticais** (ver `BACKLOG.md`). **Ordem de cortes, se faltar tempo** (a confirmar): (1) O Sem-Nome opcional, (2) a Barca de Caronte, (3) o modo Tártaro, (4) duas das quatro origens, (5) companheiros do meio (Dimas e Septímia), (6) segunda silhueta de corpo. Sugestão do plano: começar com **duas origens e um companheiro** e acrescentar o resto depois.
 
 ---
 

@@ -1,0 +1,32 @@
+{
+  "id": "agua_parada",
+  "_rascunho": "Lembrança de TESTE (Claude, 29/out/2026), a mesma da Memória de teste de combate; fontes e ato são de teste, para o Mosaico ter o que mostrar.",
+  "kind": "mourning",
+  "scope": "common",
+  "title_key": "memoria.agua_parada.nome",
+  "skill": "agua_parada",
+  "sources": [
+    {
+      "id": "remador",
+      "type": "free_shade",
+      "shade": "remador",
+      "reliable": false
+    },
+    {
+      "id": "fonte_teste_b",
+      "type": "dialogue"
+    },
+    {
+      "id": "versao_contraria",
+      "type": "dialogue",
+      "contradicts": true
+    }
+  ],
+  "full_by": [
+    "ato_teste"
+  ],
+  "mosaic_position": {
+    "x": 2,
+    "y": 4
+  }
+}

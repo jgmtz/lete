@@ -10,7 +10,9 @@ namespace Lete.Game.Combat;
 /// Uma opção do menu: identificador, chave do rótulo, chave da descrição, se está disponível e se vem depois de
 /// uma linha separadora (como Fugir, que fica fora do grupo, GDD 4.7).
 /// </summary>
-public sealed record MenuEntry(string Id, string LabelKey, string DescriptionKey, bool Available = true, bool SeparatorBefore = false);
+/// <summary>Uma opção do menu. <see cref="Guilt"/>: Culpa de uma Pesada encarada, em terracota (GDD 2.2).</summary>
+public sealed record MenuEntry(
+    string Id, string LabelKey, string DescriptionKey, bool Available = true, bool SeparatorBefore = false, bool Guilt = false);
 
 /// <summary>
 /// Caixa de ações do combate em pixel art (GDD 4.7): moldura de vaso grego, faixa de meandro, fonte pixelada
@@ -221,7 +223,7 @@ public partial class ActionMenu : Control
             button.AddThemeStyleboxOverride(style, new StyleBoxEmpty());
         }
 
-        var normal = entry.Available ? Style.Palette.IvoryDim : Style.Palette.ClayGray;
+        var normal = !entry.Available ? Style.Palette.ClayGray : entry.Guilt ? Style.Palette.Terracotta : Style.Palette.IvoryDim;
         var selected = entry.Available ? Style.Palette.Ivory : Style.Palette.ClayGray;
         button.AddThemeColorOverride("font_color", normal);
         button.AddThemeColorOverride("font_hover_color", selected);

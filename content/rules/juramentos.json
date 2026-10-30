@@ -1,0 +1,5 @@
+{
+  "id": "juramentos",
+  "_nota": "Juramentos do Estige (GDD 7.1): no máximo 3 ao mesmo tempo (decidido no GDD). A Marca do perjúrio fica em marca.json ('perjury').",
+  "max_active": 3
+}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
+using Lete.Core.Events;
 using Lete.Core.Presentation;
 using Lete.Core.State;
 using Lete.Game.Debug;
@@ -26,12 +27,18 @@ public partial class Main : Node
 
     [Export] public bool LowResRender { get; set; } = true;
 
+    /// <summary>Id desta região no save (por enquanto só existe a sala de teste).</summary>
+    [Export] public string RegionId { get; set; } = "sala_teste";
+
     private SubViewportContainer _container = null!;
     private Node3D _world = null!;
     private Player _player = null!;
     private CameraRig _cameraRig = null!;
     private Hud _hud = null!;
+    private GameMenu _menu = null!;
+    private HeavyMemoryScreen _heavyScreen = null!;
     private DebugPanel _debug = null!;
+    private IDisposable? _markSubscription;
 
     public IReadOnlyList<Marker3D> TeleportPoints =>
         GetTree().GetNodesInGroup("teleport_points").OfType<Marker3D>().ToList();
@@ -49,10 +56,21 @@ public partial class Main : Node
 
         _hud = new Hud(_player);
         AddChild(_hud);
+        _menu = new GameMenu();
+        AddChild(_menu);
+        _heavyScreen = new HeavyMemoryScreen();
+        AddChild(_heavyScreen);
         _debug = new DebugPanel(this);
         AddChild(_debug);
-        _hud.OpenChanged += RefreshPlayerInput;
+        _menu.OpenChanged += RefreshPlayerInput;
         _debug.OpenChanged += RefreshPlayerInput;
+        _heavyScreen.OpenChanged += RefreshPlayerInput;
+        HeavyMemoryPlace.Reached += SurfaceHeavyMemory;
+        GameRoot.Instance.StateReplaced += OnStateReplaced;
+        GameRoot.Instance.Saving += OnSaving;
+        _player.CharacterChanged += ApplyMarkLook;
+        _markSubscription = GameRoot.Instance.Events.Subscribe<MarkIncreased>(_ => ApplyMarkLook());
+        ApplyMarkLook();
 
         ApplyPixelSettings();
         _ = RunCommandLineAsync();
@@ -71,10 +89,69 @@ public partial class Main : Node
         _cameraRig.SnapToTarget();
     }
 
-    /// <summary>Chamado quando algo muda o texto exibido (por exemplo, o gênero).</summary>
-    public void OnTextsChanged() => _hud.RefreshTexts();
+    public override void _ExitTree()
+    {
+        GameRoot.Instance.StateReplaced -= OnStateReplaced;
+        GameRoot.Instance.Saving -= OnSaving;
+        HeavyMemoryPlace.Reached -= SurfaceHeavyMemory;
+        _markSubscription?.Dispose();
+    }
 
-    private void RefreshPlayerInput() => _player.InputEnabled = !_hud.JournalOpen && !_debug.IsOpen;
+    /// <summary>Uma Memória Pesada aflora: o aviso aparece (o jogador ainda pode adiar).</summary>
+    public void SurfaceHeavyMemory(string memoryId)
+    {
+        if (!_heavyScreen.IsOpen)
+        {
+            _menu.SetOpen(false);
+            _heavyScreen.Open(memoryId);
+        }
+    }
+
+    /// <summary>Chamado quando algo muda o texto exibido (por exemplo, o gênero).</summary>
+    public void OnTextsChanged() => _menu.RefreshTexts();
+
+    /// <summary>Um save foi carregado: o jogador volta a ser o corpo salvo, no lugar onde salvou.</summary>
+    private void OnStateReplaced()
+    {
+        var state = GameRoot.Instance.State;
+        if (state.ProtagonistId is { } chosen)
+        {
+            _player.SelectCharacter(chosen);
+        }
+
+        if (state.RegionId == RegionId && state.Position is { } position)
+        {
+            _player.TeleportTo(new Vector3(position.X, position.Y, position.Z));
+            _cameraRig.SnapToTarget();
+        }
+
+        ApplyMarkLook();
+    }
+
+    private void OnSaving()
+    {
+        var state = GameRoot.Instance.State;
+        var position = _player.GlobalPosition;
+        state.RegionId = RegionId;
+        state.Position = new System.Numerics.Vector3(position.X, position.Y, position.Z);
+    }
+
+    /// <summary>A Marca só aparece no corpo do protagonista (os outros conjuntos de sprites são de teste).</summary>
+    private void ApplyMarkLook()
+    {
+        var root = GameRoot.Instance;
+        var isProtagonist = _player.CurrentPrefix == root.State.ProtagonistId;
+        var band = root.Mark.Band;
+        _player.SetMarkLook(
+            isProtagonist ? root.MarkLook.DesaturationOf(band) : 0f,
+            !isProtagonist || MarkLook.CastsShadow(band));
+    }
+
+    private void RefreshPlayerInput()
+    {
+        _hud.SetSuppressed(_menu.IsOpen || _heavyScreen.IsOpen);
+        _player.InputEnabled = !_menu.IsOpen && !_debug.IsOpen && !_heavyScreen.IsOpen;
+    }
 
     /// <summary>Aplica a mesma densidade de pixel a sprites, texturas do cenário, câmera e viewport.</summary>
     private void ApplyPixelSettings()
@@ -99,7 +176,8 @@ public partial class Main : Node
     /// <summary>
     /// Argumentos depois de "--" na linha de comando, para conferir a cena sem jogar à mão:
     /// --render=low|direct  --gender=m|f  --teleport=Nome  --examine
-    /// --ui=journal|debug  --shot=caminho.png  --frames=N
+    /// --carregar  --ui=journal|mosaic|inventory|debug  --shot=caminho.png  --frames=N
+    /// --pesada=encarar,deixar (decide as próximas Pesadas da fila pela cena; a última fica na tela, sem --ui)
     /// </summary>
     private async Task RunCommandLineAsync()
     {
@@ -115,6 +193,11 @@ public partial class Main : Node
         if (args.TryGetValue("render", out var render))
         {
             LowResRender = render != "direct";
+        }
+
+        if (args.ContainsKey("carregar"))
+        {
+            GD.Print($"carregar: {GameRoot.Instance.Load()}");
         }
 
         if (args.TryGetValue("gender", out var gender))
@@ -138,15 +221,30 @@ public partial class Main : Node
             _player.CurrentInteractable?.Examine();
         }
 
+        if (args.TryGetValue("pesada", out var choices))
+        {
+            var list = choices.Split(',');
+            for (var i = 0; i < list.Length && GameRoot.Instance.HeavyMemories.Next is { } next; i++)
+            {
+                SurfaceHeavyMemory(next.Id);
+                _heavyScreen.Press(0);
+                _heavyScreen.Press(list[i] == "deixar" ? 1 : 0);
+                if (i < list.Length - 1 || args.ContainsKey("ui"))
+                {
+                    _heavyScreen.Press(0);
+                }
+            }
+        }
+
         if (args.TryGetValue("ui", out var ui))
         {
-            if (ui == "journal")
-            {
-                _hud.SetJournalOpen(true);
-            }
-            else if (ui == "debug")
+            if (ui == "debug")
             {
                 _debug.SetOpen(true);
+            }
+            else
+            {
+                _menu.Open(ui);
             }
         }
 

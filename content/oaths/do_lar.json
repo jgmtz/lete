@@ -1,0 +1,14 @@
+{
+  "id": "do_lar",
+  "_rascunho": "Exemplo de rascunho do GDD 7.1 (tabela). Os efeitos que a batalha ainda não lê ficam só no texto; os números são provisórios (Claude, 30/out/2026). 'voltou_a_asfodelos' é flag provisória até as regiões existirem; descer ao Tártaro antes de cumprir é perjúrio (espera o sistema de regiões). Bênção e calcanhar ainda não têm efeito no jogo.",
+  "name_key": "juramento.do_lar.nome",
+  "promise_key": "juramento.do_lar.promessa",
+  "blessing_key": "juramento.do_lar.bencao",
+  "heel_key": "juramento.do_lar.calcanhar",
+  "kept_when": {
+    "flag": "voltou_a_asfodelos"
+  },
+  "expires_when": {
+    "region_visited": "tartaro"
+  }
+}

@@ -43,6 +43,39 @@ CFG = {
     rest={"hip": (520, 640), "knee": (505, 780), "ankle": (500, 903), "toe": (592, 962)},
     caixa_canela=(466, 846, 536), caixa_pe=(455, 893, 610), canela_y1=905, pe_y0=897,
     ref_topo=(856, 700), escurece=0.80, empurra=0.9, y_emp0=540, y_emp1=850),
+
+ # Protagonista-sombra (29/out): pele escura, entao a mascara da perna e todo pixel opaco da caixa ("perna_alfa").
+ # A barra da tunica fica logo acima do joelho: o joelho do rig vai na barra e a perna inteira gira escondida nela.
+ "sombra_f_frente": dict(modo="fc", img="../../art/concept/gemini/protagonista_sombra/protagonista_mapa/protagonista_f_frente.png", vista="f0", q_n=57.0,
+    rest={"hipR": (462, 600), "kneeR": (462, 716), "ankleR": (460, 945), "toeR": (452, 995),
+          "hipL": (562, 600), "kneeL": (562, 716), "ankleL": (566, 945), "toeL": (572, 995)},
+    caixas={"R": (380, 716, 512, 1022), "L": (512, 716, 650, 1022)}, thigh_y0=716, thigh_ymax=716, shin_y0=716, foot_y=940, foot_y1=1022,
+    sem_coxa=True, perna_alfa=True, ext_shin=(728, 660), kl=[(0.6, 1.05), (0.6, 1.05), (1.0, 1.0)], preenche_y=0, interior=(30, 28, 34), recorta_y=0),
+ "sombra_f_costas": dict(modo="fc", img="../../art/concept/gemini/protagonista_sombra/protagonista_mapa/protagonista_f_costas.png", vista="c0", q_n=57.0,
+    rest={"hipL": (462, 600), "kneeL": (462, 716), "ankleL": (460, 945), "toeL": (452, 995),
+          "hipR": (562, 600), "kneeR": (562, 716), "ankleR": (566, 945), "toeR": (572, 995)},
+    caixas={"L": (380, 716, 512, 1022), "R": (512, 716, 650, 1022)}, thigh_y0=716, thigh_ymax=716, shin_y0=716, foot_y=940, foot_y1=1022,
+    sem_coxa=True, perna_alfa=True, ext_shin=(728, 660), kl=[(0.6, 1.05), (0.6, 1.05), (1.0, 1.0)], preenche_y=0, interior=(30, 28, 34), recorta_y=0),
+ "sombra_f_direita": dict(modo="duas", img="../../art/concept/gemini/protagonista_sombra/protagonista_mapa/protagonista_f_perfil_parado.png", vista="d", inicio=6, q_n=57.0,
+    rest_far={"hip": (470, 600), "knee": (470, 712), "ankle": (465, 945), "toe": (540, 995)},
+    rest_near={"hip": (550, 600), "knee": (550, 712), "ankle": (575, 945), "toe": (665, 990)},
+    y_top=706, canela_y1_far=950, canela_y1_near=950, pe_y0_far=945, pe_y0_near=945, ref_topo=(716, 660), amp=0.5,
+    divisor=(510, 712, 0.1, 965, 560), recorta_y=0, y_emp0=540, y_emp1=710, empurra=0.9, escurece=0.8),
+ "sombra_m_frente": dict(modo="fc", img="../../art/concept/gemini/protagonista_sombra/protagonista_mapa/protagonista_m_frente.png", vista="f0", q_n=57.0,
+    rest={"hipR": (450, 600), "kneeR": (450, 708), "ankleR": (445, 945), "toeR": (430, 990),
+          "hipL": (572, 600), "kneeL": (572, 708), "ankleL": (578, 945), "toeL": (590, 990)},
+    caixas={"R": (360, 708, 512, 1022), "L": (512, 708, 680, 1022)}, thigh_y0=708, thigh_ymax=708, shin_y0=708, foot_y=940, foot_y1=1022,
+    sem_coxa=True, perna_alfa=True, ext_shin=(720, 660), kl=[(0.6, 1.05), (0.6, 1.05), (1.0, 1.0)], preenche_y=0, interior=(30, 28, 34), recorta_y=0),
+ "sombra_m_costas": dict(modo="fc", img="../../art/concept/gemini/protagonista_sombra/protagonista_mapa/protagonista_m_costas.png", vista="c0", q_n=57.0,
+    rest={"hipL": (450, 600), "kneeL": (450, 708), "ankleL": (445, 945), "toeL": (430, 990),
+          "hipR": (572, 600), "kneeR": (572, 708), "ankleR": (578, 945), "toeR": (590, 990)},
+    caixas={"L": (360, 708, 512, 1022), "R": (512, 708, 680, 1022)}, thigh_y0=708, thigh_ymax=708, shin_y0=708, foot_y=940, foot_y1=1022,
+    sem_coxa=True, perna_alfa=True, ext_shin=(720, 660), kl=[(0.6, 1.05), (0.6, 1.05), (1.0, 1.0)], preenche_y=0, interior=(30, 28, 34), recorta_y=0),
+ "sombra_m_direita": dict(modo="duas", img="../../art/concept/gemini/protagonista_sombra/protagonista_mapa/protagonista_m_perfil_parado.png", vista="d", inicio=6, q_n=57.0,
+    rest_far={"hip": (450, 600), "knee": (450, 708), "ankle": (455, 950), "toe": (515, 995)},
+    rest_near={"hip": (550, 600), "knee": (550, 708), "ankle": (550, 955), "toe": (665, 990)},
+    y_top=704, canela_y1_far=955, canela_y1_near=955, pe_y0_far=950, pe_y0_near=950, ref_topo=(714, 660), amp=0.5,
+    divisor=(512, 712, -0.08, 955, 520), recorta_y=0, y_emp0=540, y_emp1=705, empurra=0.9, escurece=0.8),
 }
 
 def main_fc(c, jf, saida):
@@ -52,6 +85,8 @@ def main_fc(c, jf, saida):
     rgba = carregar(c["img"])
     r_, g_ = rgba[:, :, 0].astype(int), rgba[:, :, 1].astype(int)
     naoverde = (rgba[:, :, 3] > 0) & (r_ > g_ + 14)
+    if c.get("perna_alfa"):
+        naoverde = rgba[:, :, 3] > 0
     def dil(m, k):
         return np.array(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(2 * k + 1))) > 0
     anel = dil(naoverde, c.get("anel", 5))

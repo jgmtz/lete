@@ -22,14 +22,14 @@ O protagonista **já desceu uma vez ao Além e voltou**, deixando alguém no lug
 
 Mesma estrutura para todas; muda o rosto. Os nomes dos traídos ficam de fora de propósito (foram apagados).
 
-| Origem | Ambição | Quem foi traído | Personagem/gênero (proposta) |
-|---|---|---|---|
-| Pescador | Fama no porto | O parceiro de barco | *(nome pendente)*, masculino |
-| Sacerdote | Poder dentro do culto | O aprendiz iniciado | *(nome pendente)*, feminino |
-| Veterano | Glória de guerra | O camarada de armas | *(nome pendente)*, masculino |
-| Artesão | Uma obra-prima | O aprendiz ou sócio de ofício | *(nome pendente)*, masculino |
-| Estrangeiro | Pertencer | Quem confiou nele primeiro (quando ninguém mais confiava) | *(nome pendente)*, feminino |
-| Retratista *(proposta, ver `docs/LIA_PROPOSTA.md`)* | Ser lembrada como a melhor pintora de rostos | A menina pobre que posou e a quem ela negou o retrato | **Lia**, feminino |
+| Origem | Ambição | Quem foi traído |
+|---|---|---|
+| Pescador | Fama no porto | O parceiro de barco |
+| Sacerdote | Poder dentro do culto | O aprendiz iniciado |
+| Veterano | Glória de guerra | O camarada de armas |
+| Artesão | Uma obra-prima | O aprendiz ou sócio de ofício |
+
+O protagonista é uma sombra sem rosto, de corpo masculino ou feminino, escolhido no reflexo do rio (`GDD.md` 9, 26/out/2026). O Estrangeiro saiu e a Lia virou companheira.
 
 ### 1.2 As seis Memórias Pesadas (sequência de verdades, cada uma pior)
 
@@ -125,6 +125,8 @@ O que ele **leva consigo** é decidido pelo Mosaico mais Encarar ou Deixar.
 - Combater + saída com lacunas: sai sem saber o que perdeu, e tudo se repete lá em cima.
 - Absorver + Marca alta: o portão não o reconhece; passa como sombra entre os vivos.
 
+**O rosto (regra C, 26/out/2026):** o fim volta ao reflexo na água, como na abertura. Quem **encarou** a maioria das Memórias Pesadas recebe o rosto de volta (os traços de quem fez a Venda do Nome, com a vergonha junto); quem **deixou** a maioria termina com a romã cobrindo o rosto. Meio-termo pendente. Deve ser coerente com as combinações acima (por exemplo, Absorver + Marca alta).
+
 **Epílogo:** o Além volta ao ciclo normal, **como se ele nunca tivesse estado ali**; mostra o destino do companheiro e da Tabuinha. Os juramentos e testemunhos pesam como variáveis extras.
 
 ### 3.1 A Sombra do Esquecido (chefe final)
@@ -137,17 +139,18 @@ O Lete tirou algo dele, e essa perda virou uma sombra: **quem ele era no momento
 
 ---
 
-## 4. As 5 origens
+## 4. As 4 origens
 
 A origem dá uma **alternativa**, nunca uma vantagem: cada alternativa poupa um recurso e cada atrito cobra um (o balanceamento final decide se a soma fica neutra). Cada origem dá a mesma quantidade de Lembranças e de poder; só mudam tema e falas. A origem age em cinco camadas: prólogo (como desceu), reconhecimento (como sombras e deuses o tratam), afinidade, Lembranças exclusivas e epílogo.
 
-| Origem | Alternativa | Atrito | Silhueta e cores (arte) |
+Desde 26/out/2026 a origem **não muda o sprite** do protagonista (que é uma sombra): a coluna de silhueta e cores fica como referência de texto e do **símbolo** de cada origem.
+
+| Origem | Alternativa | Atrito | Silhueta e cores (texto) e símbolo |
 |---|---|---|---|
-| Pescador de Tênaro | Afogados e insepultos falam sem oferenda | Parte dos afogados o acusa e não ajuda | Túnica curta, corda e rede no ombro, pés descalços. Azul-esverdeado desbotado |
-| Sacerdote (de Deméter ou Hécate) | Sabe qual oferenda cada sombra aceita (poupa tentativa e erro, **mas não rende mais oferendas**) | O Palácio o trata com frieza (rixa Deméter–Hades) e os pactos saem mais caros | Manto longo, faixa de fita na cabeça, cesto de oferendas. Osso e ocre |
-| Veterano de guerra | Guerreiros o tratam como igual e dão informação sem oferenda | Sombras de quem ele matou atacam sem negociar | Couraça de couro gasta, ombreiras, capa curta, cicatriz. Vermelho desbotado e bronze |
-| Artesão (oleiro, tecelão) | Sombras aceitam troca de trabalho no lugar de oferenda | Guerreiros e Tribunal o ignoram | Avental de couro, mangas arregaçadas, mãos manchadas. Terracota e marrom |
-| Estrangeiro | Favores e dívidas antigas não o alcançam | Ninguém o reconhece, e as sombras exigem mais para se abrir | Capa de viagem com capuz, bolsa, sem insígnias. Areia e cinza |
+| Pescador de Tênaro | Afogados e insepultos falam sem oferenda | Parte dos afogados o acusa e não ajuda | Túnica curta, corda e rede no ombro, pés descalços. Azul-esverdeado desbotado. Símbolo: vara de pesca |
+| Sacerdote (de Deméter ou Hécate) | Sabe qual oferenda cada sombra aceita (poupa tentativa e erro, **mas não rende mais oferendas**) | O Palácio o trata com frieza (rixa Deméter–Hades) e os pactos saem mais caros | Manto longo, faixa de fita na cabeça, cesto de oferendas. Osso e ocre. Símbolo: cesto de oferendas com fita |
+| Veterano de guerra | Guerreiros o tratam como igual e dão informação sem oferenda | Sombras de quem ele matou atacam sem negociar | Couraça de couro gasta, ombreiras, capa curta, cicatriz. Vermelho desbotado e bronze. Símbolo: ombreira de bronze |
+| Artesão (oleiro, tecelão) | Sombras aceitam troca de trabalho no lugar de oferenda | Guerreiros e Tribunal o ignoram | Avental de couro, mangas arregaçadas, mãos manchadas. Terracota e marrom. Símbolo: pote de barro com espátula |
 
 Todos levam a **Tabuinha Rasurada** no cinto.
 
@@ -162,13 +165,25 @@ Todos levam a **Tabuinha Rasurada** no cinto.
 
 O capítulo 4 define "o que ele fez do passado" no final composto.
 
+**Fragmentos de origem (26/out/2026):** encontrar, conversar, libertar ou viajar com um espírito nomeado ou companheiro ligado à origem (ver 4.4 e 5) dá um fragmento extra de memória sobre si mesmo, sem poder. O capítulo 1 (Eco) já é "uma sombra o reconhece pela origem". Quantidade e eventos: pendência.
+
+### 4.4 Espíritos nomeados por origem (mínimo de 2)
+
+| Origem | Espírito 1 | Espírito 2 |
+|---|---|---|
+| Pescador | Remador (pronto) | **A Âncora**: marinheira afogada que carrega a âncora *(proposta)* |
+| Sacerdote | **O Sacristão**: cuidava do altar, esqueceu o rito *(proposta)* | **A Oferente**: cuja oferenda nunca chegou *(proposta)* |
+| Veterano | **O Desertor** *(proposta)* | **O Trombeteiro**: tocava a retirada *(proposta)* |
+| Artesão | Tecelã (pronta) | Padeiro (pronto) |
+
+Nome e papel dos cinco novos: a confirmar pelo João. Cada um precisa de gesto de ofício em vida, estados *vago/desperto*, fixação e um fragmento de origem.
+
 | Origem | Eco (Ato I) | Peso (Ato II) | Prova (Ato III) | Acerto (Ato IV) |
 |---|---|---|---|---|
 | Pescador | Um afogado pede para ser achado | Afogados o acusam de ter deixado alguém no mar | A Venda aconteceu a bordo | Rito de sepultamento para o parceiro sem nome |
 | Sacerdote | Uma sombra pede um rito que só ele conhece | Perséfone o reconhece com desconfiança | O pacto foi um rito proibido | Ensinar o aprendiz sem nome a ser nomeado |
 | Veterano | Um guerreiro o saúda como igual | Os mortos que ele fez o encontram | A Venda foi uma ordem de campo | O camarada pede duelo ou libertação |
 | Artesão | Um oleiro sem mãos pede reparo | O Tribunal o ignora | A obra-prima foi paga com um nome | Entregar ou destruir a obra diante do aprendiz |
-| Estrangeiro | Ninguém sabe o nome dele | Exigem provas de quem ele é | Nunca teve registro: a única testemunha foi a vítima | A vítima diz um nome que ele não reconhece |
 
 ### 4.2 Lembranças exclusivas (3 por origem, de tipos diferentes)
 
@@ -176,18 +191,26 @@ O capítulo 4 define "o que ele fez do passado" no final composto.
 - **Sacerdote:** A iniciação (Infância), O rito vedado (Ofício), O aprendiz que olhava (Família).
 - **Veterano:** A formação (Festa), O campo ao amanhecer (Luto), O juramento de armas (Família).
 - **Artesão:** As mãos de barro (Infância), A obra no forno (Ofício), A encomenda (Festa).
-- **Estrangeiro:** A estrada (Infância), A porta fechada (Luto), A mão estendida (Família).
 
 ### 4.3 Missões de origem (exemplos)
-Pescador: os afogados do Aqueronte pedem um rito de sepultamento que só ele sabe conduzir. Veterano: a sombra de alguém que matou pede para ser ouvida antes de lutar. Estrangeiro: ninguém sabe o nome dele, então uma sombra pede que ele a ajude a inventar o dela.
+Pescador: os afogados do Aqueronte pedem um rito de sepultamento que só ele sabe conduzir. Veterano: a sombra de alguém que matou pede para ser ouvida antes de lutar.
 
 ---
 
-## 5. Os 5 companheiros
+## 5. Os 6 companheiros
 
 **Regras de design:**
-1. **Independem da origem.** Qualquer combinação funciona. Falas cruzadas reagem ao **tema** da origem (ambição, traição), não a cada par.
-2. **Cada via tem um aliado e um crítico** entre os cinco; nenhuma via é sempre bem-vinda nem sempre mal vista. Nenhum companheiro é "extremo" para um lado só.
+1. **Ligados às origens por pares** (26/out/2026, dados e não código fixo): com 4 origens há 6 pares e cada companheiro fica com um. Cada origem tem 3 companheiros "próximos" e cada companheiro 2 origens; nenhum tem a mesma origem do protagonista. O vínculo dá **história, nunca poder**. Qualquer combinação continua funcionando.
+
+   | Companheiro | Origens ligadas | Tema do vínculo *(proposta, sem história escrita)* |
+   |---|---|---|
+   | Aulo | Veterano + Sacerdote | guerra, dever, obediência |
+   | Ismena | Pescador + Sacerdote | afogados, luto, ritos |
+   | Cálias | Pescador + Veterano | canta o mar e a guerra |
+   | Lia | Pescador + Artesão | retratos, ofício |
+   | Dimas | Veterano + Artesão | saque de guerra, objetos |
+   | Septímia | Sacerdote + Artesão | culto, lamparina, tecido ritual |
+2. **Cada via tem um aliado e um crítico** entre os seis; nenhuma via é sempre bem-vinda nem sempre mal vista. Nenhum companheiro é "extremo" para um lado só.
 3. **Cada um tem uma contradição interna:** valoriza algo e faz o contrário em outro ponto.
 4. **Um por partida, definitivo**; só apoia (ver `GDD.md` 4.10). Escolha ao final do Ato II (Maré 2).
 5. O vínculo cresce partilhando oferendas, lutando juntos e conversando nas Trívias. Se o jogador segue uma via que ele reprova, ele comenta e usa versão relutante do apoio.
@@ -201,6 +224,7 @@ Pescador: os afogados do Aqueronte pedem um rito de sepultamento que só ele sab
 | Dimas, o Saqueador | tolera | tolera | aprova | **reprova** | aprova |
 | Septímia, a Vestal | tolera | **reprova** | tolera | aprova | aprova |
 | Cálias, o Aedo | tolera | tolera | aprova | aprova | **reprova** |
+| Lia, a Retratista | *pendente* | *pendente* | *pendente* | *pendente* | *pendente* |
 
 ### 5.2 Ficha de cada um
 
@@ -210,6 +234,7 @@ Pescador: os afogados do Aqueronte pedem um rito de sepultamento que só ele sab
 | Ismena | Campos do Luto | **Lamento:** alarga Escutar e pode soprar uma pista de nome | Quer libertar, mas libertar apaga quem ela chorou, e ela teme ser esquecida | Guarda um fragmento do nome que ele vendeu | Tomar o lugar da pessoa sem nome para que alguém a chore |
 | Dimas | Rua dos Ofícios | **Surrupio:** baixa a Firmeza necessária para absorver; pode achar um item | Ganancioso, mas nunca toma de quem deu de graça | Vendeu o mapa de um túmulo e alguém morreu. Cobrou e dormiu bem | Assumir a dívida do protagonista como "negócio justo" |
 | Septímia | Tribunal | **Brasa:** a próxima Memória custa menos Lucidez | Defende a lei, mas quebrou um voto de propósito | "Quebrei o voto de propósito. Foi liberdade ou ambição? Nunca soube." | Jurar guardar o fogo do portão em nome dele |
+| Lia | *pendente* | *pendente* | *pendente* | *pendente* | *pendente* |
 | Cálias | Altar das Oferendas | **Canto:** a legenda mostra o próximo gesto da sombra | Quer a história inteira, mas trocou a verdade por um verso melhor | Cantou uma mentira bonita que mandou alguém à morte | Ficar para contar a história dele, como memória do portão |
 
 **Silhuetas e cores:** Aulo — armadura de legionário velha, elmo sob o braço, postura ereta; vermelho e ferro. Ismena — véu escuro, ombros caídos, mãos abertas; preto e azul-gelo. Dimas — saco às costas, lanterna e gancho, roupa remendada; marrom e dourado sujo. Septímia — túnica longa e véu claros, lamparina acesa; branco e laranja de chama. Cálias — lira nas costas, único manto colorido (desbotado), coroa de louros murchos; oliva e roxo.

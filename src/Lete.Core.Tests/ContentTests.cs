@@ -1,6 +1,9 @@
 using System.Text.Json;
 using Lete.Core.Combat;
 using Lete.Core.Data;
+using Lete.Core.Presentation;
+using Lete.Core.State;
+using Lete.Core.Systems;
 
 namespace Lete.Core.Tests;
 
@@ -80,7 +83,7 @@ public class ContentTests
                 }
             }
 
-            foreach (var res in new[] { member.Portrait, member.MapFolder }.OfType<string>())
+            foreach (var res in new[] { member.Portrait, member.MapFolder, member.Reflection }.OfType<string>())
             {
                 if (!File.Exists(FromRes(res)) && !Directory.Exists(FromRes(res)))
                 {
@@ -89,9 +92,113 @@ public class ContentTests
             }
         }
 
+        foreach (var member in Cast.Values.Where(m => m.Selectable))
+        {
+            if (member.InventoryFolder is null)
+            {
+                missing.Add($"{member.Id}: sem inventory_folder");
+                continue;
+            }
+
+            missing.AddRange(MarkArt.AllImages(member.InventoryFolder).Where(i => !File.Exists(FromRes(i))).Select(i => $"{member.Id}: {i}"));
+        }
+
         Assert.Empty(missing);
-        Assert.Equal(6, Cast.Values.Count(m => m.Selectable));
-        Assert.Equal(3, Cast.Values.Count(m => m.Selectable && m.Gender == "f"));
+        Assert.Equal(2, Cast.Values.Count(m => m.Selectable));
+        Assert.Single(Cast.Values, m => m.Selectable && m.Gender == "f");
+    }
+
+    [Fact]
+    public void Mark_RulesLoad()
+    {
+        var json = File.ReadAllText(Content("rules", "marca.json"));
+        Assert.Empty(MarkData.FromJson(json).Validate());
+        Assert.Empty(MarkData.LookFromJson(json).Validate());
+    }
+
+    [Fact]
+    public void Recollections_AllLoadWithMosaicRules()
+    {
+        var recollections = Directory.GetFiles(Content("recollections"), "*.json")
+            .Select(f => RecollectionData.FromJson(File.ReadAllText(f)))
+            .ToList();
+        Assert.NotEmpty(recollections);
+        Assert.All(recollections, r => Assert.True(File.Exists(Content("recollections", r.Id + ".json")), $"Id '{r.Id}' difere do arquivo."));
+
+        var skills = Directory.GetFiles(Content("memories"), "*.json")
+            .SelectMany(f => MemoryData.FromJson(File.ReadAllText(f)))
+            .Select(m => m.Id)
+            .ToHashSet();
+        Assert.All(recollections.Where(r => r.Skill is not null),
+            r => Assert.True(skills.Contains(r.Skill!), $"A Lembrança '{r.Id}' dá a Memória '{r.Skill}', que não existe."));
+
+        // As Pesadas formam uma fila sem buracos (1, 2, 3...).
+        Assert.NotEmpty(new HeavyMemories(new WorldState(), new Events.EventBus(), recollections).Queue);
+
+        var rules = File.ReadAllText(Content("rules", "mosaico.json"));
+        Assert.Empty(RecollectionData.RulesFromJson(rules).Validate());
+        Assert.Equal(5, RecollectionData.StoneColorsFromJson(rules).Count);
+    }
+
+    [Fact]
+    public void Tide_RulesLoad()
+    {
+        var rules = TideData.FromJson(File.ReadAllText(Content("rules", "mare.json")));
+        Assert.Equal(1m, rules.MilestoneStep);
+        Assert.Empty(rules.Validate());
+    }
+
+    [Fact]
+    public void Path_EveryKeyLoadsWithItsFileName()
+    {
+        var keys = Directory.GetFiles(Content("path"), "*.json")
+            .Select(f => (File: Path.GetFileNameWithoutExtension(f), Key: PathData.FromJson(File.ReadAllText(f))))
+            .ToList();
+        Assert.NotEmpty(keys);
+        Assert.All(keys, k => Assert.Equal(k.File, k.Key.Id));
+    }
+
+    [Fact]
+    public void Oaths_EveryOathLoadsWithItsFileName_RulesLoad()
+    {
+        var oaths = Directory.GetFiles(Content("oaths"), "*.json")
+            .Select(f => (File: Path.GetFileNameWithoutExtension(f), Oath: OathData.FromJson(File.ReadAllText(f))))
+            .ToList();
+        Assert.NotEmpty(oaths);
+        Assert.All(oaths, o => Assert.Equal(o.File, o.Oath.Id));
+        Assert.Equal(3, OathData.RulesFromJson(File.ReadAllText(Content("rules", "juramentos.json"))).MaxActive);
+        Assert.Equal(2, MarkData.FromJson(File.ReadAllText(Content("rules", "marca.json"))).PerjuryMark);
+    }
+
+    [Fact]
+    public void Profile_RulesLoad() => ProfileData.FromJson(File.ReadAllText(Content("rules", "perfil.json")));
+
+    [Fact]
+    public void Origins_FourCardsWithSymbolsAndOnePairPerCompanion()
+    {
+        var origins = OriginData.FromJson(File.ReadAllText(Content("characters", "origens.json")));
+        var companions = Cast.Values.Where(m => m.Kind == CastKind.Companion).Select(m => m.Id).ToList();
+
+        Assert.Equal(4, origins.Count);
+        Assert.Equal(6, companions.Count);
+        Assert.Empty(OriginData.LinkErrors(origins, companions));
+        Assert.All(origins, o => Assert.Equal(3, o.Companions.Count));
+        Assert.All(origins, o => Assert.True(File.Exists(FromRes(o.Symbol)), o.Symbol));
+    }
+
+    [Fact]
+    public void Origins_LinkErrorsCatchRepeatedPairAndUnknownCompanion()
+    {
+        var origins = new[]
+        {
+            new Origin("a", "", "", "", "", "", new[] { "x", "y" }),
+            new Origin("b", "", "", "", "", "", new[] { "x", "y", "z" }),
+        };
+
+        var errors = OriginData.LinkErrors(origins, new[] { "x", "y" });
+
+        Assert.Contains(errors, e => e.Contains("mesmo par"));
+        Assert.Contains(errors, e => e.Contains("'z'"));
     }
 
     [Fact]
@@ -197,43 +304,17 @@ public class ContentTests
     }
 
     [Fact]
-    public void Locale_HasEveryKeyTheContentUses()
+    public void Content_PassesLoadValidation()
     {
+        // A mesma validação que o jogo faz ao abrir (DADOS.md 9): chaves de texto, condições, ids citados.
         using var locale = JsonDocument.Parse(File.ReadAllText(Content("locale", "pt_BR.json")));
         var keys = locale.RootElement.EnumerateObject().Select(p => p.Name).ToHashSet();
+        var files = Directory.GetFiles(Content(), "*.json", SearchOption.AllDirectories)
+            .ToDictionary(f => Path.GetRelativePath(Content(), f).Replace('\\', '/'), File.ReadAllText);
 
-        var missing = Directory.GetFiles(Content(), "*.json", SearchOption.AllDirectories)
-            .Where(f => Path.GetFileName(Path.GetDirectoryName(f)) != "locale")
-            .SelectMany(f =>
-            {
-                using var doc = JsonDocument.Parse(File.ReadAllText(f));
-                return KeyReferences(doc.RootElement).Select(k => (File: Path.GetFileName(f), Key: k)).ToList();
-            })
-            .Where(r => !keys.Contains(r.Key))
-            .Select(r => $"{r.File}: {r.Key}")
-            .ToList();
+        var report = ContentValidator.Validate(files, keys, release: false);
 
-        Assert.Empty(missing);
-    }
-
-    /// <summary>Valores de campos terminados em <c>_key</c> (ou listas <c>_keys</c>), em qualquer profundidade.</summary>
-    private static IEnumerable<string> KeyReferences(JsonElement element)
-    {
-        if (element.ValueKind == JsonValueKind.Array)
-        {
-            return element.EnumerateArray().SelectMany(KeyReferences);
-        }
-
-        if (element.ValueKind != JsonValueKind.Object)
-        {
-            return Enumerable.Empty<string>();
-        }
-
-        return element.EnumerateObject().SelectMany(p =>
-            p.Name.EndsWith("_key") && p.Value.ValueKind == JsonValueKind.String ? new[] { p.Value.GetString()! }
-            : p.Name.EndsWith("_keys") && p.Value.ValueKind == JsonValueKind.Array
-                ? p.Value.EnumerateArray().Select(v => v.GetString()!)
-            : KeyReferences(p.Value));
+        Assert.True(report.Ok, string.Join("\n", report.Errors));
     }
 
     private static string FromRes(string path) => Path.Combine(Root, path["res://".Length..]);

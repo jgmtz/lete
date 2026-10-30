@@ -8,6 +8,9 @@ public sealed class EventBus
 {
     private readonly Dictionary<Type, List<Delegate>> _handlers = new();
 
+    /// <summary>Qualquer evento publicado, depois dos ouvintes do tipo (para o registro de debug).</summary>
+    public event Action<object>? AnyPublished;
+
     public IDisposable Subscribe<TEvent>(Action<TEvent> handler)
     {
         ArgumentNullException.ThrowIfNull(handler);
@@ -22,18 +25,18 @@ public sealed class EventBus
         return new Subscription(() => list.Remove(handler));
     }
 
-    public void Publish<TEvent>(TEvent evt)
+    public void Publish<TEvent>(TEvent evt) where TEvent : notnull
     {
-        if (!_handlers.TryGetValue(typeof(TEvent), out var list))
+        if (_handlers.TryGetValue(typeof(TEvent), out var list))
         {
-            return;
+            // Cópia: um ouvinte pode se desinscrever durante a publicação.
+            foreach (var handler in list.ToArray())
+            {
+                ((Action<TEvent>)handler)(evt);
+            }
         }
 
-        // Cópia: um ouvinte pode se desinscrever durante a publicação.
-        foreach (var handler in list.ToArray())
-        {
-            ((Action<TEvent>)handler)(evt);
-        }
+        AnyPublished?.Invoke(evt);
     }
 
     private sealed class Subscription : IDisposable

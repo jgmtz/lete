@@ -1,0 +1,11 @@
+{
+  "id": "aqueronte",
+  "_rascunho": "Chave do Aqueronte (GDD 2.4): as quatro formas da tabela. As flags são provisórias (Claude, 30/out/2026): as cenas que as ligam (pagar Caronte, o favor de Hermes, ajudar os insepultos) ainda não existem. A frase do Diário é rascunho.",
+  "journal_key": "diario.caminho.aqueronte",
+  "ways": [
+    { "id": "obolo", "condition": { "flag": "pagou_caronte" } },
+    { "id": "favor_de_hermes", "condition": { "flag": "favor_de_hermes" } },
+    { "id": "insepultos", "condition": { "flag": "ajudou_insepultos" } },
+    { "id": "origem_pescador", "condition": { "origin": "pescador" } }
+  ]
+}

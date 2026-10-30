@@ -22,6 +22,8 @@ public sealed class Localizer
 
     public bool Has(string key) => _strings.ContainsKey(key);
 
+    public IEnumerable<string> Keys => _strings.Keys;
+
     public string Get(string key, Gender gender) =>
         _strings.TryGetValue(key, out var text) ? GenderMarkup.Resolve(text, gender) : $"[{key}]";
 }

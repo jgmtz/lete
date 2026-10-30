@@ -1,0 +1,9 @@
+{
+  "id": "mare",
+  "_nota": "Maré do Lete (GDD 2.6; PENDENCIAS 3, decidido em 29/out/2026): um número que só sobe. Cada marco da história soma 'milestone_step' (um degrau inteiro); a derrota soma 'defeat_tide_steps' do modo de dificuldade; cada viagem entre Trívias soma 'travel_step' (fração). As regiões reagem quando a Maré cruza um degrau inteiro.",
+  "milestone_step": 1.0,
+  "travel_step": {
+    "_tbd": true,
+    "value": 0.1
+  }
+}

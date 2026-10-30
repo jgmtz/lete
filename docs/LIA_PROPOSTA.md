@@ -1,3 +1,5 @@
+> **SUBSTITUÍDO em 26/out/2026:** a Lia não é mais origem nem protagonista; é a **sexta companheira** (`docs/PROTAGONISTA_SOMBRA.md`). Capítulos, fixação, apoio e oferta final dela estão pendentes. A ficha abaixo fica como histórico e fonte de ideias.
+
 # Lia, a Retratista — protagonista jogável (PROPOSTA de 25/out/2026)
 
 > Rascunho para aprovação do João. Nada aqui altera HISTORIA/GDD/código até ele confirmar. Substitui a ficha de "sexta companheira" (`2026-10-25_lia_personagem`, descartada).

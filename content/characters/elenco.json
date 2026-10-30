@@ -1,11 +1,43 @@
 {
   "id": "elenco",
-  "_nota": "Registro único do elenco: batalhas, escolha de personagem e telas citam só o id. Alturas provisórias (_tbd). 'front_faces': para que lado a arte de frente olha (left, o padrão, ou right). 'selectable': aparece na escolha de personagem (provisório: os 6 com arte enquanto os protagonistas fixos não existem).",
+  "_nota": "Registro único do elenco: batalhas, escolha de personagem e telas citam só o id. Alturas provisórias (_tbd). 'front_faces': para que lado a arte de frente olha (left, o padrão, ou right). 'selectable': aparece na escolha pelo reflexo (os dois corpos do protagonista-sombra, 26/out/2026); 'reflection': imagem de frente do reflexo.",
   "cast": [
+    {
+      "id": "sombra_m",
+      "name_key": "personagem.sombra_m.nome",
+      "kind": "protagonist",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.1
+      },
+      "battle_back": "sombra_m_costas",
+      "portrait": "res://art/sprites/protagonista/sombra_m/parado/sombra_m_parado_frente.png",
+      "map_folder": "res://art/sprites/protagonista/sombra_m",
+      "reflection": "res://art/sprites/protagonista/sombra_m/reflexo_frente.png",
+      "inventory_folder": "res://art/ui/inventario/sombra_m",
+      "selectable": true
+    },
+    {
+      "id": "sombra_f",
+      "name_key": "personagem.sombra_f.nome",
+      "kind": "protagonist",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 1.05
+      },
+      "battle_back": "sombra_f_costas",
+      "portrait": "res://art/sprites/protagonista/sombra_f/parado/sombra_f_parado_frente.png",
+      "map_folder": "res://art/sprites/protagonista/sombra_f",
+      "reflection": "res://art/sprites/protagonista/sombra_f/reflexo_frente.png",
+      "inventory_folder": "res://art/ui/inventario/sombra_f",
+      "selectable": true
+    },
     {
       "id": "lia",
       "name_key": "personagem.lia.nome",
-      "kind": "protagonist",
+      "kind": "companion",
       "gender": "f",
       "height": {
         "_tbd": true,
@@ -15,7 +47,7 @@
       "battle_back": "lia_34_costas",
       "portrait": "res://art/sprites/companheiros/lia_sim/parado/lia_parado_frente.png",
       "map_folder": "res://art/sprites/companheiros/lia_sim",
-      "selectable": true
+      "selectable": false
     },
     {
       "id": "aulo",
@@ -31,7 +63,7 @@
       "battle_back": "aulo_c",
       "portrait": "res://art/sprites/companheiros/aulo_sim/parado/aulo_parado_frente.png",
       "map_folder": "res://art/sprites/companheiros/aulo_sim",
-      "selectable": true
+      "selectable": false
     },
     {
       "id": "ismena",
@@ -47,7 +79,7 @@
       "battle_back": "ismena_c",
       "portrait": "res://art/sprites/companheiros/ismena_sim/parado/ismena_parado_frente.png",
       "map_folder": "res://art/sprites/companheiros/ismena_sim",
-      "selectable": true
+      "selectable": false
     },
     {
       "id": "dimas",
@@ -61,7 +93,7 @@
       "battle_front": "dimas_34",
       "portrait": "res://art/sprites/companheiros/dimas_sim/parado/dimas_parado_frente.png",
       "map_folder": "res://art/sprites/companheiros/dimas_sim",
-      "selectable": true
+      "selectable": false
     },
     {
       "id": "septimia",
@@ -76,7 +108,7 @@
       "battle_back": "septimia_34_costas",
       "portrait": "res://art/sprites/companheiros/septimia_sim/parado/septimia_parado_frente.png",
       "map_folder": "res://art/sprites/companheiros/septimia_sim",
-      "selectable": true
+      "selectable": false
     },
     {
       "id": "calias",
@@ -91,7 +123,7 @@
       "battle_back": "calias_34_costas",
       "portrait": "res://art/sprites/companheiros/calias_sim/parado/calias_parado_frente.png",
       "map_folder": "res://art/sprites/companheiros/calias_sim",
-      "selectable": true
+      "selectable": false
     },
     {
       "id": "remador",
@@ -135,6 +167,281 @@
         },
         "by_style": {
           "pixel_160": "res://art/sprites/sombras/tecela/batalha_flutuar_160/tecela_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "soldado",
+      "_papel": "Sombra comum: corpo-base reutilizável (troca de adereço e paleta, ARTE.md). Nome e corpo são proposta (PENDENCIAS 43).",
+      "name_key": "shade.soldado.nome",
+      "kind": "shade",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "soldado_34",
+      "map_folder": "res://art/sprites/sombras/soldado",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/soldado/batalha_flutuar_160/soldado_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "lavadeira",
+      "_papel": "Sombra comum: corpo-base reutilizável (troca de adereço e paleta, ARTE.md). Nome e corpo são proposta (PENDENCIAS 43).",
+      "name_key": "shade.lavadeira.nome",
+      "kind": "shade",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 0.95
+      },
+      "battle_front": "lavadeira_34",
+      "map_folder": "res://art/sprites/sombras/lavadeira",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/lavadeira/batalha_flutuar_160/lavadeira_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "pastor",
+      "_papel": "Sombra comum: corpo-base reutilizável (troca de adereço e paleta, ARTE.md). Nome e corpo são proposta (PENDENCIAS 43).",
+      "name_key": "shade.pastor.nome",
+      "kind": "shade",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "pastor_34",
+      "map_folder": "res://art/sprites/sombras/pastor",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/pastor/batalha_flutuar_160/pastor_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "carpideira",
+      "_papel": "Sombra comum: corpo-base reutilizável (troca de adereço e paleta, ARTE.md). Nome e corpo são proposta (PENDENCIAS 43).",
+      "name_key": "shade.carpideira.nome",
+      "kind": "shade",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 0.95
+      },
+      "battle_front": "carpideira_34",
+      "map_folder": "res://art/sprites/sombras/carpideira",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/carpideira/batalha_flutuar_160/carpideira_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "mercador",
+      "_papel": "Sombra comum: corpo-base reutilizável (troca de adereço e paleta, ARTE.md). Nome e corpo são proposta (PENDENCIAS 43).",
+      "name_key": "shade.mercador.nome",
+      "kind": "shade",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "mercador_34",
+      "map_folder": "res://art/sprites/sombras/mercador",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/mercador/batalha_flutuar_160/mercador_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "camponesa",
+      "_papel": "Sombra comum: corpo-base reutilizável (troca de adereço e paleta, ARTE.md). Nome e corpo são proposta (PENDENCIAS 43).",
+      "name_key": "shade.camponesa.nome",
+      "kind": "shade",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 0.95
+      },
+      "battle_front": "camponesa_34",
+      "map_folder": "res://art/sprites/sombras/camponesa",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/camponesa/batalha_flutuar_160/camponesa_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "ancora",
+      "_papel": "Espírito nomeado da origem pescador (HISTORIA 4.4). Nome, papel e visual são proposta (PENDENCIAS 43); sem falas ainda.",
+      "name_key": "shade.ancora.nome",
+      "kind": "shade",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 0.95
+      },
+      "battle_front": "ancora_34",
+      "map_folder": "res://art/sprites/sombras/ancora",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/ancora/batalha_flutuar_160/ancora_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "sacristao",
+      "_papel": "Espírito nomeado da origem sacerdote (HISTORIA 4.4). Nome, papel e visual são proposta (PENDENCIAS 43); sem falas ainda.",
+      "name_key": "shade.sacristao.nome",
+      "kind": "shade",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "sacristao_34",
+      "map_folder": "res://art/sprites/sombras/sacristao",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/sacristao/batalha_flutuar_160/sacristao_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "oferente",
+      "_papel": "Espírito nomeado da origem sacerdote (HISTORIA 4.4). Nome, papel e visual são proposta (PENDENCIAS 43); sem falas ainda.",
+      "name_key": "shade.oferente.nome",
+      "kind": "shade",
+      "gender": "f",
+      "height": {
+        "_tbd": true,
+        "value": 0.95
+      },
+      "battle_front": "oferente_34",
+      "map_folder": "res://art/sprites/sombras/oferente",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/oferente/batalha_flutuar_160/oferente_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "desertor",
+      "_papel": "Espírito nomeado da origem veterano (HISTORIA 4.4). Nome, papel e visual são proposta (PENDENCIAS 43); sem falas ainda.",
+      "name_key": "shade.desertor.nome",
+      "kind": "shade",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "desertor_34",
+      "map_folder": "res://art/sprites/sombras/desertor",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/desertor/batalha_flutuar_160/desertor_flutuar_"
+        }
+      },
+      "selectable": false
+    },
+    {
+      "id": "trombeteiro",
+      "_papel": "Espírito nomeado da origem veterano (HISTORIA 4.4). Nome, papel e visual são proposta (PENDENCIAS 43); sem falas ainda.",
+      "name_key": "shade.trombeteiro.nome",
+      "kind": "shade",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "trombeteiro_34",
+      "map_folder": "res://art/sprites/sombras/trombeteiro",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/trombeteiro/batalha_flutuar_160/trombeteiro_flutuar_"
         }
       },
       "selectable": false

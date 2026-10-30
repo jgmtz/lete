@@ -81,12 +81,33 @@ public class MemoryTests
         Assert.True(lucidity.IsEmpty);
 
         // Empate (2 a 2): esquece a usada por último.
-        Assert.Equal("mesa", book.CheckForgetting(lucidity)!.Id);
+        var forgetting = book.CheckForgetting(lucidity)!;
+        Assert.Equal(("mesa", false), (forgetting.Skill.Id, forgetting.Resisted));
         Assert.True(book.IsForgotten("mesa"));
         Assert.Throws<InvalidOperationException>(() => book.Use("mesa", GestureGrade.Good, new Gauge(50f)));
 
         book.Rest();
         Assert.False(book.IsForgotten("mesa"));
+    }
+
+    [Fact]
+    public void Memory_LightnessProtectionHoldsAForgetting_RenewsOnRest()
+    {
+        var book = new MemoryBook(new[] { Skill("colo") }, protections: 1);
+        var lucidity = new Gauge(12f);
+        book.Use("colo", GestureGrade.Good, lucidity);
+
+        Assert.Equal(new Forgetting(book.Skills[0], Resisted: true), book.CheckForgetting(lucidity));
+        Assert.False(book.IsForgotten("colo"));
+        Assert.Equal(0, book.ProtectionsLeft);
+
+        var again = new Gauge(12f);
+        book.Use("colo", GestureGrade.Good, again);
+        Assert.False(book.CheckForgetting(again)!.Resisted);
+        Assert.True(book.IsForgotten("colo"));
+
+        book.Rest();
+        Assert.Equal(1, book.ProtectionsLeft);
     }
 
     [Fact]

@@ -51,15 +51,6 @@ public class AbsorbTests
     }
 
     [Fact]
-    public void Mark_NeverGoesDown()
-    {
-        var mark = new MarkCounter();
-        mark.Add(2);
-        Assert.Equal(2, mark.Value);
-        Assert.Throws<ArgumentOutOfRangeException>(() => mark.Add(-1));
-    }
-
-    [Fact]
     public void Flow_AbsorbedShadeEndsInVictoryAbsorbed()
     {
         var attacks = new[] { new ShadeAttack(ShadeAttackKind.Direct, "aparo", "golpe", new GradeValues(0f, 10f, 20f)) };

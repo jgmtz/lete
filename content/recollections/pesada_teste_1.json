@@ -1,0 +1,28 @@
+{
+  "id": "pesada_teste_1",
+  "_rascunho": "Pesada de TESTE (Claude, 30/out/2026), só para conferir a fila, o aviso, Encarar/Deixar, a Culpa e a Leveza. As seis de verdade vêm da HISTORIA 1.2.",
+  "kind": "family",
+  "scope": "heavy",
+  "order": 1,
+  "title_key": "pesada.teste_1.titulo",
+  "skill": "culpa_teste_1",
+  "warning_key": "pesada.teste_1.aviso",
+  "surface_key": "pesada.teste_1.aflora",
+  "stages": {
+    "full": {
+      "text_key": "pesada.teste_1.verdade"
+    }
+  },
+  "leave": {
+    "text_key": "pesada.teste_1.deixar",
+    "lucidity_max": {
+      "_tbd": true,
+      "value": 10
+    },
+    "protections": 1
+  },
+  "mosaic_position": {
+    "x": 0,
+    "y": 8
+  }
+}

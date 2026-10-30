@@ -1,0 +1,35 @@
+{
+  "id": "mosaico",
+  "_nota": "Mosaico (GDD 2.1). 'key_kinds': tipos com Memória plena para a Chave de Memória (3 de 5, GDD). 'stone_colors': cor da pedra por tipo; ocre (Infância) e vermelho (Festa) estão no GDD, as outras são provisórias. Tela provisória até haver arte (João, 29/out/2026). 'stage_power': multiplicador da força da Memória (habilidade) em cada estágio: Fragmento fraca, Recordação média, plena máxima (GDD 2.1); valores provisórios.",
+  "key_kinds": 3,
+  "stone_colors": {
+    "childhood": "#C8923E",
+    "feast": "#A3302A",
+    "family": {
+      "_tbd": true,
+      "value": "#D9CDB0"
+    },
+    "mourning": {
+      "_tbd": true,
+      "value": "#4F7A92"
+    },
+    "craft": {
+      "_tbd": true,
+      "value": "#8C7A5B"
+    }
+  },
+  "stage_power": {
+    "fragment": {
+      "_tbd": true,
+      "value": 0.5
+    },
+    "recalled": {
+      "_tbd": true,
+      "value": 0.75
+    },
+    "full": {
+      "_tbd": true,
+      "value": 1.0
+    }
+  }
+}

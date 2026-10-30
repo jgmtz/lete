@@ -1,7 +1,7 @@
 import sys, json, time, subprocess
 from playwright.sync_api import sync_playwright
 N=int(sys.argv[1]); out=sys.argv[2]
-srv=subprocess.Popen(['python3','-m','http.server','8766'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(1)
+srv=subprocess.Popen([sys.executable,'-m','http.server','8766'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(1)
 res={}
 try:
   with sync_playwright() as p:

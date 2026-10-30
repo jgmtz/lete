@@ -15,6 +15,10 @@ public enum CastKind
 /// <paramref name="Selectable"/>: aparece na escolha de personagem (provisório até os 6 protagonistas existirem).
 /// <paramref name="FrontFacesRight"/>: a arte de frente olha para a direita (o normal do 3/4 é olhar para a esquerda);
 /// a escolha pelo reflexo espelha quem precisa para que todos olhem para o mesmo lado.
+/// <paramref name="Reflection"/>: caminho da imagem de frente mostrada no reflexo do rio na escolha (os dois corpos do
+/// protagonista-sombra, que não têm arte de batalha de frente); sem ela, o reflexo usa a arte de batalha de frente.
+/// <paramref name="InventoryFolder"/>: pasta das imagens do corpo no inventário (protagonista-sombra): <c>etapa0..3.png</c>
+/// pela etapa da Marca e <c>rosto_devolvido.png</c>/<c>rosto_coberto.png</c> pela regra C.
 /// </summary>
 public sealed record CastMember(
     string Id,
@@ -29,7 +33,9 @@ public sealed record CastMember(
     string? Tint,
     IdleAnimation? Idle,
     bool Selectable,
-    bool FrontFacesRight = false)
+    bool FrontFacesRight = false,
+    string? Reflection = null,
+    string? InventoryFolder = null)
 {
     /// <summary>A arte de batalha para a pose pedida.</summary>
     public string ArtFor(bool back) =>

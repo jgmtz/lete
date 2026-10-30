@@ -23,7 +23,7 @@
     }
   },
   "protagonist": {
-    "id": "lia",
+    "id": "sombra_f",
     "breath": {
       "_tbd": true,
       "value": 100
@@ -41,7 +41,7 @@
       "pose": "back"
     },
     {
-      "id": "lia",
+      "id": "sombra_f",
       "pose": "back"
     }
   ],

@@ -17,6 +17,8 @@ import numpy as np
 from PIL import Image, ImageDraw
 import cv2
 
+# Altura da tela de trabalho (celulas quadradas de 1024; o marionete_capa.py importa este valor).
+H = 1024
 KL_PERNA = [(0.88, 1.05), (0.93, 1.05), (1.0, 1.0)]  # coxa, canela+bota, pe (o pe nao encolhe)
 KL_BRACO = [(0.85, 1.05), (0.85, 1.05)]
 

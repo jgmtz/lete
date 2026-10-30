@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Godot;
 using Lete.Core.Combat;
 using Lete.Core.Data;
+using Lete.Core.Events;
 using Lete.Core.State;
 using Lete.Game.Combat;
 using Lete.Game.UI;
@@ -11,23 +12,25 @@ using Lete.Game.UI;
 namespace Lete.Game.Opening;
 
 /// <summary>
-/// Cutscene de abertura e escolha do personagem (proposta do João, 26/out/2026; ver PENDÊNCIAS): primeira pessoa,
-/// acordando e caminhando desorientado até a margem de um rio escuro; ajoelha e vê o próprio reflexo como uma mancha
-/// negra; escolhe um dos personagens (bustos borrados, um de cada vez); o reflexo se resolve no escolhido e o jogo
-/// começa. Tudo em tempo real e com geometria provisória (margem, rio, juncos), sem vídeo.
+/// Cutscene de abertura e começo do jogo (protagonista-sombra, decisão do João de 26/out/2026; ver
+/// <c>docs/PROTAGONISTA_SOMBRA.md</c>): primeira pessoa, acordando e caminhando desorientado até a margem de um rio
+/// escuro; ajoelha e vê o próprio reflexo, sem rosto; escolhe entre os dois corpos pelo reflexo; logo depois escolhe a
+/// origem em 4 cartas (<see cref="OriginCards"/>) e o jogo começa. Tudo em tempo real e com geometria provisória
+/// (margem, rio, juncos), sem vídeo.
 /// Pular: qualquer tecla, a partir da segunda vez. Reduzir movimento: <c>reduce_motion_toggle</c> (F3), guardado.
 /// </summary>
 public partial class OpeningDirector : Node3D
 {
     private const string MainScenePath = "res://src/Lete.Game/Main.tscn";
+    public const string OriginsPath = "res://content/characters/origens.json";
     private const string BustArtFolder = "res://art/sprites/batalha/pixel_160";
-    private const string OptionsPath = "user://opcoes.cfg";
+    private static string OptionsPath => GameRoot.UserPath("opcoes.cfg");
     private const string EyelidsShaderPath = "res://src/Lete.Game/Opening/eyelids.gdshader";
     private const string WaterShaderPath = "res://src/Lete.Game/Opening/water.gdshader";
     private const string ReflectionShaderPath = "res://src/Lete.Game/Opening/reflection.gdshader";
 
     /// <summary>Argumentos de conferência do Main: com eles, a abertura passa direto para a exploração.</summary>
-    private static readonly string[] MainArgs = { "teleport", "ui", "shot", "examine", "render", "gender", "frames", "sem-abertura" };
+    private static readonly string[] MainArgs = { "teleport", "ui", "shot", "examine", "render", "gender", "frames", "sem-abertura", "carregar" };
 
     [ExportGroup("Tempo (segundos)")]
     // TODO decisão: duração da parte sem controle (proposta: 20 a 30 s, pulável).
@@ -93,6 +96,9 @@ public partial class OpeningDirector : Node3D
     [Export] public float ResolvedMurk { get; set; } = 0.15f;
     [Export] public float ChoosingBlur { get; set; } = 0.012f;
 
+    /// <summary>Quanto do halo pálido continua em volta do corpo na escolha (a sombra é escura como a água).</summary>
+    [Export] public float ChoosingHalo { get; set; } = 0.7f;
+
     /// <summary>A mancha negra ganha cor ao começar a escolha, neste tempo.</summary>
     [Export] public float RevealSeconds { get; set; } = 1.6f;
 
@@ -105,6 +111,8 @@ public partial class OpeningDirector : Node3D
         Cinematic,
         Choosing,
         Resolving,
+        Origin,
+        Closing,
     }
 
     private readonly List<CastMember> _choices = new();
@@ -119,6 +127,7 @@ public partial class OpeningDirector : Node3D
     private ShaderMaterial _eyes = null!;
     private ShaderMaterial _reflection = null!;
     private Control _carousel = null!;
+    private OriginCards _origins = null!;
     private Label _hint = null!;
     private Label _notice = null!;
     private float _eyesOpenOverride = -1f;
@@ -141,9 +150,10 @@ public partial class OpeningDirector : Node3D
         _seenBefore = (bool)options.GetValue("abertura", "vista", false);
         _reducedMotion = (bool)options.GetValue("acessibilidade", "reduzir_movimento", false);
 
-        // TODO decisão: ordem das origens no carrossel e qual vem selecionada. Provisório: a ordem do elenco.
+        // TODO decisão: qual corpo aparece primeiro no reflexo. Provisório: a ordem do elenco.
         var cast = CastData.FromJson(FileAccess.GetFileAsString(BattleStage.CastPath));
         _choices.AddRange(cast.Values.Where(m => m.Selectable));
+        _origins = new OriginCards(OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath)));
 
         BuildWorld();
         BuildEyes();
@@ -198,22 +208,48 @@ public partial class OpeningDirector : Node3D
             return;
         }
 
-        if (_stage != Stage.Choosing)
+        if (_stage is not (Stage.Choosing or Stage.Origin))
         {
             return;
         }
 
+        var choosing = _stage == Stage.Choosing;
         if (@event.IsActionPressed("ui_left") || @event.IsActionPressed("move_left"))
         {
-            Select(_selected - 1);
+            if (choosing)
+            {
+                Select(_selected - 1);
+            }
+            else
+            {
+                _origins.Select(_origins.Selected - 1);
+            }
         }
         else if (@event.IsActionPressed("ui_right") || @event.IsActionPressed("move_right"))
         {
-            Select(_selected + 1);
+            if (choosing)
+            {
+                Select(_selected + 1);
+            }
+            else
+            {
+                _origins.Select(_origins.Selected + 1);
+            }
         }
         else if (@event.IsActionPressed("ui_accept") || @event.IsActionPressed("gesture_confirm"))
         {
-            Confirm();
+            if (choosing)
+            {
+                ConfirmBody();
+            }
+            else
+            {
+                ConfirmOrigin();
+            }
+        }
+        else if (!choosing && @event.IsActionPressed("cancel"))
+        {
+            BackToReflection();
         }
         else
         {
@@ -319,10 +355,11 @@ public partial class OpeningDirector : Node3D
         reveal.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("black", v)), 1f, 0f, RevealSeconds);
         reveal.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("blur", v)), ReflectionBlur, ChoosingBlur, RevealSeconds);
         reveal.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("murk", v)), 0f, ChoosingMurk, RevealSeconds);
+        reveal.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("halo_keep", v)), 0f, ChoosingHalo, RevealSeconds);
     }
 
     /// <summary>
-    /// Troca quem aparece no reflexo: a água se agita, a imagem troca no meio da agitação e a água assenta.
+    /// Troca o corpo que aparece no reflexo: a água se agita, a imagem troca no meio da agitação e a água assenta.
     /// A escolha é só pelo reflexo (pedido do João, 26/out/2026).
     /// </summary>
     private void Select(int index)
@@ -335,18 +372,47 @@ public partial class OpeningDirector : Node3D
         _stir.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("stir", v)), StirRipple, 0f, StirSeconds / 2f);
     }
 
-    private async void Confirm()
+    /// <summary>O corpo foi escolhido: o reflexo assenta e as cartas de origem aparecem por cima do rio.</summary>
+    private async void ConfirmBody()
     {
         _stage = Stage.Resolving;
         var chosen = _choices[_selected];
+        var state = GameRoot.Instance.State;
+        state.ProtagonistId = chosen.Id;
+        state.Gender = chosen.Gender == "f" ? Gender.Feminine : Gender.Masculine;
+
         var hide = CreateTween();
         hide.TweenProperty(_carousel, "modulate:a", 0f, CarouselSlideSeconds * 2f);
-
-        // O reflexo se resolve no personagem escolhido.
         var resolve = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Sine);
         resolve.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("murk", v)), ChoosingMurk, ResolvedMurk, ResolveSeconds);
         resolve.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("blur", v)), ChoosingBlur, ResolvedReflectionBlur, ResolveSeconds);
         await ToSignal(resolve, Tween.SignalName.Finished);
+
+        // As palavras das cartas concordam com o corpo escolhido ({m|f}).
+        _origins.Refresh(T);
+        _origins.Visible = true;
+        var show = CreateTween();
+        show.TweenProperty(_origins, "modulate:a", 1f, CarouselSlideSeconds * 2f).From(0f);
+        _stage = Stage.Origin;
+    }
+
+    /// <summary>Volta das cartas para o reflexo (trocar de corpo); a água fica turva de novo.</summary>
+    private void BackToReflection()
+    {
+        _stage = Stage.Choosing;
+        var tween = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Sine);
+        tween.TweenProperty(_origins, "modulate:a", 0f, CarouselSlideSeconds * 2f);
+        tween.TweenProperty(_carousel, "modulate:a", 1f, CarouselSlideSeconds * 2f);
+        tween.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("murk", v)), ResolvedMurk, ChoosingMurk, RevealSeconds);
+        tween.TweenMethod(Callable.From<float>(v => _reflection.SetShaderParameter("blur", v)), ResolvedReflectionBlur, ChoosingBlur, RevealSeconds);
+    }
+
+    private async void ConfirmOrigin()
+    {
+        _stage = Stage.Closing;
+        var origin = _origins.Current;
+        var hide = CreateTween();
+        hide.TweenProperty(_origins, "modulate:a", 0f, CarouselSlideSeconds * 2f);
         await ToSignal(GetTree().CreateTimer(HoldSeconds), SceneTreeTimer.SignalName.Timeout);
 
         // Fecha os olhos e o jogo começa.
@@ -355,9 +421,9 @@ public partial class OpeningDirector : Node3D
         await ToSignal(close, Tween.SignalName.Finished);
 
         var state = GameRoot.Instance.State;
-        state.ProtagonistId = chosen.Id;
-        state.Gender = chosen.Gender == "f" ? Gender.Feminine : Gender.Masculine;
-        GD.Print($"Abertura: escolhido {chosen.Id}");
+        state.OriginId = origin.Id;
+        GameRoot.Instance.Events.Publish(new OriginChosen(origin.Id));
+        GD.Print($"Abertura: escolhido {state.ProtagonistId}, origem {origin.Id}");
         GoToMain();
     }
 
@@ -385,7 +451,7 @@ public partial class OpeningDirector : Node3D
             return cached;
         }
 
-        var image = GD.Load<Texture2D>($"{BustArtFolder}/{member.FrontArt}.png").GetImage();
+        var image = GD.Load<Texture2D>(member.Reflection ?? $"{BustArtFolder}/{member.FrontArt}.png").GetImage();
         var region = new Rect2I(0, 0, image.GetWidth(), Mathf.RoundToInt(image.GetHeight() * BustCrop));
         var cropped = image.GetRegion(region);
         if (member.FrontFacesRight)
@@ -503,13 +569,17 @@ public partial class OpeningDirector : Node3D
         _carousel.SetAnchorsPreset(Control.LayoutPreset.FullRect);
         layer.AddChild(_carousel);
 
-        // TODO decisão: mostrar o nome da origem e uma descrição? Provisório: só a dica de controle; a escolha é pelo reflexo.
+        // No reflexo, só a dica de controle: o corpo se escolhe pela imagem na água.
         _hint = UiStyle.MakeLabel(T("abertura.dica.escolher"));
         _hint.HorizontalAlignment = HorizontalAlignment.Center;
         _hint.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.CenterBottom);
         _hint.GrowHorizontal = Control.GrowDirection.Both;
         _hint.OffsetTop = -UiStyle.BodyFontSize * 4;
         _carousel.AddChild(_hint);
+
+        _origins.Visible = false;
+        _origins.Theme = UiStyle.BuildTheme(UiStyle.ExplorationScale);
+        layer.AddChild(_origins);
 
         var noticeLayer = new CanvasLayer { Layer = 3 };
         AddChild(noticeLayer);
@@ -565,6 +635,22 @@ public partial class OpeningDirector : Node3D
         {
             await Press("ui_right");
             await ToSignal(GetTree().CreateTimer(0.6f), SceneTreeTimer.SignalName.Timeout);
+        }
+
+        await Press("ui_accept");
+
+        // Origem: --origem=<id> (sem ele, a primeira carta).
+        var origin = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--origem="))?.Split('=', 2)[1] ?? "";
+        while (_stage != Stage.Origin)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
+
+        await ToSignal(GetTree().CreateTimer(1f), SceneTreeTimer.SignalName.Timeout);
+        for (var tries = 0; origin != "" && _origins.Current.Id != origin && tries < 8; tries++)
+        {
+            await Press("ui_right");
+            await ToSignal(GetTree().CreateTimer(0.5f), SceneTreeTimer.SignalName.Timeout);
         }
 
         await Press("ui_accept");

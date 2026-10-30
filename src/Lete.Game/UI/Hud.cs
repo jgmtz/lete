@@ -1,12 +1,11 @@
-using System;
 using Godot;
 using Lete.Game.World;
 
 namespace Lete.Game.UI;
 
 /// <summary>
-/// HUD de exploração do M0: aviso de "Examinar", a frase do objeto examinado e o Diário placeholder.
-/// Sem marcadores nem contagens: o Diário só lista frases.
+/// HUD de exploração: aviso de "Examinar" e a frase do objeto examinado. O Diário fica no menu do jogo
+/// (<see cref="GameMenu"/>); com o menu aberto, o HUD se esconde.
 /// </summary>
 public partial class Hud : CanvasLayer
 {
@@ -15,8 +14,6 @@ public partial class Hud : CanvasLayer
     private readonly Player _player;
     private Label _prompt = null!;
     private Label _message = null!;
-    private PanelContainer _journalPanel = null!;
-    private VBoxContainer _journalList = null!;
     private double _messageTimeLeft;
 
     public Hud(Player player) => _player = player;
@@ -24,9 +21,7 @@ public partial class Hud : CanvasLayer
     // Construtor sem parâmetros exigido pelo Godot para tipos de script.
     public Hud() => _player = null!;
 
-    public bool JournalOpen => _journalPanel.Visible;
-
-    public event Action? OpenChanged;
+    private bool _suppressed;
 
     public override void _Ready()
     {
@@ -38,8 +33,6 @@ public partial class Hud : CanvasLayer
         _message = UiStyle.MakeLabel("");
         _message.AutowrapMode = TextServer.AutowrapMode.WordSmart;
         AddBottomBand(_message, 120, 90);
-
-        BuildJournalPanel();
 
         _player.NearbyChanged += RefreshPrompt;
         Interactable.Examined += ShowExamined;
@@ -61,45 +54,17 @@ public partial class Hud : CanvasLayer
         }
     }
 
-    public override void _UnhandledInput(InputEvent @event)
+    /// <summary>Esconde o aviso e a frase enquanto um menu cobre a tela.</summary>
+    public void SetSuppressed(bool suppressed)
     {
-        if (@event.IsActionPressed("journal"))
-        {
-            SetJournalOpen(!JournalOpen);
-            GetViewport().SetInputAsHandled();
-        }
-        else if (JournalOpen && @event.IsActionPressed("cancel"))
-        {
-            SetJournalOpen(false);
-            GetViewport().SetInputAsHandled();
-        }
-    }
-
-    public void SetJournalOpen(bool open)
-    {
-        if (open)
-        {
-            RefreshJournal();
-        }
-
-        _journalPanel.Visible = open;
-        if (open)
+        _suppressed = suppressed;
+        if (suppressed)
         {
             _messageTimeLeft = 0;
             _message.Visible = false;
         }
 
         RefreshPrompt();
-        OpenChanged?.Invoke();
-    }
-
-    /// <summary>Redesenha os textos (por exemplo, depois de trocar o gênero no debug).</summary>
-    public void RefreshTexts()
-    {
-        if (JournalOpen)
-        {
-            RefreshJournal();
-        }
     }
 
     private void ShowExamined(string key)
@@ -111,50 +76,7 @@ public partial class Hud : CanvasLayer
 
     private void RefreshPrompt()
     {
-        _prompt.Visible = !JournalOpen && _player.CurrentInteractable is not null;
-    }
-
-    private void BuildJournalPanel()
-    {
-        _journalPanel = UiStyle.MakePanel();
-        _journalPanel.CustomMinimumSize = new Vector2(900, 500);
-        AddChild(_journalPanel);
-        _journalPanel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.Center, Control.LayoutPresetMode.KeepSize);
-
-        var column = new VBoxContainer();
-        column.AddThemeConstantOverride("separation", 16);
-        _journalPanel.AddChild(column);
-
-        column.AddChild(UiStyle.MakeLabel(GameRoot.Instance.Text("ui.diario.titulo"), UiStyle.TitleFontSize));
-
-        _journalList = new VBoxContainer();
-        _journalList.AddThemeConstantOverride("separation", 12);
-        column.AddChild(_journalList);
-
-        _journalPanel.Visible = false;
-    }
-
-    private void RefreshJournal()
-    {
-        foreach (var child in _journalList.GetChildren())
-        {
-            child.QueueFree();
-        }
-
-        var entries = GameRoot.Instance.Journal.Entries;
-        if (entries.Count == 0)
-        {
-            _journalList.AddChild(UiStyle.MakeLabel(GameRoot.Instance.Text("ui.diario.vazio")));
-            return;
-        }
-
-        foreach (var key in entries)
-        {
-            var line = UiStyle.MakeLabel("— " + GameRoot.Instance.Text(key));
-            line.AutowrapMode = TextServer.AutowrapMode.WordSmart;
-            line.CustomMinimumSize = new Vector2(850, 0);
-            _journalList.AddChild(line);
-        }
+        _prompt.Visible = !_suppressed && _player.CurrentInteractable is not null;
     }
 
     /// <summary>Faixa horizontal presa embaixo da tela, com o texto centralizado.</summary>

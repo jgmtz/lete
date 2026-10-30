@@ -1,3 +1,5 @@
+> **SUBSTITUÍDO em 26/out/2026** por `docs/PROTAGONISTA_SOMBRA.md` (protagonista-sombra, 2 corpos, 4 origens, 6 companheiros). Mantido só como histórico.
+
 # Protagonistas fixos: gênero definido pelo personagem (PROPOSTA de 25/out/2026)
 
 > Decisão do João nesta conversa: **cada origem é um personagem fixo**, com o gênero definido pelo sprite. O jogador escolhe a origem vendo os sprites (retratos) e o gênero vem junto. Não há mais escolha de gênero nem criador de personagem na versão 1. Isto resolve a pendência nº 1 ("Gênero e silhueta"). Tudo que está marcado *(proposta)* ainda precisa de confirmação do João; o Claude Code **não** deve inventar o que não está aqui.

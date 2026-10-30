@@ -69,4 +69,17 @@ public class EventBusTests
 
         Assert.True(secondCalled);
     }
+
+    [Fact]
+    public void AnyPublished_SeesEveryEventEvenWithoutSubscribers()
+    {
+        var bus = new EventBus();
+        var seen = new List<object>();
+        bus.AnyPublished += seen.Add;
+
+        bus.Publish(new Ping(1));
+        bus.Publish(new ShadeFreed("remador"));
+
+        Assert.Equal(new object[] { new Ping(1), new ShadeFreed("remador") }, seen);
+    }
 }

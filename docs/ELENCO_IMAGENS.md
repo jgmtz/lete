@@ -31,7 +31,7 @@
 
 ## 3. Elenco e imagens necessárias
 
-### 3.1 Companheiros (5) — F, C, AF, AC (4 imagens cada) + combate depois
+### 3.1 Companheiros (6, com a Lia) — F, C, AF, AC (4 imagens cada) + combate depois
 | Personagem | Imagens agora | Depois (combate, M1+) |
 |---|---|---|
 | Aulo, o Soldado | F ✅ C ✅ (retratos aprovados) · andar frente ✅, costas ✅, esquerda ✅ e direita ✅ (sprite 56 px, 12 quadros, marionete 3D; braço parado; mesmo rosto nos dois perfis) → **Aulo fechado**. **Nova versão SIMÉTRICA (24/out): frente, costas, perfil direito aprovados; andar 56 px nas 4 direções + parado em `aulo_sim/`. Esta é a versão oficial e a única guardada (a antiga assimétrica foi apagada). Parado de lado a partir de `aulo_pp_parado_direita.png`; regra nova: 4 imagens por personagem (F, C, perfil andando, perfil parado). Regra de simetria para todos os personagens: ver `docs/PIPELINE_PERSONAGEM.md`.** | AT, DX |
@@ -40,17 +40,12 @@
 | Septímia, a Vestal | F, C, AF, AC | AT, DX |
 | Cálias, o Aedo | F, C, AF, AC | AT, DX |
 
-### 3.2 Protagonistas — 6 personagens fixos (decisão de 25/out, ver `docs/PROTAGONISTAS_FIXOS.md`)
-Cada origem é um personagem fixo; o gênero vem do sprite (proposta: 3 homens e 3 mulheres, a confirmar). Por personagem: **batalha frente e costas** (assimétricas, com as ferramentas do ofício) e **mapa F, C e PD** (simétricas, sem itens; PE = espelho do PD). A roupa vem da origem. Tabuinha Rasurada no cinto sempre.
+### 3.2 Protagonista-sombra — 2 corpos (decisão de 26/out, ver `docs/PROTAGONISTA_SOMBRA.md`)
+Substitui os 6 protagonistas fixos. Por corpo (M e F): mapa **frente, costas e perfil parado**; batalha **costas 3/4**; Marca **etapas 1 a 3, rosto devolvido e rosto coberto**. Mais os **4 símbolos de origem**. ✅ **Tudo pronto (29/out, 26 imagens)**; já no jogo: sprites de mapa 56 px em `art/sprites/protagonista/sombra_{m,f}/` (4 direções + parado + `reflexo_frente.png` de 160 px), batalha `art/sprites/batalha/pixel_160/sombra_{m,f}_costas.png`, símbolos de 64 px em `art/ui/origens/`; originais em `art/concept/gemini/protagonista_sombra/` (o rosto masculino teve os traços apagados por script; os originais com traços estão em `originais_antes_da_correcao_rosto/`).
 
-| # | Origem | Personagem | Gênero (proposta) | Arte |
-|---|---|---|---|---|
-| 1 | Pescador | *(nome pendente)* | Masculino | a fazer |
-| 2 | Sacerdote | *(nome pendente)* | Feminino | a fazer |
-| 3 | Veterano | *(nome pendente)* | Masculino | a fazer |
-| 4 | Artesão | *(nome pendente)* | Masculino | a fazer |
-| 5 | Estrangeiro | *(nome pendente)* | Feminino | a fazer |
-| 6 | Retratista | **Lia** | Feminino | ✅ batalha + mapa prontos |
+A **Lia** passou a ser a sexta companheira (a arte dela já está pronta e continua valendo).
+
+**Prontos (30/out/2026):** os 5 espíritos nomeados novos (A Âncora, O Sacristão, A Oferente, O Desertor, O Trombeteiro) e os 6 corpos comuns de sombras (Soldado caído, Lavadeira, Pastor, Carpideira, Mercador, Camponesa): batalha 3/4 em `art/sprites/batalha/pixel_160/<slug>_34.png`, andar e parado de 56 px e flutuar de batalha (6 quadros, 160) em `art/sprites/sombras/<slug>/`, originais em `art/concept/gemini/sombras/`, GIFs e tiras em `art/concept/conferencia/sombras/<slug>/`; registrados no elenco. Gerados por `tools/proc_sombra.sh` (caminhos fixos de outra máquina, `/home/claude/lete-projeto`: ajustar `R` antes de rodar aqui).
 
 ### 3.3 Sombras — F + FL (+ AT depois)
 Pedir **opacas** (translucidez entra por shader). Sem vista de costas (no jogo aparecem de frente).
@@ -149,7 +144,7 @@ Image 1 is the exact reference: same character, same size, same camera angle (3/
 - **Septímia:** `CHARACTER: Septímia, a former Vestal priestess, calm and dignified. Long white tunic and a pale veil (the Roman suffibulum) with a thin band at the head, simple and clean. She carries a small clay oil lamp with a lit flame in front of her in both hands; the flame is a flat orange pixel shape (#E0833A) with no glow. Straight posture, serene but guarded face. Dominant colors: off-white and flame orange.`
 - **Cálias:** `CHARACTER: Cálias, a wandering Greek bard (aoidos), thin and expressive, middle-aged. A wooden lyre slung on his back. The only colorful garment in the whole cast: a faded olive-green (#7A7F45) mantle (himation) with muted purple (#6B4A7A) trim, worn and sun-bleached. A crown of wilted laurel leaves on his head. Gentle ironic smile, one hand raised slightly as if about to tell a story. Dominant colors: olive and muted purple.`
 
-### Protagonista (trocar `[GENDER]` por `male` ou `female`)
+### Protagonista com roupa de origem (**obsoleto desde 26/out**: o protagonista é uma sombra; ver 3.2)
 Linha comum: `Ordinary neutral face, short plain dark-brown hair, [GENDER], average slim build. A small wax writing tablet with scratched-out writing hangs from the belt.`
 - **Pescador:** `CHARACTER: the player character, origin "fisherman of Cape Taenarum". Ordinary neutral face, short plain dark-brown hair, [GENDER], average slim build. Short coarse tunic in faded teal-green (#4E7F86, desaturated), a coil of rope and a folded fishing net over one shoulder, barefoot, sun-weathered skin, rolled-up sleeves. A small wax writing tablet with scratched-out writing hangs from the belt.`
 - **Sacerdote:** `CHARACTER: the player character, origin "priest of Demeter and Hecate". Ordinary neutral face, short plain dark-brown hair, [GENDER], average slim build. Long ankle-length robe in bone (#D9CBB0) and ochre, a woolen ribbon band (fillet) tied around the head, a small woven basket of offerings held in one hand (bread, a small jar). A small wax writing tablet with scratched-out writing hangs from the belt.`
@@ -157,7 +152,7 @@ Linha comum: `Ordinary neutral face, short plain dark-brown hair, [GENDER], aver
 - **Artesão:** `CHARACTER: the player character, origin "potter and weaver craftsman". Ordinary neutral face, short plain dark-brown hair, [GENDER], average slim build. Thick leather apron over a terracotta-brown tunic, sleeves rolled up, hands and forearms stained with clay, a small tool (wooden spatula) tucked in the belt. A small wax writing tablet with scratched-out writing hangs from the belt.`
 - **Estrangeiro:** `CHARACTER: the player character, origin "foreigner". Ordinary neutral face, short plain dark-brown hair, [GENDER], average slim build. Long traveling cloak in sand and gray with the hood pulled back onto the shoulders, plain worn tunic, a leather shoulder bag, dusty boots, no insignia or decoration of any kind. A small wax writing tablet with scratched-out writing hangs from the belt.`
 
-### Lia, a Retratista (protagonista jogável; **proposta, em geração de imagens**, ver `docs/LIA_PROPOSTA.md`)
+### Lia, a Retratista (**sexta companheira** desde 26/out; arte pronta)
 Ordem: 1 batalha frente 3/4 → 2 batalha costas 3/4 (anexar a 1) → depois de aprovar: F e C simétricas, perfis e parado. Batalha (assimétrica): tábua com um retrato pela metade e pincel fino. Mapa (simétrico): sem itens, sem bolsa. Pernas visíveis do joelho para baixo (rig do Dimas, a confirmar).
 - **Lia:** `CHARACTER: Lia, a portrait painter, adult woman. Soft rounded face, fair skin with a few freckles, light blue eyes, arched brown eyebrows, open warm smile. Long wavy dark-brown hair tied back with a linen band (taenia), one small gold hoop earring. Knee-length linen tunic in faded saffron (#C99A3B, desaturated) with rolled-up sleeves and paint stains (no pink or magenta stains). Leather-and-linen apron in lapis blue (#4A6A8A) with straps crossed on the back and tied in a bow. Leather pouch on her RIGHT hip, strap over her LEFT shoulder. Sandals. Dominant colors: faded saffron and lapis blue.`
   > Linha montada pelo Claude a partir da descrição de aparência em `LIA_PROPOSTA.md` (a `LIA_FICHA.md` citada nos prompts não veio no pacote). Os blocos de prompt da conversa com o Gemini continuam valendo; se divergirem, valem eles.

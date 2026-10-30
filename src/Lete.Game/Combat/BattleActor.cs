@@ -33,6 +33,7 @@ public partial class BattleActor : Node3D
     private CpuParticles3D? _sparks;
     private Vector3? _home;
     private MeshInstance3D _blob = null!;
+    private bool _castsShadow = true;
 
     public BattleAnimTuning Tuning { get; set; } = null!;
 
@@ -120,6 +121,14 @@ public partial class BattleActor : Node3D
         _material.SetShaderParameter(smooth ? "tex_linear" : "tex_nearest", texture);
         _material.SetShaderParameter("smooth_filter", smooth);
         _material.SetShaderParameter("tint", tint);
+    }
+
+    /// <summary>A Marca no protagonista (<c>Lete.Core.Presentation.MarkLook</c>): perda de cor e, na faixa alta, sem sombra.</summary>
+    public void SetMarkLook(float desaturation, bool castsShadow)
+    {
+        _material.SetShaderParameter("desaturation", desaturation);
+        _castsShadow = castsShadow;
+        _blob.Visible = castsShadow;
     }
 
     /// <summary>Ponto no meio do corpo (ex.: 0,55 = um pouco acima da cintura), em coordenadas do mundo.</summary>
@@ -361,7 +370,7 @@ public partial class BattleActor : Node3D
         }
 
         _material.SetShaderParameter("dissolve", 0f);
-        _blob.Visible = true;
+        _blob.Visible = _castsShadow;
         _blob.Transparency = 0f;
         _body.Rotation = Vector3.Zero;
         _body.Position = Vector3.Zero;

@@ -1,0 +1,8 @@
+{
+  "id": "vale_do_lete",
+  "_rascunho": "Chave da entrada do Vale do Lete (GDD 2.4): a Chave de Memória (Memória plena em 3 dos 5 tipos, o mesmo número de 'key_kinds' em content/rules/mosaico.json). A forma 'Nome' da tabela ainda não está definida. A frase do Diário é rascunho (Claude, 30/out/2026).",
+  "journal_key": "diario.caminho.vale_do_lete",
+  "ways": [
+    { "id": "chave_de_memoria", "condition": { "recollection_kind_full_count": { "min": 3 } } }
+  ]
+}

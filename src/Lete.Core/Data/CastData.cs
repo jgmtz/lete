@@ -38,7 +38,9 @@ public static class CastData
                 null or "left" => false,
                 "right" => true,
                 var other => throw new FormatException($"'front_faces' = '{other}' desconhecido (use left ou right)."),
-            })).ToList();
+            },
+            Optional(m, "reflection"),
+            Optional(m, "inventory_folder"))).ToList();
 
         var errors = new List<string>();
         foreach (var group in members.GroupBy(m => m.Id).Where(g => g.Count() > 1))
@@ -51,9 +53,9 @@ public static class CastData
             errors.Add($"'{m.Id}' não tem arte de batalha.");
         }
 
-        foreach (var m in members.Where(m => m.Selectable && m.FrontArt is null))
+        foreach (var m in members.Where(m => m.Selectable && m.Reflection is null && m.FrontArt is null))
         {
-            errors.Add($"'{m.Id}' aparece na escolha de personagem, mas não tem arte de frente (o busto sai dela).");
+            errors.Add($"'{m.Id}' aparece na escolha de personagem, mas não tem imagem de reflexo nem arte de frente.");
         }
 
         return errors.Count == 0
