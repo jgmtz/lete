@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://src/Lete.Game/World/CameraRig.cs" id="1_cam"]
 [ext_resource type="PackedScene" path="res://src/Lete.Game/World/Player.tscn" id="2_player"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://src/Lete.Game/World/TriviaRest.cs" id="12_descanso"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/HearthFire.cs" id="13_fogo"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/OfferingAltar.cs" id="14_altar"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/ItemPickup.cs" id="15_item"]
 
 [sub_resource type="Environment" id="Environment_nevoa"]
 background_mode = 1
@@ -320,6 +321,19 @@ Amount = 3
 [node name="Reach" type="CollisionShape3D" parent="Altar"]
 shape = SubResource("Shape_alcance")
 
+[node name="Remo" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -7, 0, 2)
+script = ExtResource("15_item")
+ItemId = "remo_do_afogado"
+
+[node name="Reach" type="CollisionShape3D" parent="Remo"]
+shape = SubResource("Shape_alcance")
+
+[node name="Haste" type="CSGBox3D" parent="Remo" groups=["pixel_surface"]]
+transform = Transform3D(0.94, 0.34, 0, -0.34, 0.94, 0, 0, 0, 1, 0, 0.05, 0)
+size = Vector3(1.6, 0.08, 0.12)
+material = SubResource("Mat_terracota")
+
 [node name="Padeiro" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 3, 0, 3)
 script = ExtResource("9_conversa")
@@ -372,6 +386,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 6, 0, 5)
 
 [node name="Altar" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -6, 0, 7)
+
+[node name="Remo" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -6, 0, 2)
 
 [node name="Pesada1" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -1, 0, -7)

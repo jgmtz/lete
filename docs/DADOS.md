@@ -22,7 +22,7 @@ Usadas em diálogos, revelação de névoa, estoque de mercadores, missões, eve
 ```
 
 - **Combinadores:** `all`, `any`, `not`.
-- **Predicados previstos:** `origin`, `gender` (só para texto), `recollection` (`id`, `min_stage`, `state`: certain/uncertain/false), `recollection_kind_full_count` (nº de tipos com Memória plena), `heavy_memory` (`id`, `state`: face/leave/pending), `mark_band`, `tide_min`, `flag`, `path_key`, `oath_active`, `oath_broken`, `offering_shared` (`shade`, `kind`), `shade_state` (freed/destroyed/spared/seen/absorbed/fled/yielded), `companion`, `bond_min`, `difficulty`, `profile` (via mais usada, tipo predominante), `item_owned`, `trivia_lit`, `region_visited`, `quest_stage`.
+- **Predicados previstos:** `origin`, `gender` (só para texto), `recollection` (`id`, `min_stage`, `state`: certain/uncertain/false), `recollection_kind_full` (tipo com Memória plena, para a evolução dos itens), `recollection_kind_full_count` (nº de tipos com Memória plena), `heavy_memory` (`id`, `state`: face/leave/pending), `mark_band`, `tide_min`, `flag`, `path_key`, `oath_active`, `oath_broken`, `offering_shared` (`shade`, `kind`), `shade_state` (freed/destroyed/spared/seen/absorbed/fled/yielded), `companion`, `bond_min`, `difficulty`, `profile` (via mais usada, tipo predominante), `item_owned`, `trivia_lit`, `region_visited`, `quest_stage`.
 - O avaliador devolve `Pass`, `Fail` ou `NearMiss` (falha em exatamente um predicado marcado `soft`). **Opções de diálogo bloqueadas** ficam visíveis em cinza com `hint_if_blocked` (chave de texto com dica vaga).
 - **Implementado (29/out/2026, `Lete.Core/Conditions`):** um predicado é um objeto com **uma chave só** (o nome) e, se for o caso, `"soft": true` (ex.: `{ "flag": "x", "soft": true }`; não vale dentro de `not`). Formatos:
   - texto (id): `origin`, `gender` (`m`/`f`), `flag`, `path_key`, `oath_active`, `oath_broken`, `companion`, `difficulty`, `item_owned`, `trivia_lit`, `region_visited`, `shade_lucidity` (só em diálogo);
@@ -173,6 +173,8 @@ Sombras **comuns** referenciam um `base_body` (um dos 6 corpos-base) e um conjun
 
 **Relíquia:** `category: "relic"`, `path_key` (a chave que abre), `hint_key`, `lesson` (`blessing` + `burden`); não equipável; no alforje.
 **Modificadores** são declarativos (ex.: `dodge_frame_size`, `parry_window`, `mist_resistance`, `rule_passive`) e aplicados pelo sistema de equipamento, nunca por código específico do item.
+
+**Implementado (30/out/2026, `Lete.Core/Items`):** item = arquivo de `content/items/` com `category` (a pasta também guarda a Bolsa de teste e as provisões): `id`, `category`, `name_key`, `story_key`, `affinity`, `set` (id em `content/item_sets/`), `unlocks_path` (relíquia: a chave do Caminho que ela abre; no lugar de `path_key`, que o validador leria como chave de texto) e `stages` [{`id`: worn | recognized | awakened, `when` (condição; o primeiro não tem), `story_key` (linha de história que vai para o Diário ao evoluir), `modifiers`}]. O item evolui sozinho quando a condição vale (decisão do João). Modificadores por enquanto: `parry_window` (alarga a janela do aparo), `dodge_box` (aumenta o quadro da Esquiva, fração), `breath_max`, `lucidity_max`. Conjunto (`content/item_sets/<id>.json`): `id`, `name_key`, `story_key`, `pieces`, `modifiers` (valem quando o jogador tem todas as peças). Valem os modificadores do equipado, dos conjuntos completos e das relíquias do alforje. Condição nova: `recollection_kind_full` (tipo com Memória plena). No save: `itens` {`tem` (id → estágio), `equipado` (espaço → id), `conjuntos`}.
 
 ---
 

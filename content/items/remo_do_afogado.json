@@ -1,0 +1,52 @@
+{
+  "id": "remo_do_afogado",
+  "_rascunho": "Item de TESTE a partir do exemplo do GDD 6.2 (Claude, 30/out/2026). Textos e números são rascunho; a missão do dono ainda não existe, então a flag faz o papel dela. O anel duplo e lento do Gasto é efeito especial (fica para depois).",
+  "category": "instrument",
+  "name_key": "item.remo_do_afogado.nome",
+  "story_key": "item.remo_do_afogado.historia",
+  "affinity": "craft",
+  "set": "conjunto_do_afogado",
+  "stages": [
+    {
+      "id": "worn",
+      "modifiers": {}
+    },
+    {
+      "id": "recognized",
+      "when": {
+        "all": [
+          {
+            "recollection_kind_full": "craft"
+          },
+          {
+            "flag": "remo_reconhecido"
+          }
+        ]
+      },
+      "story_key": "item.remo_do_afogado.reconhecido",
+      "modifiers": {
+        "parry_window": {
+          "_tbd": true,
+          "value": 0.1
+        }
+      }
+    },
+    {
+      "id": "awakened",
+      "when": {
+        "flag": "remo_desperto"
+      },
+      "story_key": "item.remo_do_afogado.desperto",
+      "modifiers": {
+        "parry_window": {
+          "_tbd": true,
+          "value": 0.15
+        },
+        "lucidity_max": {
+          "_tbd": true,
+          "value": 5
+        }
+      }
+    }
+  ]
+}

@@ -412,6 +412,8 @@ Três tipos: **de região** (ligadas à sombra nomeada local), **de oferenda ou 
 Cada item tem uma **Afinidade** (um dos cinco tipos de Lembrança) e três estágios: **Gasto, Reconhecido, Desperto**. Para evoluir é preciso **Memória plena do tipo certo** *e* uma pequena missão ligada ao dono do item (levar o objeto ao lugar onde viveu, ou encontrar quem o conheceu). Cada estágio acrescenta um efeito e uma linha de história.
 Exemplo, **Remo do afogado** (Afinidade: Ofício): *Gasto* — ataque lento com anel duplo; *Reconhecido* — anel perdoa mais, revela quem era o dono; *Desperto* — "lembra" a água e ganha efeito próprio, depois de devolver a história dele à margem do Aqueronte.
 
+**Regras fechadas (João, 30/out/2026):** o item **evolui sozinho** quando a condição do estágio vale (a linha de história vai para o Diário); o equipamento se troca **a qualquer hora fora da luta**; por enquanto os itens só mudam números simples na luta (janela do aparo, quadro da Esquiva, Fôlego e Lucidez máximos), e os efeitos especiais (como o anel duplo do remo) vêm depois.
+
 **Conjuntos de dono:** peças que pertenceram à mesma sombra (remo, manto e moeda do afogado) formam um conjunto; reuni-las conta a história inteira, desbloqueia um efeito e uma pequena missão.
 
 ### 6.3 Relíquias de heróis

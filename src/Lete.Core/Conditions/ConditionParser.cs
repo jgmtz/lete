@@ -17,7 +17,7 @@ public static class ConditionParser
     /// <summary>Nomes de todos os predicados conhecidos (os da lista de DADOS.md 1 e <c>shade_lucidity</c> dos diálogos).</summary>
     public static readonly IReadOnlySet<string> PredicateNames = new HashSet<string>(StringComparer.Ordinal)
     {
-        "origin", "gender", "recollection", "recollection_kind_full_count", "heavy_memory", "mark_band", "tide_min",
+        "origin", "gender", "recollection", "recollection_kind_full", "recollection_kind_full_count", "heavy_memory", "mark_band", "tide_min",
         "flag", "path_key", "oath_active", "oath_broken", "offering_shared", "shade_state", "companion", "bond_min",
         "difficulty", "profile", "item_owned", "trivia_lit", "region_visited", "quest_stage", "shade_lucidity",
     };
@@ -121,6 +121,7 @@ public static class ConditionParser
             Id(Field(value, at, "id"), $"{at}.id"),
             OptionalEnum<RecollectionStage>(value, at, "min_stage"),
             OptionalEnum<RecollectionCertainty>(value, at, "state")),
+        "recollection_kind_full" => new RecollectionKindFull(Enum<RecollectionKind>(value, at)),
         "recollection_kind_full_count" => new RecollectionKindFullCount(Count(Field(value, at, "min"), $"{at}.min")),
         "heavy_memory" => new HeavyMemoryIs(
             Id(Field(value, at, "id"), $"{at}.id"),

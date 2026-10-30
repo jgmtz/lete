@@ -114,7 +114,11 @@ public enum ItemStage
 
 public sealed record ItemAcquired(string ItemId);
 
-public sealed record ItemEvolved(string ItemId, ItemStage Stage);
+/// <summary>O item subiu de estágio; <paramref name="StoryKey"/> é a linha de história que vai para o Diário.</summary>
+public sealed record ItemEvolved(string ItemId, ItemStage Stage, string? StoryKey);
+
+/// <summary>Todas as peças de um conjunto de dono reunidas; <paramref name="StoryKey"/> conta a história inteira.</summary>
+public sealed record ItemSetCompleted(string SetId, string StoryKey);
 
 // ---- Companheiro e diálogo ----
 

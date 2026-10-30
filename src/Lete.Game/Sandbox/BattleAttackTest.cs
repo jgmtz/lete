@@ -360,16 +360,19 @@ public partial class BattleAttackTest : Node
     /// <summary>O Fôlego que sobrou da luta anterior (GDD 4.8: só volta nas fontes de cura).</summary>
     private Gauge Breath()
     {
-        var gauge = new Gauge(_protagonistStats.Breath);
+        var gauge = new Gauge(_protagonistStats.Breath + GameRoot.Instance.Items.Modifiers.BreathMax);
         gauge.Reduce(System.Math.Min(GameRoot.Instance.State.Vitals.BreathSpent, gauge.Max - 1f));
         return gauge;
     }
 
-    /// <summary>A Lucidez que sobrou; a Leveza das Pesadas deixadas e a bênção dos juramentos aumentam o máximo (GDD 2.2, 7.1).</summary>
+    /// <summary>
+    /// A Lucidez que sobrou; a Leveza das Pesadas deixadas, a bênção dos juramentos e os itens mudam o máximo (GDD 2.2,
+    /// 7.1, 6).
+    /// </summary>
     private Gauge Lucidity()
     {
         var gauge = new Gauge(_protagonistStats.Lucidity + GameRoot.Instance.HeavyMemories.Lightness.LucidityMax
-            + GameRoot.Instance.Oaths.Effects.LucidityMax);
+            + GameRoot.Instance.Oaths.Effects.LucidityMax + GameRoot.Instance.Items.Modifiers.LucidityMax);
         gauge.Reduce(System.Math.Min(GameRoot.Instance.State.Vitals.LuciditySpent, gauge.Max));
         return gauge;
     }
@@ -1063,7 +1066,8 @@ public partial class BattleAttackTest : Node
         await Wait(ShadeTellSeconds);
 
         var widening = (_flow.SupportActive && _support is not null ? _support.WindowWidening : 0f) + _flow.FocusWidening;
-        var windows = Windows.Widened(widening);
+        var items = GameRoot.Instance.Items.Modifiers;
+        var windows = Windows.Widened(widening + (attack.Kind == ShadeAttackKind.Direct ? items.ParryWindow : 0f));
         var slow = _flow.ShadeSlowFactor;
         var gesture = _gestures[attack.Gesture];
 
@@ -1078,7 +1082,10 @@ public partial class BattleAttackTest : Node
         {
             _hud.SetGestureActive(true, T("combate.gesto.esquivar"));
             var (settings, pattern) = GestureData.DodgeFromJson(gesture);
-            var grade = windows.Grade(await RunDodge(settings, pattern.Slowed(slow)));
+            // A veste aumenta o quadro da Esquiva (GDD 6.1).
+            var box = 1f + items.DodgeBox;
+            var grade = windows.Grade(await RunDodge(
+                settings with { BoxWidth = settings.BoxWidth * box, BoxHeight = settings.BoxHeight * box }, pattern.Slowed(slow)));
             await TakeHit(attack, grade);
         }
     }

@@ -37,6 +37,7 @@ public class ConditionTests
         public bool WasOfferingShared(string shade, string? kind) => false;
         public bool ShadeIs(string shade, ShadeState state) => false;
         public bool OwnsItem(string item) => false;
+        public bool IsRecollectionKindFull(RecollectionKind kind) => false;
         public bool IsTriviaLit(string trivia) => false;
         public bool WasRegionVisited(string region) => false;
         public int? QuestStage(string quest) => Quests.TryGetValue(quest, out var stage) ? stage : null;
@@ -163,6 +164,7 @@ public class ConditionTests
             ["origin"] = "\"pescador\"",
             ["gender"] = "\"f\"",
             ["recollection"] = """{ "id": "a", "min_stage": "full", "state": "false" }""",
+            ["recollection_kind_full"] = "\"craft\"",
             ["recollection_kind_full_count"] = """{ "min": 2 }""",
             ["heavy_memory"] = """{ "id": "a", "state": "leave" }""",
             ["mark_band"] = """{ "min": "low" }""",

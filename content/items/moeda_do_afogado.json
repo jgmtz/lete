@@ -1,0 +1,20 @@
+{
+  "id": "moeda_do_afogado",
+  "_rascunho": "Item de TESTE a partir do exemplo do GDD 6.2 (Claude, 30/out/2026). Textos e números são rascunho; a missão do dono ainda não existe, então a flag faz o papel dela.",
+  "category": "votive",
+  "name_key": "item.moeda_do_afogado.nome",
+  "story_key": "item.moeda_do_afogado.historia",
+  "affinity": "family",
+  "set": "conjunto_do_afogado",
+  "stages": [
+    {
+      "id": "worn",
+      "modifiers": {
+        "lucidity_max": {
+          "_tbd": true,
+          "value": 5
+        }
+      }
+    }
+  ]
+}

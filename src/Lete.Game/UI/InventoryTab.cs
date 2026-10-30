@@ -30,6 +30,9 @@ public partial class InventoryTab : HBoxContainer, IMenuTab
     private Label _originName = null!;
     private Label _craft = null!;
     private Label _bag = null!;
+    private Label _equipment = null!;
+    private VBoxContainer _items = null!;
+    private Label _satchel = null!;
 
     public string TitleKey => "ui.inventario.titulo";
 
@@ -51,9 +54,16 @@ public partial class InventoryTab : HBoxContainer, IMenuTab
         };
         AddChild(_body);
 
+        // A coluna rola quando há itens demais para o painel.
+        var scroll = new ScrollContainer
+        {
+            SizeFlagsHorizontal = SizeFlags.ExpandFill,
+            HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+        };
+        AddChild(scroll);
         var column = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill };
         column.AddThemeConstantOverride("separation", 16);
-        AddChild(column);
+        scroll.AddChild(column);
 
         _bodyName = UiStyle.MakeLabel("");
         _bodyName.AddThemeColorOverride("font_color", UiStyle.Palette.IvoryDim);
@@ -77,6 +87,16 @@ public partial class InventoryTab : HBoxContainer, IMenuTab
         seal.AddChild(names);
         column.AddChild(seal);
 
+        column.AddChild(UiStyle.MakeLabel(GameRoot.Instance.Text("ui.inventario.equipamento"), UiStyle.TitleFontSize));
+        _equipment = UiStyle.MakeLabel("");
+        column.AddChild(_equipment);
+        column.AddChild(UiStyle.MakeLabel(GameRoot.Instance.Text("ui.inventario.itens")));
+        _items = new VBoxContainer();
+        column.AddChild(_items);
+        _satchel = UiStyle.MakeLabel("");
+        _satchel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        column.AddChild(_satchel);
+
         column.AddChild(UiStyle.MakeLabel(GameRoot.Instance.Text("ui.inventario.bolsa"), UiStyle.TitleFontSize));
         _bag = UiStyle.MakeLabel("");
         _bag.AutowrapMode = TextServer.AutowrapMode.WordSmart;
@@ -99,6 +119,53 @@ public partial class InventoryTab : HBoxContainer, IMenuTab
         _originName.Text = origin is null ? GameRoot.Instance.Text("ui.inventario.sem_origem") : GameRoot.Instance.Text(origin.NameKey);
         _craft.Text = origin is null ? "" : $"{GameRoot.Instance.Text("origem.oficio")}: {GameRoot.Instance.Text(origin.CraftKey)}";
         _bag.Text = BagText();
+        RefreshItems();
+    }
+
+    /// <summary>
+    /// Espaços de equipamento, os itens que se equipam (apertar equipa ou tira; trocar é livre fora da luta, decisão do
+    /// João, 30/out/2026) e as relíquias do alforje.
+    /// </summary>
+    private void RefreshItems()
+    {
+        var root = GameRoot.Instance;
+        var items = root.Items;
+        string NameOf(Lete.Core.Items.Item item) => string.Format(root.Text("ui.inventario.item_estagio"), root.Text(item.NameKey),
+            root.Text($"item.estagio.{Lete.Core.Conditions.ConditionParser.SnakeCase(items.StageOf(item.Id)!.Value)}"));
+
+        _equipment.Text = string.Join("\n", System.Enum.GetValues<Lete.Core.Items.EquipSlot>().Select(slot => string.Format(
+            root.Text("ui.inventario.espaco"),
+            root.Text($"item.espaco.{Lete.Core.Conditions.ConditionParser.SnakeCase(slot)}"),
+            items.EquippedIn(slot) is { } id ? NameOf(items.Definitions[id]) : root.Text("ui.inventario.vazio"))));
+
+        foreach (var child in _items.GetChildren())
+        {
+            _items.RemoveChild(child);
+            child.QueueFree();
+        }
+
+        foreach (var item in items.Owned.Where(i => i.Category is not (Lete.Core.Items.ItemCategory.Relic or Lete.Core.Items.ItemCategory.Utensil)))
+        {
+            var equipped = items.SlotOf(item.Id) is not null;
+            var button = new Button { Text = (equipped ? "• " : "") + NameOf(item), Alignment = HorizontalAlignment.Left };
+            button.Pressed += () =>
+            {
+                if (items.SlotOf(item.Id) is not null)
+                {
+                    items.Unequip(item.Id);
+                }
+                else
+                {
+                    items.Equip(item.Id);
+                }
+
+                RefreshItems();
+            };
+            _items.AddChild(button);
+        }
+
+        var relics = items.Owned.Where(i => i.Category == Lete.Core.Items.ItemCategory.Relic).Select(i => root.Text(i.NameKey)).ToList();
+        _satchel.Text = relics.Count == 0 ? "" : $"{root.Text("ui.inventario.alforje")}: {string.Join(", ", relics)}";
     }
 
     /// <summary>Oferendas e provisões com a quantidade, e os óbolos (itens contados são da Bolsa, não progresso).</summary>

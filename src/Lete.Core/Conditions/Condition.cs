@@ -73,6 +73,12 @@ public sealed record RecollectionAt(string Id, RecollectionStage? MinStage, Reco
     public override IEnumerable<(string, string)> References() => new[] { (ConditionTargets.Recollections, Id) };
 }
 
+/// <summary>O jogador tem Memória plena de uma Lembrança deste tipo (evolução dos itens pela Afinidade, GDD 6.2).</summary>
+public sealed record RecollectionKindFull(RecollectionKind Kind) : Predicate
+{
+    public override string Name => "recollection_kind_full";
+}
+
 public sealed record RecollectionKindFullCount(int Min) : Predicate
 {
     public override string Name => "recollection_kind_full_count";

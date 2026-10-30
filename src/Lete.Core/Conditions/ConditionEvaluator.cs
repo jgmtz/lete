@@ -70,6 +70,7 @@ public static class ConditionEvaluator
         RecollectionAt p => f.RecollectionStageOf(p.Id) is { } stage
             && (p.MinStage is null || stage >= p.MinStage)
             && (p.Certainty is null || f.RecollectionCertaintyOf(p.Id) == p.Certainty),
+        RecollectionKindFull p => f.IsRecollectionKindFull(p.Kind),
         RecollectionKindFullCount p => f.FullRecollectionKinds >= p.Min,
         HeavyMemoryIs p => f.HeavyMemory(p.Id) == p.State,
         MarkBandIn p => (p.Min is null || f.MarkBand >= p.Min) && (p.Max is null || f.MarkBand <= p.Max),

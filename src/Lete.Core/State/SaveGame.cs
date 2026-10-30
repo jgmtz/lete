@@ -53,6 +53,14 @@ public static class SaveGame
                     ["tipos"] = Array(e.Kinds.Select(ConditionParser.SnakeCase)),
                 }).ToArray()),
             },
+            ["itens"] = new JsonObject
+            {
+                ["tem"] = Ints(state.Items.Owned),
+                ["equipado"] = new JsonObject(state.Items.Equipped
+                    .OrderBy(p => p.Key)
+                    .Select(p => KeyValuePair.Create(ConditionParser.SnakeCase(p.Key), (JsonNode?)p.Value))),
+                ["conjuntos"] = Array(state.Items.CompletedSets.OrderBy(s => s, StringComparer.Ordinal)),
+            },
             ["bolsa"] = new JsonObject
             {
                 ["obolos"] = state.Inventory.Obols,
@@ -174,6 +182,20 @@ public static class SaveGame
                     Text(e, "via") is { } via ? EnumOf<Via>(via) : null,
                     Strings(e, "tipos").Select(EnumOf<RecollectionKind>).ToList())));
             }
+        }
+
+        if (json["itens"] is JsonObject items)
+        {
+            ReadInts(items, "tem", state.Items.Owned);
+            if (items["equipado"] is JsonObject equipped)
+            {
+                foreach (var (slot, item) in equipped)
+                {
+                    state.Items.Equipped[EnumOf<Lete.Core.Items.EquipSlot>(slot)] = item?.GetValue<string>() ?? "";
+                }
+            }
+
+            state.Items.CompletedSets.UnionWith(Strings(items, "conjuntos"));
         }
 
         if (json["bolsa"] is JsonObject bag)

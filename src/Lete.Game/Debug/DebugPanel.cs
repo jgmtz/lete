@@ -30,6 +30,7 @@ public partial class DebugPanel : CanvasLayer
     private Label _oathState = null!;
     private Label _dialogueState = null!;
     private Label _bagState = null!;
+    private Label _itemState = null!;
     private Button _companionButton = null!;
     private Label _mosaicState = null!;
     private OptionButton _sourcePicker = null!;
@@ -160,6 +161,20 @@ public partial class DebugPanel : CanvasLayer
         });
         AddButton(bagRow, "debug.bolsa.descansar", () => GameRoot.Instance.Healing.Rest());
         column.AddChild(bagRow);
+
+        column.AddChild(UiStyle.MakeLabel(T("debug.itens")));
+        _itemState = UiStyle.MakeLabel("");
+        _itemState.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        column.AddChild(_itemState);
+        var itemRow = new HFlowContainer();
+        AddButton(itemRow, "debug.itens.dar", () =>
+        {
+            foreach (var id in GameRoot.Instance.Items.Definitions.Keys)
+            {
+                GameRoot.Instance.Items.Acquire(id);
+            }
+        });
+        column.AddChild(itemRow);
 
         column.AddChild(UiStyle.MakeLabel(T("debug.dialogo")));
         _dialogueState = UiStyle.MakeLabel("");
@@ -302,6 +317,13 @@ public partial class DebugPanel : CanvasLayer
             string.Join(", ", inventory.Offerings.Where(o => o.Value > 0).Select(o => $"{o.Key} {o.Value}")),
             string.Join(", ", inventory.Provisions.Where(o => o.Value > 0).Select(o => $"{o.Key} {o.Value}")),
             vitalsState.BreathSpent, vitalsState.LuciditySpent);
+        var items = GameRoot.Instance.Items;
+        var itemLine = string.Format(T("debug.itens.estado"),
+            string.Join(", ", items.Owned.Select(i => $"{i.Id} ({items.StageOf(i.Id)})")),
+            string.Join(", ", GameRoot.Instance.State.Items.Equipped.Select(p => $"{p.Key}={p.Value}")),
+            string.Join(", ", GameRoot.Instance.State.Items.CompletedSets));
+        _itemState.Text = items.ConditionsWaitingForSystems.Count == 0 ? itemLine
+            : itemLine + "\n" + string.Format(T("debug.itens.esperando"), string.Join(", ", items.ConditionsWaitingForSystems));
         var dialogue = GameRoot.Instance.State.Dialogue;
         _dialogueState.Text = string.Format(T("debug.dialogo.estado"),
             dialogue.Awakened.Count == 0 ? "-" : string.Join(", ", dialogue.Awakened), dialogue.Chosen.Count, dialogue.CommentsSeen.Count);
@@ -434,6 +456,7 @@ public partial class DebugPanel : CanvasLayer
             // Mudar o estado sem evento: o Caminho confere de novo (uma flag pode dar uma chave).
             GameRoot.Instance.PathKeys.Refresh();
             GameRoot.Instance.Oaths.Refresh();
+            GameRoot.Instance.Items.Refresh();
             Refresh();
         }
     }

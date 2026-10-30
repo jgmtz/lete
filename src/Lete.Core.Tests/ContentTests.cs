@@ -181,6 +181,19 @@ public class ContentTests
     }
 
     [Fact]
+    public void Items_LoadWithTheirSetsAndRelicPaths()
+    {
+        var items = Directory.GetFiles(Content("items"), "*.json").Select(File.ReadAllText)
+            .Where(Lete.Core.Items.ItemData.IsItem).Select(Lete.Core.Items.ItemData.FromJson).ToList();
+        var sets = Directory.GetFiles(Content("item_sets"), "*.json")
+            .Select(f => Lete.Core.Items.ItemData.SetFromJson(File.ReadAllText(f))).ToList();
+        Assert.NotEmpty(items);
+        Assert.All(items, i => Assert.True(File.Exists(Content("items", i.Id + ".json")), $"Item '{i.Id}' difere do arquivo."));
+        Assert.All(sets, s => Assert.All(s.Pieces, p => Assert.Contains(items, i => i.Id == p && i.SetId == s.Id)));
+        Assert.All(items.Where(i => i.PathKey is not null), i => Assert.True(File.Exists(Content("path", i.PathKey + ".json"))));
+    }
+
+    [Fact]
     public void Profile_RulesLoad() => ProfileData.FromJson(File.ReadAllText(Content("rules", "perfil.json")));
 
     [Fact]

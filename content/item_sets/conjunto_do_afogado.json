@@ -1,0 +1,17 @@
+{
+  "id": "conjunto_do_afogado",
+  "_rascunho": "Conjunto de TESTE do exemplo do GDD 6.2 (remo, manto e moeda do afogado). Efeito e texto em rascunho; a pequena missão que ele desbloqueia ainda não existe.",
+  "name_key": "conjunto.afogado.nome",
+  "story_key": "conjunto.afogado.historia",
+  "pieces": [
+    "remo_do_afogado",
+    "manto_do_afogado",
+    "moeda_do_afogado"
+  ],
+  "modifiers": {
+    "breath_max": {
+      "_tbd": true,
+      "value": 10
+    }
+  }
+}

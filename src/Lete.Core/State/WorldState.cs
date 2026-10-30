@@ -44,6 +44,9 @@ public sealed class WorldState
     /// <summary>Perfil: vias e tipos de Memória contados, e os encontros recentes (ver <c>Systems.Profile</c>).</summary>
     public ProfileState Profile { get; } = new();
 
+    /// <summary>Itens únicos: os que tem (com o estágio), o equipado e os conjuntos reunidos.</summary>
+    public ItemsState Items { get; } = new();
+
     /// <summary>A Bolsa: óbolos, oferendas e provisões.</summary>
     public InventoryState Inventory { get; } = new();
 

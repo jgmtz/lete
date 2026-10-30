@@ -6,7 +6,7 @@ using Lete.Core.Systems;
 namespace Lete.Core.Conditions;
 
 /// <summary>
-/// Responde às condições pelo <see cref="WorldState"/>. Os predicados de sistemas que ainda não existem (oferendas, sombras, vínculo, itens, Trívias, regiões, missões, dificuldade)
+/// Responde às condições pelo <see cref="WorldState"/>. Os predicados de sistemas que ainda não existem (oferendas, sombras, vínculo, Trívias, regiões, missões, dificuldade)
 /// lançam <see cref="NotSupportedException"/> dizendo qual sistema falta, em vez de responder errado em silêncio.
 /// </summary>
 public sealed class WorldFacts : IConditionFacts
@@ -51,7 +51,8 @@ public sealed class WorldFacts : IConditionFacts
     public bool IsOathBroken(string oath) => _state.Oaths.TryGetValue(oath, out var status) && status == OathStatus.Broken;
     public bool WasOfferingShared(string shade, string? kind) => Missing<bool>("offering_shared", "oferendas");
     public bool ShadeIs(string shade, ShadeState state) => Missing<bool>("shade_state", "estado das sombras");
-    public bool OwnsItem(string item) => Missing<bool>("item_owned", "itens");
+    public bool OwnsItem(string item) => _state.Items.Owned.ContainsKey(item);
+    public bool IsRecollectionKindFull(RecollectionKind kind) => _mosaic.IsKindFull(kind);
     public bool IsTriviaLit(string trivia) => Missing<bool>("trivia_lit", "Trívias");
     public bool WasRegionVisited(string region) => Missing<bool>("region_visited", "regiões visitadas");
     public int? QuestStage(string quest) => Missing<int?>("quest_stage", "missões");

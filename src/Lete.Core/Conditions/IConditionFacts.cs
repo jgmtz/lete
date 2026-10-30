@@ -36,6 +36,7 @@ public interface IConditionFacts
     bool WasOfferingShared(string shade, string? kind);
     bool ShadeIs(string shade, ShadeState state);
     bool OwnsItem(string item);
+    bool IsRecollectionKindFull(RecollectionKind kind);
     bool IsTriviaLit(string trivia);
     bool WasRegionVisited(string region);
 

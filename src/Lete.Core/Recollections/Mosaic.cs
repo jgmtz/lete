@@ -117,6 +117,10 @@ public sealed class Mosaic : IDisposable
         .Distinct()
         .Count();
 
+    /// <summary>Há Memória plena deste tipo (Lembranças comuns e da origem; Pesadas não contam).</summary>
+    public bool IsKindFull(RecollectionKind kind) => Known
+        .Any(r => r.Scope != RecollectionScope.Heavy && r.Kind == kind && StageOf(r.Id) == RecollectionStage.Full);
+
     /// <summary>Chave de Memória: abre o Vale do Lete (o jogador nunca vê o número).</summary>
     public bool HasMemoryKey => FullKinds >= _rules.KeyKinds;
 

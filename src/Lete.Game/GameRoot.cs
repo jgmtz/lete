@@ -5,6 +5,7 @@ using Lete.Core.Conditions;
 using Lete.Core.Data;
 using Lete.Core.Dialogue;
 using Lete.Core.Events;
+using Lete.Core.Items;
 using Lete.Core.Localization;
 using Lete.Core.Presentation;
 using Lete.Core.Recollections;
@@ -30,6 +31,8 @@ public partial class GameRoot : Node
     private const string HealingRulesPath = "res://content/rules/cura.json";
     public const string ProvisionsPath = "res://content/items/provisoes.json";
     public const string TestBagPath = "res://content/items/bolsa_teste.json";
+    private const string ItemsFolder = "res://content/items";
+    private const string ItemSetsFolder = "res://content/item_sets";
     private const string OriginsPath = "res://content/characters/origens.json";
     private const string OathRulesPath = "res://content/rules/juramentos.json";
     private const string MosaicRulesPath = "res://content/rules/mosaico.json";
@@ -62,6 +65,7 @@ public partial class GameRoot : Node
     public Oaths Oaths { get; private set; } = null!;
     public Dialogues Dialogues { get; private set; } = null!;
     public Offerings Offerings { get; private set; } = null!;
+    public ItemTracker Items { get; private set; } = null!;
     public Healing Healing { get; private set; } = null!;
 
     /// <summary>As provisões do jogo (definições; as quantidades estão na Bolsa do estado).</summary>
@@ -117,6 +121,8 @@ public partial class GameRoot : Node
     private System.Collections.Generic.Dictionary<string, DialogueGraph> _dialogues = null!;
     private OfferingRules _offeringRules = null!;
     private HealingRules _healingRules = null!;
+    private System.Collections.Generic.Dictionary<string, Item> _items = null!;
+    private System.Collections.Generic.Dictionary<string, ItemSet> _itemSets = null!;
     private System.Collections.Generic.Dictionary<string, string> _originNames = null!;
 
     public override void _EnterTree()
@@ -150,22 +156,30 @@ public partial class GameRoot : Node
         _offeringRules = BagData.OfferingRulesFromJson(FileAccess.GetFileAsString(OfferingRulesPath));
         _healingRules = BagData.HealingRulesFromJson(FileAccess.GetFileAsString(HealingRulesPath));
         Provisions = BagData.ProvisionsFromJson(FileAccess.GetFileAsString(ProvisionsPath));
+        // A pasta de itens também tem a Bolsa de teste e as provisões: só os arquivos com 'category' são itens.
+        _items = LoadFolder(ItemsFolder, ItemData.FromJson, i => i.Id, ItemData.IsItem);
+        _itemSets = LoadFolder(ItemSetsFolder, ItemData.SetFromJson, s => s.Id);
         _originNames = OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath))
             .ToDictionary(o => o.Id, o => o.NameKey, StringComparer.Ordinal);
 
         BuildSystems();
     }
 
-    /// <summary>Um item por arquivo <c>.json</c> da pasta, pelo id.</summary>
-    private static System.Collections.Generic.Dictionary<string, T> LoadFolder<T>(string folder, Func<string, T> read, Func<T, string> id)
+    /// <summary>Um item por arquivo <c>.json</c> da pasta, pelo id (só os que <paramref name="accept"/> aceita, se houver).</summary>
+    private static System.Collections.Generic.Dictionary<string, T> LoadFolder<T>(
+        string folder, Func<string, T> read, Func<T, string> id, Func<string, bool>? accept = null)
     {
         var items = new System.Collections.Generic.Dictionary<string, T>(StringComparer.Ordinal);
         foreach (var name in DirAccess.GetFilesAt(folder))
         {
             if (name.EndsWith(".json", StringComparison.Ordinal))
             {
-                var item = read(FileAccess.GetFileAsString($"{folder}/{name}"));
-                items[id(item)] = item;
+                var json = FileAccess.GetFileAsString($"{folder}/{name}");
+                if (accept is null || accept(json))
+                {
+                    var item = read(json);
+                    items[id(item)] = item;
+                }
             }
         }
 
@@ -215,6 +229,7 @@ public partial class GameRoot : Node
         PathKeys?.Dispose();
         Oaths?.Dispose();
         Dialogues?.Dispose();
+        Items?.Dispose();
         Journal = new Journal(State, Events);
         Mark = new MarkTracker(State, Events, _markRules);
         Tide = new TideTracker(State, Events, _tideRules);
@@ -228,8 +243,10 @@ public partial class GameRoot : Node
         Healing = new Healing(State, Events, _healingRules, Offerings, () => Tide.Step);
         Dialogues = new Dialogues(State, Events, _dialogues, Facts, new GameDialogueEffects(this),
             id => _recollections.TryGetValue(id, out var recollection) ? recollection.Kind : null, Offerings);
+        Items = new ItemTracker(State, Events, _items, _itemSets, () => Facts);
         PathKeys = new PathKeys(State, Events, _pathKeys, () => Facts);
         PathKeys.Refresh();
+        Items.Refresh();
     }
 
     /// <summary>

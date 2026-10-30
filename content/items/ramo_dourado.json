@@ -1,0 +1,24 @@
+{
+  "id": "ramo_dourado",
+  "_rascunho": "Relíquia de TESTE: o ramo dourado seco de Eneias (GDD 6.3). É uma forma de obter a chave do Aqueronte (na Eneida, o ramo convence Caronte). A lição (bênção com ônus) e os textos são rascunho.",
+  "category": "relic",
+  "name_key": "item.ramo_dourado.nome",
+  "story_key": "item.ramo_dourado.historia",
+  "affinity": "family",
+  "unlocks_path": "aqueronte",
+  "stages": [
+    {
+      "id": "worn",
+      "modifiers": {
+        "lucidity_max": {
+          "_tbd": true,
+          "value": 5
+        },
+        "breath_max": {
+          "_tbd": true,
+          "value": -5
+        }
+      }
+    }
+  ]
+}

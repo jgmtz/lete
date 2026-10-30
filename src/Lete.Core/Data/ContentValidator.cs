@@ -38,6 +38,8 @@ public static class ContentValidator
         new ReferenceRule("battle", "companion", "companions"),
         new ReferenceRule("shades", "gesture", "gestures"),
         new ReferenceRule("recollections", "shade", "shades"),
+        new ReferenceRule("items", "set", "item_sets"),
+        new ReferenceRule("items", "unlocks_path", "path"),
     };
 
     private const string LocaleFolder = "locale";
