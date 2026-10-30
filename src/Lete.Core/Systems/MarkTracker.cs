@@ -6,8 +6,8 @@ namespace Lete.Core.Systems;
 /// <summary>
 /// Marca dos Mortos (GDD 2.3, <c>docs/PROTAGONISTA_SOMBRA.md</c> 6 e 7). Guarda o contador e a etapa no
 /// <see cref="WorldState"/>; os dois só sobem. A etapa 1 vem do primeiro Eco absorvido (escuta
-/// <see cref="ShadeAbsorbed"/>); as etapas 2 e 3 vêm das faixas média e alta. O perjúrio (<see cref="OathBroken"/>)
-/// sobe <see cref="MarkRules.PerjuryMark"/>. O rosto do fim sai da regra C.
+/// <see cref="ShadeAbsorbed"/>); as etapas 2 e 3 vêm das faixas média e alta. O perjúrio (<see cref="OathBroken"/>, ou
+/// uma prova falsa no Tribunal, <see cref="TestimonyPerjury"/>) sobe <see cref="MarkRules.PerjuryMark"/>. O rosto do fim sai da regra C.
 /// </summary>
 public sealed class MarkTracker : IDisposable
 {
@@ -22,6 +22,7 @@ public sealed class MarkTracker : IDisposable
     private readonly IDisposable _perjury;
     private readonly IDisposable _given;
     private readonly IDisposable _shared;
+    private readonly IDisposable _testimony;
 
     public MarkTracker(WorldState state, EventBus events, MarkRules rules)
     {
@@ -32,6 +33,7 @@ public sealed class MarkTracker : IDisposable
         _perjury = events.Subscribe<OathBroken>(_ => Add(_rules.PerjuryMark));
         _given = events.Subscribe<OfferingGiven>(e => Add(_rules.MarkOfOffering(e.Kind)));
         _shared = events.Subscribe<OfferingShared>(e => Add(_rules.MarkOfOffering(e.Kind)));
+        _testimony = events.Subscribe<TestimonyPerjury>(_ => Add(_rules.PerjuryMark));
     }
 
     public MarkBand Band => _rules.BandOf(_state.Mark);
@@ -76,6 +78,7 @@ public sealed class MarkTracker : IDisposable
         _perjury.Dispose();
         _given.Dispose();
         _shared.Dispose();
+        _testimony.Dispose();
     }
 
     private void RaiseStage(int stage)

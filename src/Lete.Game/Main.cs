@@ -30,6 +30,9 @@ public partial class Main : Node
     /// <summary>Id desta região no save (por enquanto só existe a sala de teste).</summary>
     [Export] public string RegionId { get; set; } = "sala_teste";
 
+    /// <summary>Onde o jogador aparece ao chegar numa Trívia pela tocha (ao lado dela, não dentro).</summary>
+    private static readonly Vector3 TriviaArrivalOffset = new(0f, 0f, 1.5f);
+
     private SubViewportContainer _container = null!;
     private Node3D _world = null!;
     private Player _player = null!;
@@ -38,6 +41,9 @@ public partial class Main : Node
     private GameMenu _menu = null!;
     private HeavyMemoryScreen _heavyScreen = null!;
     private DialogueScreen _dialogueScreen = null!;
+    private ShopScreen _shop = null!;
+    private TriviaScreen _trivia = null!;
+    private TrialScreen _trial = null!;
     private DebugPanel _debug = null!;
     private IDisposable? _markSubscription;
 
@@ -71,6 +77,19 @@ public partial class Main : Node
         AddChild(_dialogueScreen);
         _dialogueScreen.OpenChanged += RefreshPlayerInput;
         Talkable.Talked += OpenDialogue;
+        _shop = new ShopScreen();
+        _trivia = new TriviaScreen();
+        _trial = new TrialScreen();
+        foreach (var screen in new ChoiceScreen[] { _shop, _trivia, _trial })
+        {
+            AddChild(screen);
+            screen.OpenChanged += RefreshPlayerInput;
+        }
+
+        _trivia.Traveled += ArriveAtTrivia;
+        MerchantStall.Opened += OpenShop;
+        TriviaRest.Reached += OpenTrivia;
+        TribunalSeat.Opened += OpenTrial;
         GameRoot.Instance.StateReplaced += OnStateReplaced;
         GameRoot.Instance.Saving += OnSaving;
         _player.CharacterChanged += ApplyMarkLook;
@@ -100,6 +119,9 @@ public partial class Main : Node
         GameRoot.Instance.Saving -= OnSaving;
         HeavyMemoryPlace.Reached -= SurfaceHeavyMemory;
         Talkable.Talked -= OpenDialogue;
+        MerchantStall.Opened -= OpenShop;
+        TriviaRest.Reached -= OpenTrivia;
+        TribunalSeat.Opened -= OpenTrial;
         _markSubscription?.Dispose();
     }
 
@@ -110,6 +132,34 @@ public partial class Main : Node
         {
             _menu.SetOpen(false);
             _heavyScreen.Open(memoryId);
+        }
+    }
+
+    public void OpenShop(string merchantId)
+    {
+        _menu.SetOpen(false);
+        _shop.Open(merchantId);
+    }
+
+    public void OpenTrivia(string triviaId)
+    {
+        _menu.SetOpen(false);
+        _trivia.Open(triviaId);
+    }
+
+    public void OpenTrial(string trialId)
+    {
+        _menu.SetOpen(false);
+        _trial.Open(trialId);
+    }
+
+    /// <summary>Viagem pela tocha: leva o jogador à Trívia de destino, se ela estiver nesta região.</summary>
+    private void ArriveAtTrivia(string triviaId)
+    {
+        if (GetTree().GetNodesInGroup(TriviaRest.Group).OfType<TriviaRest>().FirstOrDefault(t => t.TriviaId == triviaId) is { } target)
+        {
+            _player.TeleportTo(target.GlobalPosition + TriviaArrivalOffset);
+            _cameraRig.SnapToTarget();
         }
     }
 
@@ -164,7 +214,7 @@ public partial class Main : Node
 
     private void RefreshPlayerInput()
     {
-        var talking = _dialogueScreen.IsOpen;
+        var talking = _dialogueScreen.IsOpen || _shop.IsOpen || _trivia.IsOpen || _trial.IsOpen;
         _hud.SetSuppressed(_menu.IsOpen || _heavyScreen.IsOpen || talking);
         _player.InputEnabled = !_menu.IsOpen && !_debug.IsOpen && !_heavyScreen.IsOpen && !talking;
     }
@@ -199,6 +249,7 @@ public partial class Main : Node
     /// --carregar  --ui=journal|mosaic|inventory|debug  --shot=caminho.png  --frames=N
     /// --pesada=encarar,deixar (decide as próximas Pesadas da fila pela cena; a última fica na tela, sem --ui)
     /// --companheiro=aulo  --despertar=padeiro (oferenda certa)  --conversar=padeiro --escolher=0,1 (botões, em ordem)
+    /// --loja=coveiro  --trivia=trivia_sala  --julgamento=julgamento_padeiro  --obolos=N  --apertar=0,1 (botões da tela aberta)
     /// </summary>
     private async Task RunCommandLineAsync()
     {
@@ -253,6 +304,20 @@ public partial class Main : Node
             GameRoot.Instance.Events.Publish(new OfferingShared(shade, lucidity.OfferingKind ?? "mel"));
         }
 
+        if (args.TryGetValue("obolos", out var obols))
+        {
+            GameRoot.Instance.State.Inventory.Obols += int.Parse(obols);
+        }
+
+        ChoiceScreen? opened = args.TryGetValue("loja", out var shop) ? Open(_shop, () => OpenShop(shop))
+            : args.TryGetValue("trivia", out var trivia) ? Open(_trivia, () => OpenTrivia(trivia))
+            : args.TryGetValue("julgamento", out var trial) ? Open(_trial, () => OpenTrial(trial))
+            : null;
+        foreach (var step in opened is not null && args.TryGetValue("apertar", out var presses) ? presses.Split(',') : Array.Empty<string>())
+        {
+            opened!.Press(int.Parse(step));
+        }
+
         if (args.TryGetValue("conversar", out var dialogue))
         {
             OpenDialogue(dialogue);
@@ -296,6 +361,12 @@ public partial class Main : Node
             GD.Print($"screenshot: {shotPath} ({error})");
             GetTree().Quit();
         }
+    }
+
+    private static ChoiceScreen Open(ChoiceScreen screen, Action open)
+    {
+        open();
+        return screen;
     }
 
     private async Task WaitFrames(int count)

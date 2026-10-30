@@ -35,6 +35,8 @@ public sealed class Profile : IDisposable
         _subscriptions.Add(events.Subscribe<ShadeYielded>(_ => End(Via.Yield)));
         _subscriptions.Add(events.Subscribe<PlayerDefeated>(_ => End(null)));
         _subscriptions.Add(events.Subscribe<MemoryUsed>(e => _pendingKinds.Add(e.Kind)));
+        _subscriptions.Add(events.Subscribe<TrialJudged>(e =>
+            _state.TrialStances[e.Stance] = _state.TrialStances.GetValueOrDefault(e.Stance) + 1));
     }
 
     public IReadOnlyDictionary<Via, int> ViaTotals => _state.ViaTotals;
@@ -48,6 +50,19 @@ public sealed class Profile : IDisposable
 
     /// <summary>O tipo das Memórias mais usadas nos encontros recentes; nulo se empatou ou se ainda são poucas.</summary>
     public RecollectionKind? TopKind => Top(_state.Recent.SelectMany(e => e.Kinds), _rules.MinMemoryUses);
+
+    /// <summary>
+    /// Juiz severo (acusou mais do que defendeu) ou clemente (defendeu mais); nulo sem julgamentos ou no empate (GDD 7.2).
+    /// </summary>
+    public JudgeLeaning? Judge
+    {
+        get
+        {
+            var defended = _state.TrialStances.GetValueOrDefault(Lete.Core.World.TrialStance.Defend);
+            var accused = _state.TrialStances.GetValueOrDefault(Lete.Core.World.TrialStance.Accuse);
+            return defended > accused ? JudgeLeaning.Clement : accused > defended ? JudgeLeaning.Severe : null;
+        }
+    }
 
     public void Dispose()
     {
@@ -91,6 +106,13 @@ public sealed class Profile : IDisposable
         var leaders = counts.Where(c => c.Count == most).ToList();
         return leaders.Count == 1 ? leaders[0].Item : null;
     }
+}
+
+/// <summary>Como o jogador julga no Tribunal (lido pelo Perfil, GDD 7.2).</summary>
+public enum JudgeLeaning
+{
+    Severe,
+    Clement,
 }
 
 /// <summary>

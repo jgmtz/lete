@@ -31,6 +31,7 @@ public partial class DebugPanel : CanvasLayer
     private Label _dialogueState = null!;
     private Label _bagState = null!;
     private Label _itemState = null!;
+    private Label _worldState = null!;
     private Button _companionButton = null!;
     private Label _mosaicState = null!;
     private OptionButton _sourcePicker = null!;
@@ -175,6 +176,19 @@ public partial class DebugPanel : CanvasLayer
             }
         });
         column.AddChild(itemRow);
+
+        column.AddChild(UiStyle.MakeLabel(T("debug.mundo")));
+        _worldState = UiStyle.MakeLabel("");
+        _worldState.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        column.AddChild(_worldState);
+        var worldRow = new HFlowContainer();
+        AddButton(worldRow, "debug.mundo.obolos", () => GameRoot.Instance.State.Inventory.Obols += 10);
+        AddButton(worldRow, "debug.mundo.julgamento", () =>
+        {
+            SetOpen(false);
+            _main.OpenTrial("julgamento_padeiro");
+        });
+        column.AddChild(worldRow);
 
         column.AddChild(UiStyle.MakeLabel(T("debug.dialogo")));
         _dialogueState = UiStyle.MakeLabel("");
@@ -324,6 +338,11 @@ public partial class DebugPanel : CanvasLayer
             string.Join(", ", GameRoot.Instance.State.Items.CompletedSets));
         _itemState.Text = items.ConditionsWaitingForSystems.Count == 0 ? itemLine
             : itemLine + "\n" + string.Format(T("debug.itens.esperando"), string.Join(", ", items.ConditionsWaitingForSystems));
+        var world = GameRoot.Instance.State;
+        _worldState.Text = string.Format(T("debug.mundo.estado"),
+            world.LitTrivias.Count == 0 ? "-" : string.Join(", ", world.LitTrivias),
+            world.Trials.Count == 0 ? "-" : string.Join(", ", world.Trials.Select(p => $"{p.Key}={p.Value}")),
+            world.Perjuries, GameRoot.Instance.Profile.Judge?.ToString() ?? "-");
         var dialogue = GameRoot.Instance.State.Dialogue;
         _dialogueState.Text = string.Format(T("debug.dialogo.estado"),
             dialogue.Awakened.Count == 0 ? "-" : string.Join(", ", dialogue.Awakened), dialogue.Chosen.Count, dialogue.CommentsSeen.Count);

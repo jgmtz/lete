@@ -91,6 +91,15 @@ public sealed record OathKept(string OathId);
 
 public sealed record TestimonyGiven(string TrialId, string RecollectionId);
 
+/// <summary>Uma Lembrança falsa (ou incerta, quando o julgamento marca) apresentada como prova: perjúrio (a Marca sobe).</summary>
+public sealed record TestimonyPerjury(string TrialId, string RecollectionId);
+
+/// <summary>O julgamento terminou: a sombra vai para <paramref name="Destination"/>; o Perfil conta a postura.</summary>
+public sealed record TrialJudged(string TrialId, string ShadeId, Lete.Core.World.ShadeDestination Destination, Lete.Core.World.TrialStance Stance);
+
+/// <summary>O jogador comprou de um mercador (<paramref name="WareKey"/>: item:id, oferenda:tipo, provisao:id).</summary>
+public sealed record WareBought(string MerchantId, string WareKey, int Price);
+
 // ---- Mundo ----
 
 public sealed record TriviaLit(string TriviaId);

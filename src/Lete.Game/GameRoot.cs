@@ -6,6 +6,7 @@ using Lete.Core.Data;
 using Lete.Core.Dialogue;
 using Lete.Core.Events;
 using Lete.Core.Items;
+using Lete.Core.World;
 using Lete.Core.Localization;
 using Lete.Core.Presentation;
 using Lete.Core.Recollections;
@@ -33,6 +34,11 @@ public partial class GameRoot : Node
     public const string TestBagPath = "res://content/items/bolsa_teste.json";
     private const string ItemsFolder = "res://content/items";
     private const string ItemSetsFolder = "res://content/item_sets";
+    private const string MerchantsFolder = "res://content/merchants";
+    private const string TriviasFolder = "res://content/trivias";
+    private const string TrialsFolder = "res://content/trials";
+    private const string MerchantRulesPath = "res://content/rules/mercadores.json";
+    private const string TribunalRulesPath = "res://content/rules/tribunal.json";
     private const string OriginsPath = "res://content/characters/origens.json";
     private const string OathRulesPath = "res://content/rules/juramentos.json";
     private const string MosaicRulesPath = "res://content/rules/mosaico.json";
@@ -66,6 +72,9 @@ public partial class GameRoot : Node
     public Dialogues Dialogues { get; private set; } = null!;
     public Offerings Offerings { get; private set; } = null!;
     public ItemTracker Items { get; private set; } = null!;
+    public Merchants Merchants { get; private set; } = null!;
+    public Trivias Trivias { get; private set; } = null!;
+    public Tribunal Tribunal { get; private set; } = null!;
     public Healing Healing { get; private set; } = null!;
 
     /// <summary>As provisões do jogo (definições; as quantidades estão na Bolsa do estado).</summary>
@@ -123,6 +132,11 @@ public partial class GameRoot : Node
     private HealingRules _healingRules = null!;
     private System.Collections.Generic.Dictionary<string, Item> _items = null!;
     private System.Collections.Generic.Dictionary<string, ItemSet> _itemSets = null!;
+    private System.Collections.Generic.Dictionary<string, Merchant> _merchants = null!;
+    private System.Collections.Generic.Dictionary<string, Trivia> _trivias = null!;
+    private System.Collections.Generic.Dictionary<string, Trial> _trials = null!;
+    private MerchantRules _merchantRules = null!;
+    private TribunalRules _tribunalRules = null!;
     private System.Collections.Generic.Dictionary<string, string> _originNames = null!;
 
     public override void _EnterTree()
@@ -159,6 +173,11 @@ public partial class GameRoot : Node
         // A pasta de itens também tem a Bolsa de teste e as provisões: só os arquivos com 'category' são itens.
         _items = LoadFolder(ItemsFolder, ItemData.FromJson, i => i.Id, ItemData.IsItem);
         _itemSets = LoadFolder(ItemSetsFolder, ItemData.SetFromJson, s => s.Id);
+        _merchants = LoadFolder(MerchantsFolder, WorldData.MerchantFromJson, m => m.Id);
+        _trivias = LoadFolder(TriviasFolder, WorldData.TriviaFromJson, t => t.Id);
+        _trials = LoadFolder(TrialsFolder, WorldData.TrialFromJson, t => t.Id);
+        _merchantRules = WorldData.MerchantRulesFromJson(FileAccess.GetFileAsString(MerchantRulesPath));
+        _tribunalRules = WorldData.TribunalRulesFromJson(FileAccess.GetFileAsString(TribunalRulesPath));
         _originNames = OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath))
             .ToDictionary(o => o.Id, o => o.NameKey, StringComparer.Ordinal);
 
@@ -244,6 +263,9 @@ public partial class GameRoot : Node
         Dialogues = new Dialogues(State, Events, _dialogues, Facts, new GameDialogueEffects(this),
             id => _recollections.TryGetValue(id, out var recollection) ? recollection.Kind : null, Offerings);
         Items = new ItemTracker(State, Events, _items, _itemSets, () => Facts);
+        Merchants = new Merchants(State, Events, _merchants, _merchantRules, Profile, Offerings, Items, () => Tide.Step);
+        Trivias = new Trivias(State, Events, _trivias, Tide);
+        Tribunal = new Tribunal(State, Events, _trials, _tribunalRules, Mosaic);
         PathKeys = new PathKeys(State, Events, _pathKeys, () => Facts);
         PathKeys.Refresh();
         Items.Refresh();

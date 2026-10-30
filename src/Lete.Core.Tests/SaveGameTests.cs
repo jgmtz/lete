@@ -37,6 +37,11 @@ public class SaveGameTests
         state.Items.Equipped[Lete.Core.Items.EquipSlot.Instrument] = "remo_do_afogado";
         state.Items.Equipped[Lete.Core.Items.EquipSlot.Votive2] = "moeda_do_afogado";
         state.Items.CompletedSets.Add("conjunto_do_afogado");
+        state.Merchants["coveiro/oferenda:mel"] = new MerchantSale(2, 1);
+        state.LitTrivias.Add("trivia_sala");
+        state.Trials["julgamento_padeiro"] = Lete.Core.World.ShadeDestination.Elysium;
+        state.Perjuries = 1;
+        state.Profile.TrialStances[Lete.Core.World.TrialStance.Defend] = 1;
         state.Inventory.Obols = 7;
         state.Inventory.Offerings["mel"] = 2;
         state.Inventory.Provisions["pao"] = 1;
@@ -85,6 +90,11 @@ public class SaveGameTests
         Assert.Equal(original.Items.Owned, loaded.Items.Owned);
         Assert.Equal(original.Items.Equipped, loaded.Items.Equipped);
         Assert.Equal(original.Items.CompletedSets, loaded.Items.CompletedSets);
+        Assert.Equal(original.Merchants, loaded.Merchants);
+        Assert.Equal(original.LitTrivias, loaded.LitTrivias);
+        Assert.Equal(original.Trials, loaded.Trials);
+        Assert.Equal(1, loaded.Perjuries);
+        Assert.Equal(original.Profile.TrialStances, loaded.Profile.TrialStances);
         Assert.Equal(7, loaded.Inventory.Obols);
         Assert.Equal(original.Inventory.Offerings, loaded.Inventory.Offerings);
         Assert.Equal(original.Inventory.Provisions, loaded.Inventory.Provisions);

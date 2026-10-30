@@ -1,0 +1,12 @@
+{
+  "id": "tribunal",
+  "_nota": "Tribunal (GDD 7.2; decisão do João, 30/out/2026): a nota é a soma dos pesos das provas apresentadas mais o bônus da postura (calar não apresenta nada). A Marca do perjúrio é a de marca.json ('perjury').",
+  "defend_bonus": {
+    "_tbd": true,
+    "value": 1
+  },
+  "accuse_bonus": {
+    "_tbd": true,
+    "value": -1
+  }
+}

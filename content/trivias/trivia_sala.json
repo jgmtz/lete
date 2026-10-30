@@ -1,0 +1,9 @@
+{
+  "id": "trivia_sala",
+  "_rascunho": "Trívia de TESTE (a da sala, com as tochas). Liga à do fundo.",
+  "region": "sala_teste",
+  "name_key": "trivia.sala.nome",
+  "torches": [
+    "trivia_sala_fundo"
+  ]
+}

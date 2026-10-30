@@ -1,0 +1,63 @@
+{
+  "id": "julgamento_padeiro",
+  "_rascunho": "Julgamento de TESTE do Padeiro (GDD 7.2), com as frases do Diário da conversa dele e a Lembrança de teste. Pesos, mínimos e textos em rascunho (Claude, 30/out/2026).",
+  "judge_key": "juiz.minos.nome",
+  "shade": "padeiro",
+  "intro_key": "julgamento.padeiro.abertura",
+  "slots": 2,
+  "evidence": [
+    {
+      "journal": "diario.padeiro.mulher",
+      "weight": {
+        "_tbd": true,
+        "value": 2
+      }
+    },
+    {
+      "journal": "diario.padeiro.frase",
+      "weight": {
+        "_tbd": true,
+        "value": 1
+      }
+    },
+    {
+      "journal": "diario.padeiro.fornada",
+      "weight": {
+        "_tbd": true,
+        "value": -1
+      }
+    },
+    {
+      "recollection": "maos_no_barro",
+      "weight": {
+        "_tbd": true,
+        "value": 1
+      }
+    }
+  ],
+  "perjury_if_uncertain": [
+    "agua_parada"
+  ],
+  "verdicts": [
+    {
+      "destination": "elisios",
+      "min": {
+        "_tbd": true,
+        "value": 3
+      },
+      "text_key": "julgamento.padeiro.elisios"
+    },
+    {
+      "destination": "asfodelos",
+      "min": {
+        "_tbd": true,
+        "value": 0
+      },
+      "text_key": "julgamento.padeiro.asfodelos"
+    },
+    {
+      "destination": "tartaro",
+      "text_key": "julgamento.padeiro.tartaro"
+    }
+  ]
+}

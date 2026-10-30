@@ -194,6 +194,23 @@ public class ContentTests
     }
 
     [Fact]
+    public void World_MerchantsTriviasAndTrialsLoad()
+    {
+        T[] Load<T>(string folder, Func<string, T> read) => Directory.GetFiles(Content(folder), "*.json").Select(f => read(File.ReadAllText(f))).ToArray();
+        var merchants = Load("merchants", Lete.Core.World.WorldData.MerchantFromJson);
+        var trivias = Load("trivias", Lete.Core.World.WorldData.TriviaFromJson);
+        var trials = Load("trials", Lete.Core.World.WorldData.TrialFromJson);
+        Assert.NotEmpty(merchants);
+        Assert.All(trivias, t => Assert.All(t.Torches, torch => Assert.Contains(trivias, x => x.Id == torch)));
+        Assert.NotEmpty(trials);
+        Lete.Core.World.WorldData.MerchantRulesFromJson(File.ReadAllText(Content("rules", "mercadores.json")));
+        Lete.Core.World.WorldData.TribunalRulesFromJson(File.ReadAllText(Content("rules", "tribunal.json")));
+        var provisions = BagData.ProvisionsFromJson(File.ReadAllText(Content("items", "provisoes.json")));
+        Assert.All(merchants.SelectMany(m => m.Stock).Where(w => w.Kind == Lete.Core.World.WareKind.Provision),
+            w => Assert.Contains(provisions, p => p.Id == w.Id));
+    }
+
+    [Fact]
     public void Profile_RulesLoad() => ProfileData.FromJson(File.ReadAllText(Content("rules", "perfil.json")));
 
     [Fact]

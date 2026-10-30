@@ -1,0 +1,9 @@
+{
+  "id": "trivia_sala_fundo",
+  "_rascunho": "Segunda Trívia de TESTE, no fundo da sala, para conferir a viagem pela tocha.",
+  "region": "sala_teste",
+  "name_key": "trivia.sala_fundo.nome",
+  "torches": [
+    "trivia_sala"
+  ]
+}

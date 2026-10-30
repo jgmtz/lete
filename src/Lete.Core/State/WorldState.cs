@@ -44,6 +44,17 @@ public sealed class WorldState
     /// <summary>Perfil: vias e tipos de Memória contados, e os encontros recentes (ver <c>Systems.Profile</c>).</summary>
     public ProfileState Profile { get; } = new();
 
+    /// <summary>Vendas por mercador e entrada (<c>mercador/entrada</c>), no degrau da Maré em que aconteceram.</summary>
+    public Dictionary<string, MerchantSale> Merchants { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>Trívias acesas (ligadas à rede de viagem).</summary>
+    public HashSet<string> LitTrivias { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>Julgamentos feitos (id → destino da sombra) e quantos perjúrios houve no Tribunal.</summary>
+    public Dictionary<string, Lete.Core.World.ShadeDestination> Trials { get; } = new(StringComparer.Ordinal);
+
+    public int Perjuries { get; set; }
+
     /// <summary>Itens únicos: os que tem (com o estágio), o equipado e os conjuntos reunidos.</summary>
     public ItemsState Items { get; } = new();
 

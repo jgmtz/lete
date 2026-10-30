@@ -47,12 +47,21 @@ public static class SaveGame
             {
                 ["vias"] = Counts(state.Profile.ViaTotals),
                 ["tipos"] = Counts(state.Profile.KindTotals),
+                ["tribunal"] = Counts(state.Profile.TrialStances),
                 ["recentes"] = new JsonArray(state.Profile.Recent.Select(e => (JsonNode?)new JsonObject
                 {
                     ["via"] = e.Via is { } via ? ConditionParser.SnakeCase(via) : null,
                     ["tipos"] = Array(e.Kinds.Select(ConditionParser.SnakeCase)),
                 }).ToArray()),
             },
+            ["mercadores"] = new JsonObject(state.Merchants
+                .OrderBy(p => p.Key, StringComparer.Ordinal)
+                .Select(p => KeyValuePair.Create(p.Key, (JsonNode?)new JsonArray(p.Value.Sold, p.Value.Step)))),
+            ["trivias_acesas"] = Array(state.LitTrivias.OrderBy(t => t, StringComparer.Ordinal)),
+            ["julgamentos"] = new JsonObject(state.Trials
+                .OrderBy(p => p.Key, StringComparer.Ordinal)
+                .Select(p => KeyValuePair.Create(p.Key, (JsonNode?)ConditionParser.SnakeCase(p.Value)))),
+            ["perjurios"] = state.Perjuries,
             ["itens"] = new JsonObject
             {
                 ["tem"] = Ints(state.Items.Owned),
@@ -176,6 +185,7 @@ public static class SaveGame
         {
             ReadCounts(profile, "vias", state.Profile.ViaTotals);
             ReadCounts(profile, "tipos", state.Profile.KindTotals);
+            ReadCounts(profile, "tribunal", state.Profile.TrialStances);
             if (profile["recentes"] is JsonArray recent)
             {
                 state.Profile.Recent.AddRange(recent.OfType<JsonObject>().Select(e => new ProfileEncounter(
@@ -184,6 +194,26 @@ public static class SaveGame
             }
         }
 
+        if (json["mercadores"] is JsonObject merchants)
+        {
+            foreach (var (key, sale) in merchants)
+            {
+                state.Merchants[key] = sale is JsonArray { Count: 2 } pair
+                    ? new MerchantSale(pair[0]!.GetValue<int>(), pair[1]!.GetValue<int>())
+                    : throw new FormatException($"Venda '{key}' precisa ser [vendidas, degrau].");
+            }
+        }
+
+        state.LitTrivias.UnionWith(Strings(json, "trivias_acesas"));
+        if (json["julgamentos"] is JsonObject trials)
+        {
+            foreach (var (id, destination) in trials)
+            {
+                state.Trials[id] = EnumOf<Lete.Core.World.ShadeDestination>(destination?.GetValue<string>() ?? "");
+            }
+        }
+
+        state.Perjuries = json["perjurios"]?.GetValue<int>() ?? 0;
         if (json["itens"] is JsonObject items)
         {
             ReadInts(items, "tem", state.Items.Owned);

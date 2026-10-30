@@ -13,6 +13,9 @@ public sealed class ProfileState
     /// <summary>Usos de Memória em combate por tipo de Lembrança.</summary>
     public Dictionary<RecollectionKind, int> KindTotals { get; } = new();
 
+    /// <summary>Posturas no Tribunal (defender, acusar, calar) e quantas vezes.</summary>
+    public Dictionary<Lete.Core.World.TrialStance, int> TrialStances { get; } = new();
+
     /// <summary>Os últimos encontros, do mais antigo ao mais novo.</summary>
     public List<ProfileEncounter> Recent { get; } = new();
 }

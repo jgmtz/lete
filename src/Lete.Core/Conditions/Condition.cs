@@ -168,6 +168,7 @@ public sealed record ItemOwned(string Item) : Predicate
 public sealed record TriviaIsLit(string Trivia) : Predicate
 {
     public override string Name => "trivia_lit";
+    public override IEnumerable<(string, string)> References() => new[] { (ConditionTargets.Trivias, Trivia) };
 }
 
 public sealed record RegionVisited(string Region) : Predicate
@@ -202,4 +203,5 @@ public static class ConditionTargets
     public const string Regions = "regions";
     public const string Missions = "missions";
     public const string PathKeys = "path";
+    public const string Trivias = "trivias";
 }

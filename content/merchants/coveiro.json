@@ -1,0 +1,74 @@
+{
+  "id": "coveiro",
+  "_rascunho": "Mercador de TESTE a partir do exemplo do GDD 6.4: O Coveiro (Asfódelos; básico, neutro, sempre disponível). O estoque neutro é básico; o manto e a moeda têm etiquetas para mostrar o preço de outro caminho. Preços e quantidades provisórios (Claude, 30/out/2026).",
+  "name_key": "mercador.coveiro.nome",
+  "greeting_key": "mercador.coveiro.saudacao",
+  "stock": [
+    {
+      "offering": "mel",
+      "price": {
+        "_tbd": true,
+        "value": 2
+      },
+      "count": {
+        "_tbd": true,
+        "value": 2
+      }
+    },
+    {
+      "offering": "agua",
+      "price": {
+        "_tbd": true,
+        "value": 2
+      },
+      "count": {
+        "_tbd": true,
+        "value": 2
+      }
+    },
+    {
+      "offering": "farinha",
+      "price": {
+        "_tbd": true,
+        "value": 2
+      },
+      "count": {
+        "_tbd": true,
+        "value": 2
+      }
+    },
+    {
+      "provision": "pao",
+      "price": {
+        "_tbd": true,
+        "value": 3
+      },
+      "count": {
+        "_tbd": true,
+        "value": 2
+      }
+    },
+    {
+      "item": "manto_do_afogado",
+      "price": {
+        "_tbd": true,
+        "value": 8
+      },
+      "tags": [
+        "fight",
+        "mourning"
+      ]
+    },
+    {
+      "item": "moeda_do_afogado",
+      "price": {
+        "_tbd": true,
+        "value": 6
+      },
+      "tags": [
+        "free",
+        "family"
+      ]
+    }
+  ]
+}

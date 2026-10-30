@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=28 format=3]
 
 [ext_resource type="Script" path="res://src/Lete.Game/World/CameraRig.cs" id="1_cam"]
 [ext_resource type="PackedScene" path="res://src/Lete.Game/World/Player.tscn" id="2_player"]
@@ -15,6 +15,9 @@
 [ext_resource type="Script" path="res://src/Lete.Game/World/HearthFire.cs" id="13_fogo"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/OfferingAltar.cs" id="14_altar"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/ItemPickup.cs" id="15_item"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/MerchantStall.cs" id="16_mercador"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/TribunalSeat.cs" id="17_tribunal"]
+[ext_resource type="Texture2D" path="res://art/sprites/sombras/mercador/parado/mercador_parado_frente.png" id="18_coveiro"]
 
 [sub_resource type="Environment" id="Environment_nevoa"]
 background_mode = 1
@@ -238,6 +241,7 @@ omni_range = 5.0
 [node name="Examine" type="Area3D" parent="Trivia"]
 script = ExtResource("12_descanso")
 JournalKey = "obj.trivia.examinar"
+TriviaId = "trivia_sala"
 
 [node name="Reach" type="CollisionShape3D" parent="Trivia/Examine"]
 shape = SubResource("Shape_alcance")
@@ -334,6 +338,53 @@ transform = Transform3D(0.94, 0.34, 0, -0.34, 0.94, 0, 0, 0, 1, 0, 0.05, 0)
 size = Vector3(1.6, 0.08, 0.12)
 material = SubResource("Mat_terracota")
 
+[node name="TriviaFundo" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 8, 0, -3)
+script = ExtResource("12_descanso")
+TriviaId = "trivia_sala_fundo"
+
+[node name="Reach" type="CollisionShape3D" parent="TriviaFundo"]
+shape = SubResource("Shape_alcance")
+
+[node name="Tocha" type="CSGCylinder3D" parent="TriviaFundo" groups=["pixel_surface"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 0, 0.6, 0)
+use_collision = true
+radius = 0.15
+height = 1.2
+sides = 6
+material = SubResource("Mat_terracota")
+
+[node name="Chama" type="OmniLight3D" parent="TriviaFundo"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 0, 1.4, 0)
+light_color = Color(1, 0.7, 0.35, 1)
+omni_range = 3.0
+
+[node name="Coveiro" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -2, 0, 6)
+script = ExtResource("16_mercador")
+MerchantId = "coveiro"
+
+[node name="Reach" type="CollisionShape3D" parent="Coveiro"]
+shape = SubResource("Shape_alcance")
+
+[node name="Sprite" type="Sprite3D" parent="Coveiro"]
+texture = ExtResource("18_coveiro")
+script = ExtResource("10_sprite")
+
+[node name="Tribunal" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 2, 0, -7)
+script = ExtResource("17_tribunal")
+TrialId = "julgamento_padeiro"
+
+[node name="Reach" type="CollisionShape3D" parent="Tribunal"]
+shape = SubResource("Shape_alcance")
+
+[node name="Pedra" type="CSGBox3D" parent="Tribunal" groups=["pixel_surface"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 0, 0.4, 0)
+use_collision = true
+size = Vector3(1.2, 0.8, 0.6)
+material = SubResource("Mat_terracota")
+
 [node name="Padeiro" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 3, 0, 3)
 script = ExtResource("9_conversa")
@@ -389,6 +440,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -6, 0, 7)
 
 [node name="Remo" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -6, 0, 2)
+
+[node name="Coveiro" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -2, 0, 7)
+
+[node name="Tribunal" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, 2, 0, -6)
 
 [node name="Pesada1" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -0, 1, -1, 0, -7)

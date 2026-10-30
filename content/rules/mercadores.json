@@ -1,0 +1,8 @@
+{
+  "id": "mercadores",
+  "_nota": "Mercadores (GDD 6.4): o que é de outro caminho (etiquetas que não combinam com o Perfil recente) custa este fator a mais. Oferendas e provisões repõem a cada degrau da Maré (decisão do João, 30/out/2026).",
+  "off_path_price_factor": {
+    "_tbd": true,
+    "value": 1.5
+  }
+}

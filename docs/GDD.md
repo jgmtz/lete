@@ -456,6 +456,7 @@ Minos, Radamanto e Éaco julgam sombras que **o jogador conheceu**. Cada julgame
 - O veredito leva a sombra a um destino (Asfódelos, Elísios ou Tártaro); o jogador a reencontra lá, com outra atitude.
 - Ele **depõe sob juramento**: apresentar Lembrança *incerta* ou *falsa* como prova pode virar **perjúrio** (liga os dois sistemas).
 - De 4 a 6 julgamentos, todos de sombras nomeadas. Alimentam o Perfil (juiz severo ou clemente).
+- **Regras fechadas (João, 30/out/2026):** o veredito sai dos **pesos das provas apresentadas mais a postura**; apresentar uma Lembrança **falsa é sempre perjúrio**, e uma **incerta, quando o julgamento a marcar**. Mercadores: oferendas e provisões **acabam e repõem a cada degrau da Maré**; itens únicos se compram uma vez.
 
 ---
 

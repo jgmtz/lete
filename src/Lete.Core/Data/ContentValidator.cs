@@ -40,6 +40,7 @@ public static class ContentValidator
         new ReferenceRule("recollections", "shade", "shades"),
         new ReferenceRule("items", "set", "item_sets"),
         new ReferenceRule("items", "unlocks_path", "path"),
+        new ReferenceRule("merchants", "item", "items"),
     };
 
     private const string LocaleFolder = "locale";

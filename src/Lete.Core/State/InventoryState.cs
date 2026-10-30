@@ -1,5 +1,8 @@
 namespace Lete.Core.State;
 
+/// <summary>Quantas unidades de uma entrada o mercador vendeu, e em que degrau da Maré (no degrau seguinte, ele repõe).</summary>
+public sealed record MerchantSale(int Sold, int Step);
+
 /// <summary>A Bolsa no <see cref="WorldState"/>: óbolos, oferendas por tipo e provisões por id.</summary>
 public sealed class InventoryState
 {
