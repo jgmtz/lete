@@ -147,7 +147,9 @@ public static class ConditionParser
         "quest_stage" => new QuestStageMin(
             Id(Field(value, at, "id"), $"{at}.id"),
             Count(Field(value, at, "min"), $"{at}.min")),
-        "shade_lucidity" => new ShadeLucidityIs(Id(value, at)),
+        "shade_lucidity" => Lete.Core.Dialogue.DialogueData.LucidityIds.Contains(Id(value, at))
+            ? new ShadeLucidityIs(Id(value, at))
+            : throw Error(at, $"use {string.Join(", ", Lete.Core.Dialogue.DialogueData.LucidityIds)}."),
         _ => throw Error(at, $"predicado desconhecido '{name}'."),
     };
 

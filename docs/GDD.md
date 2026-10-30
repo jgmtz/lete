@@ -374,6 +374,7 @@ Vêm do mundo dos vivos (caem no Altar das Oferendas) e das provisões. Tipos: m
 - **Opções bloqueadas ficam visíveis, em cinza, com dica vaga** ("você sente que já ouviu esse cheiro de forno..."). Isso mostra que existe mais e incentiva a revisita.
 - **Companheiro na conversa:** em cenas importantes comenta **uma vez**; o jogador pode concordar, discordar ou ignorar, o que alimenta o vínculo.
 - **Escopo:** falas reativas (origem, Marca, memória) só nas sombras nomeadas e nos seres fixos. Sombras de preenchimento usam bancos curtos.
+- **Regras fechadas (João, 30/out/2026):** a lucidez vem do **estado base** do arquivo da sombra, subido por **condições** (ex.: uma Lembrança ligada); a **oferenda certa** a deixa desperta **até o fim da conversa**. Opções já escolhidas aparecem **esmaecidas, mas disponíveis**. O comentário do companheiro já funciona (uma vez, concordar/discordar/ignorar); o vínculo que ele muda entra com o item Companheiro.
 - **Exemplo (Padeiro, Rua dos Ofícios):** estado *vago* (sem oferenda): Escutar → repete o gesto de amassar e murmura "a fornada atrasou..."; Perguntar → não entende; Calar → nada; `[cinza]` reconhece o cheiro do forno. Depois de partilhar **farinha**, o estado vira *desperto*: abrem-se "Quem era a mulher que esperava o pão?", `[Artesão] Mostrar as mãos` (ele o trata como colega) e `[Memória de Ofício]` (completa a frase dele). Quando o efeito passa, volta a *vago* e o Diário guarda o que contou.
 
 ### 5.3 Missões

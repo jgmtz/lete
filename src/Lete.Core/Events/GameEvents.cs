@@ -122,3 +122,9 @@ public sealed record CompanionBondChanged(string CompanionId, int Bond);
 
 /// <summary>Opção escolhida num diálogo (postura: escutar, perguntar, pressionar, consolar, calar).</summary>
 public sealed record DialogueChoiceMade(string DialogueId, string NodeId, string Posture);
+
+/// <summary>Uma conversa terminou (o despertar da oferenda acaba aqui).</summary>
+public sealed record DialogueEnded(string DialogueId);
+
+/// <summary>O jogador respondeu ao comentário do companheiro (o vínculo escuta quando existir).</summary>
+public sealed record CompanionCommented(string CommentId, string CompanionId, Lete.Core.Dialogue.CommentResponse Response);

@@ -445,6 +445,31 @@
         }
       },
       "selectable": false
+    },
+    {
+      "id": "padeiro",
+      "_papel": "Espírito nomeado da origem artesão (Rua dos Ofícios, GDD 5.2 e HISTORIA 4.4). Arte de 25/out/2026.",
+      "name_key": "shade.padeiro.nome",
+      "kind": "shade",
+      "gender": "m",
+      "height": {
+        "_tbd": true,
+        "value": 1.0
+      },
+      "battle_front": "padeiro_34",
+      "map_folder": "res://art/sprites/sombras/padeiro",
+      "tint": "#8C9BAD",
+      "idle_frames": {
+        "frames": 6,
+        "fps": {
+          "_tbd": true,
+          "value": 8
+        },
+        "by_style": {
+          "pixel_160": "res://art/sprites/sombras/padeiro/batalha_flutuar_160/padeiro_flutuar_"
+        }
+      },
+      "selectable": false
     }
   ]
 }

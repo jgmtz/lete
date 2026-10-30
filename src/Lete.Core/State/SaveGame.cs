@@ -53,6 +53,12 @@ public static class SaveGame
                     ["tipos"] = Array(e.Kinds.Select(ConditionParser.SnakeCase)),
                 }).ToArray()),
             },
+            ["dialogo"] = new JsonObject
+            {
+                ["escolhidas"] = Array(state.Dialogue.Chosen.OrderBy(c => c, StringComparer.Ordinal)),
+                ["comentarios"] = Array(state.Dialogue.CommentsSeen.OrderBy(c => c, StringComparer.Ordinal)),
+                ["despertas"] = Array(state.Dialogue.Awakened.OrderBy(c => c, StringComparer.Ordinal)),
+            },
             ["juramentos"] = new JsonObject(state.Oaths
                 .OrderBy(p => p.Key, StringComparer.Ordinal)
                 .Select(p => KeyValuePair.Create(p.Key, (JsonNode?)OathToText(p.Value)))),
@@ -156,6 +162,13 @@ public static class SaveGame
                     Text(e, "via") is { } via ? EnumOf<Via>(via) : null,
                     Strings(e, "tipos").Select(EnumOf<RecollectionKind>).ToList())));
             }
+        }
+
+        if (json["dialogo"] is JsonObject dialogue)
+        {
+            state.Dialogue.Chosen.UnionWith(Strings(dialogue, "escolhidas"));
+            state.Dialogue.CommentsSeen.UnionWith(Strings(dialogue, "comentarios"));
+            state.Dialogue.Awakened.UnionWith(Strings(dialogue, "despertas"));
         }
 
         if (json["juramentos"] is JsonObject oaths)

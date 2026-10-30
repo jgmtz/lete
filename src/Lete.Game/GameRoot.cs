@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using Godot;
 using Lete.Core.Conditions;
 using Lete.Core.Data;
+using Lete.Core.Dialogue;
 using Lete.Core.Events;
 using Lete.Core.Localization;
 using Lete.Core.Presentation;
@@ -23,6 +25,8 @@ public partial class GameRoot : Node
     private const string ProfileRulesPath = "res://content/rules/perfil.json";
     private const string PathFolder = "res://content/path";
     private const string OathsFolder = "res://content/oaths";
+    private const string DialogueFolder = "res://content/dialogue";
+    private const string OriginsPath = "res://content/characters/origens.json";
     private const string OathRulesPath = "res://content/rules/juramentos.json";
     private const string MosaicRulesPath = "res://content/rules/mosaico.json";
     private const string RecollectionsFolder = "res://content/recollections";
@@ -52,6 +56,31 @@ public partial class GameRoot : Node
     public Profile Profile { get; private set; } = null!;
     public PathKeys PathKeys { get; private set; } = null!;
     public Oaths Oaths { get; private set; } = null!;
+    public Dialogues Dialogues { get; private set; } = null!;
+
+    /// <summary>Chave do nome de uma origem (para o rótulo <c>[Artesão]</c> das conversas).</summary>
+    public string OriginNameKey(string originId) => _originNames.TryGetValue(originId, out var key) ? key : originId;
+
+    /// <summary>Os efeitos dos nós de conversa, cada um no sistema certo.</summary>
+    private sealed class GameDialogueEffects : IDialogueEffects
+    {
+        private readonly GameRoot _root;
+
+        public GameDialogueEffects(GameRoot root) => _root = root;
+
+        public void Apply(DialogueEffect effect)
+        {
+            switch (effect)
+            {
+                case AddJournalEntry e: _root.Journal.Add(e.EntryKey); break;
+                case SetFlag e: _root.State.Flags.Add(e.Flag); break;
+                case GainOriginFragment e: _root.OriginFragments.Gain(e.FragmentId); break;
+                case HearRecollectionSource e: _root.Mosaic.Hear(e.RecollectionId, e.SourceId); break;
+                case SwearOath e: _root.Oaths.Swear(e.OathId); break;
+                case BreakOath e: _root.Oaths.Break(e.OathId); break;
+            }
+        }
+    }
     public OriginFragments OriginFragments { get; private set; } = null!;
 
     /// <summary>Respostas do estado atual às condições do conteúdo (<see cref="ConditionEvaluator"/>).</summary>
@@ -75,6 +104,8 @@ public partial class GameRoot : Node
     private System.Collections.Generic.Dictionary<string, PathKey> _pathKeys = null!;
     private System.Collections.Generic.Dictionary<string, Oath> _oaths = null!;
     private OathRules _oathRules = null!;
+    private System.Collections.Generic.Dictionary<string, DialogueGraph> _dialogues = null!;
+    private System.Collections.Generic.Dictionary<string, string> _originNames = null!;
 
     public override void _EnterTree()
     {
@@ -103,6 +134,9 @@ public partial class GameRoot : Node
         _pathKeys = LoadFolder(PathFolder, PathData.FromJson, k => k.Id);
         _oaths = LoadFolder(OathsFolder, OathData.FromJson, o => o.Id);
         _oathRules = OathData.RulesFromJson(FileAccess.GetFileAsString(OathRulesPath));
+        _dialogues = LoadFolder(DialogueFolder, DialogueData.FromJson, d => d.Id);
+        _originNames = OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath))
+            .ToDictionary(o => o.Id, o => o.NameKey, StringComparer.Ordinal);
 
         BuildSystems();
     }
@@ -165,6 +199,7 @@ public partial class GameRoot : Node
         Profile?.Dispose();
         PathKeys?.Dispose();
         Oaths?.Dispose();
+        Dialogues?.Dispose();
         Journal = new Journal(State, Events);
         Mark = new MarkTracker(State, Events, _markRules);
         Tide = new TideTracker(State, Events, _tideRules);
@@ -174,6 +209,8 @@ public partial class GameRoot : Node
         Profile = new Profile(State, Events, _profileRules);
         Facts = new WorldFacts(State, _markRules, Mosaic, Profile);
         Oaths = new Oaths(State, Events, _oaths, _oathRules, () => Facts);
+        Dialogues = new Dialogues(State, Events, _dialogues, Facts, new GameDialogueEffects(this),
+            id => _recollections.TryGetValue(id, out var recollection) ? recollection.Kind : null);
         PathKeys = new PathKeys(State, Events, _pathKeys, () => Facts);
         PathKeys.Refresh();
     }

@@ -1,0 +1,152 @@
+{
+  "id": "padeiro",
+  "_rascunho": "Conversa de TESTE do Padeiro (Rua dos Ofícios), a partir do exemplo do GDD 5.2 (Claude, 30/out/2026). Falas em rascunho; o comentário do companheiro só tem Aulo e Lia por enquanto. A Lembrança usada é a de teste (maos_no_barro).",
+  "mode": "shade",
+  "speaker_key": "shade.padeiro.nome",
+  "shade": "padeiro",
+  "lucidity": {
+    "base": "vaga",
+    "offering": "farinha"
+  },
+  "start": [
+    "desperto_inicio",
+    "vago_inicio"
+  ],
+  "nodes": [
+    {
+      "id": "vago_inicio",
+      "when": {
+        "shade_lucidity": "vaga"
+      },
+      "line_key": "dlg.padeiro.vago.linha",
+      "options": [
+        {
+          "posture": "escutar",
+          "text_key": "dlg.padeiro.vago.escutar",
+          "next": "vago_escutar"
+        },
+        {
+          "posture": "perguntar",
+          "text_key": "dlg.padeiro.vago.perguntar",
+          "next": "vago_nao_entende"
+        },
+        {
+          "posture": "escutar",
+          "text_key": "dlg.padeiro.vago.cheiro_forno",
+          "requires": {
+            "recollection": {
+              "id": "maos_no_barro",
+              "min_stage": "fragment"
+            }
+          },
+          "hint_key": "dlg.padeiro.vago.cheiro_forno.dica",
+          "show_blocked": true,
+          "next": "vago_reconhece"
+        },
+        {
+          "posture": "calar",
+          "text_key": "dlg.padeiro.vago.calar",
+          "next": "fim"
+        }
+      ]
+    },
+    {
+      "id": "vago_escutar",
+      "line_key": "dlg.padeiro.vago.escutar.resposta",
+      "next": "vago_inicio",
+      "effects": [
+        {
+          "journal_key": "diario.padeiro.fornada"
+        }
+      ]
+    },
+    {
+      "id": "vago_nao_entende",
+      "line_key": "dlg.padeiro.vago.perguntar.resposta",
+      "next": "vago_inicio"
+    },
+    {
+      "id": "vago_reconhece",
+      "line_key": "dlg.padeiro.vago.cheiro_forno.resposta",
+      "next": "fim"
+    },
+    {
+      "id": "desperto_inicio",
+      "when": {
+        "shade_lucidity": "desperta"
+      },
+      "line_key": "dlg.padeiro.desperto.linha",
+      "options": [
+        {
+          "posture": "perguntar",
+          "text_key": "dlg.padeiro.desperto.mulher",
+          "next": "desperto_mulher"
+        },
+        {
+          "posture": "escutar",
+          "text_key": "dlg.padeiro.desperto.maos",
+          "requires": {
+            "origin": "artesao"
+          },
+          "next": "desperto_maos"
+        },
+        {
+          "posture": "consolar",
+          "text_key": "dlg.padeiro.desperto.frase",
+          "requires": {
+            "recollection": {
+              "id": "maos_no_barro",
+              "min_stage": "full"
+            }
+          },
+          "hint_key": "dlg.padeiro.desperto.frase.dica",
+          "show_blocked": true,
+          "next": "desperto_frase"
+        },
+        {
+          "posture": "calar",
+          "text_key": "dlg.padeiro.desperto.calar",
+          "next": "fim"
+        }
+      ]
+    },
+    {
+      "id": "desperto_mulher",
+      "line_key": "dlg.padeiro.desperto.mulher.resposta",
+      "next": "desperto_inicio",
+      "effects": [
+        {
+          "journal_key": "diario.padeiro.mulher"
+        }
+      ],
+      "comment": {
+        "id": "padeiro_mulher",
+        "lines": [
+          {
+            "companion": "aulo",
+            "line_key": "dlg.padeiro.comentario.aulo"
+          },
+          {
+            "companion": "lia",
+            "line_key": "dlg.padeiro.comentario.lia"
+          }
+        ]
+      }
+    },
+    {
+      "id": "desperto_maos",
+      "line_key": "dlg.padeiro.desperto.maos.resposta",
+      "next": "desperto_inicio"
+    },
+    {
+      "id": "desperto_frase",
+      "line_key": "dlg.padeiro.desperto.frase.resposta",
+      "next": "fim",
+      "effects": [
+        {
+          "journal_key": "diario.padeiro.frase"
+        }
+      ]
+    }
+  ]
+}

@@ -171,6 +171,16 @@ public class ContentTests
     }
 
     [Fact]
+    public void Dialogues_EveryGraphLoadsWithItsFileName()
+    {
+        var graphs = Directory.GetFiles(Content("dialogue"), "*.json")
+            .Select(f => (File: Path.GetFileNameWithoutExtension(f), Graph: Lete.Core.Dialogue.DialogueData.FromJson(File.ReadAllText(f))))
+            .ToList();
+        Assert.NotEmpty(graphs);
+        Assert.All(graphs, g => Assert.Equal(g.File, g.Graph.Id));
+    }
+
+    [Fact]
     public void Profile_RulesLoad() => ProfileData.FromJson(File.ReadAllText(Content("rules", "perfil.json")));
 
     [Fact]

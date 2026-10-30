@@ -32,6 +32,9 @@ public class SaveGameTests
         state.JournalEntries.Add("obj.estela.examinar");
         state.Flags.Add("viu_o_rio");
         state.PathKeys["aqueronte"] = "obolo";
+        state.Dialogue.Chosen.Add("padeiro/dlg.padeiro.vago.escutar");
+        state.Dialogue.CommentsSeen.Add("padeiro_mulher");
+        state.Dialogue.Awakened.Add("padeiro");
         state.Oaths["mao_aberta"] = OathStatus.Broken;
         state.Oaths["do_lar"] = OathStatus.Active;
         state.Oaths["do_silencio"] = OathStatus.Kept;
@@ -68,6 +71,9 @@ public class SaveGameTests
         Assert.Equal(original.JournalEntries, loaded.JournalEntries);
         Assert.Equal(original.Flags, loaded.Flags);
         Assert.Equal(original.PathKeys, loaded.PathKeys);
+        Assert.Equal(original.Dialogue.Chosen, loaded.Dialogue.Chosen);
+        Assert.Equal(original.Dialogue.CommentsSeen, loaded.Dialogue.CommentsSeen);
+        Assert.Equal(original.Dialogue.Awakened, loaded.Dialogue.Awakened);
         Assert.Equal(original.Oaths, loaded.Oaths);
         Assert.Equal(original.Profile.ViaTotals, loaded.Profile.ViaTotals);
         Assert.Equal(original.Profile.KindTotals, loaded.Profile.KindTotals);

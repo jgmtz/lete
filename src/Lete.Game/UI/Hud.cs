@@ -77,6 +77,10 @@ public partial class Hud : CanvasLayer
     private void RefreshPrompt()
     {
         _prompt.Visible = !_suppressed && _player.CurrentInteractable is not null;
+        if (_player.CurrentInteractable is { } target)
+        {
+            _prompt.Text = GameRoot.Instance.Text(target.PromptKey);
+        }
     }
 
     /// <summary>Faixa horizontal presa embaixo da tela, com o texto centralizado.</summary>

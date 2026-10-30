@@ -37,6 +37,7 @@ public partial class Main : Node
     private Hud _hud = null!;
     private GameMenu _menu = null!;
     private HeavyMemoryScreen _heavyScreen = null!;
+    private DialogueScreen _dialogueScreen = null!;
     private DebugPanel _debug = null!;
     private IDisposable? _markSubscription;
 
@@ -66,6 +67,10 @@ public partial class Main : Node
         _debug.OpenChanged += RefreshPlayerInput;
         _heavyScreen.OpenChanged += RefreshPlayerInput;
         HeavyMemoryPlace.Reached += SurfaceHeavyMemory;
+        _dialogueScreen = new DialogueScreen();
+        AddChild(_dialogueScreen);
+        _dialogueScreen.OpenChanged += RefreshPlayerInput;
+        Talkable.Talked += OpenDialogue;
         GameRoot.Instance.StateReplaced += OnStateReplaced;
         GameRoot.Instance.Saving += OnSaving;
         _player.CharacterChanged += ApplyMarkLook;
@@ -94,6 +99,7 @@ public partial class Main : Node
         GameRoot.Instance.StateReplaced -= OnStateReplaced;
         GameRoot.Instance.Saving -= OnSaving;
         HeavyMemoryPlace.Reached -= SurfaceHeavyMemory;
+        Talkable.Talked -= OpenDialogue;
         _markSubscription?.Dispose();
     }
 
@@ -104,6 +110,15 @@ public partial class Main : Node
         {
             _menu.SetOpen(false);
             _heavyScreen.Open(memoryId);
+        }
+    }
+
+    public void OpenDialogue(string dialogueId)
+    {
+        if (!_dialogueScreen.IsOpen)
+        {
+            _menu.SetOpen(false);
+            _dialogueScreen.Open(dialogueId);
         }
     }
 
@@ -149,8 +164,9 @@ public partial class Main : Node
 
     private void RefreshPlayerInput()
     {
-        _hud.SetSuppressed(_menu.IsOpen || _heavyScreen.IsOpen);
-        _player.InputEnabled = !_menu.IsOpen && !_debug.IsOpen && !_heavyScreen.IsOpen;
+        var talking = _dialogueScreen.IsOpen;
+        _hud.SetSuppressed(_menu.IsOpen || _heavyScreen.IsOpen || talking);
+        _player.InputEnabled = !_menu.IsOpen && !_debug.IsOpen && !_heavyScreen.IsOpen && !talking;
     }
 
     /// <summary>Aplica a mesma densidade de pixel a sprites, texturas do cenário, câmera e viewport.</summary>
@@ -160,6 +176,10 @@ public partial class Main : Node
         var density = new PixelDensity(SpriteHeightPx, CharacterHeightMeters, CharacterScreenHeightPx, viewportHeight);
 
         _player.PixelSize = density.PixelSize;
+        foreach (var sprite in GetTree().GetNodesInGroup(MapSprite.Group).OfType<Sprite3D>())
+        {
+            sprite.PixelSize = density.PixelSize;
+        }
         _cameraRig.Camera.Size = density.CameraSize;
         _container.StretchShrink = LowResRender ? density.LowResShrink : 1;
 
@@ -178,6 +198,7 @@ public partial class Main : Node
     /// --render=low|direct  --gender=m|f  --teleport=Nome  --examine
     /// --carregar  --ui=journal|mosaic|inventory|debug  --shot=caminho.png  --frames=N
     /// --pesada=encarar,deixar (decide as próximas Pesadas da fila pela cena; a última fica na tela, sem --ui)
+    /// --companheiro=aulo  --despertar=padeiro (oferenda certa)  --conversar=padeiro --escolher=0,1 (botões, em ordem)
     /// </summary>
     private async Task RunCommandLineAsync()
     {
@@ -219,6 +240,26 @@ public partial class Main : Node
         if (args.ContainsKey("examine"))
         {
             _player.CurrentInteractable?.Examine();
+        }
+
+        if (args.TryGetValue("companheiro", out var companion))
+        {
+            GameRoot.Instance.State.CompanionId = companion;
+        }
+
+        if (args.TryGetValue("despertar", out var shade) && GameRoot.Instance.Dialogues.Graphs.Values
+                .FirstOrDefault(g => g.ShadeId == shade)?.Lucidity is { } lucidity)
+        {
+            GameRoot.Instance.Events.Publish(new OfferingShared(shade, lucidity.OfferingKind ?? "mel"));
+        }
+
+        if (args.TryGetValue("conversar", out var dialogue))
+        {
+            OpenDialogue(dialogue);
+            foreach (var step in args.TryGetValue("escolher", out var steps) ? steps.Split(',') : Array.Empty<string>())
+            {
+                _dialogueScreen.Press(int.Parse(step));
+            }
         }
 
         if (args.TryGetValue("pesada", out var choices))

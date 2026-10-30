@@ -12,6 +12,9 @@ public partial class Interactable : Area3D
     /// <summary>Chave de localização da frase que vai para o Diário.</summary>
     [Export] public string JournalKey { get; set; } = "";
 
+    /// <summary>Chave do aviso que aparece perto dele ("Examinar").</summary>
+    public virtual string PromptKey => "ui.prompt.examinar";
+
     /// <summary>Disparado ao examinar (mesmo se a frase já estiver no Diário), para a interface mostrar o texto.</summary>
     public static event Action<string>? Examined;
 
@@ -21,7 +24,7 @@ public partial class Interactable : Area3D
         BodyExited += body => (body as Player)?.RemoveNearby(this);
     }
 
-    public void Examine()
+    public virtual void Examine()
     {
         GameRoot.Instance.Journal.Add(JournalKey);
         Examined?.Invoke(JournalKey);

@@ -44,6 +44,9 @@ public sealed class WorldState
     /// <summary>Perfil: vias e tipos de Memória contados, e os encontros recentes (ver <c>Systems.Profile</c>).</summary>
     public ProfileState Profile { get; } = new();
 
+    /// <summary>Conversas: opções já escolhidas, comentários do companheiro feitos, sombras despertas.</summary>
+    public DialogueState Dialogue { get; } = new();
+
     /// <summary>Juramentos já jurados (id → ativo, quebrado ou cumprido), ver <c>Systems.Oaths</c>.</summary>
     public Dictionary<string, OathStatus> Oaths { get; } = new(StringComparer.Ordinal);
 

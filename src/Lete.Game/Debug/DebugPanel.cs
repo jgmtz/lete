@@ -28,6 +28,8 @@ public partial class DebugPanel : CanvasLayer
     private Label _profileState = null!;
     private Label _pathState = null!;
     private Label _oathState = null!;
+    private Label _dialogueState = null!;
+    private Button _companionButton = null!;
     private Label _mosaicState = null!;
     private OptionButton _sourcePicker = null!;
     private readonly List<(string Recollection, string Source)> _sources = new();
@@ -140,6 +142,25 @@ public partial class DebugPanel : CanvasLayer
         AddButton(tideRow, "debug.mare.viagem", () => GameRoot.Instance.Tide.Travel());
         AddButton(tideRow, "debug.mare.derrota", () => GameRoot.Instance.Tide.Defeat(1));
         column.AddChild(tideRow);
+
+        column.AddChild(UiStyle.MakeLabel(T("debug.dialogo")));
+        _dialogueState = UiStyle.MakeLabel("");
+        _dialogueState.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        column.AddChild(_dialogueState);
+        var dialogueRow = new HFlowContainer();
+        AddButton(dialogueRow, "debug.dialogo.oferenda", () => GameRoot.Instance.Events.Publish(new OfferingShared("padeiro", "farinha")));
+        _companionButton = new Button();
+        _companionButton.Pressed += () =>
+        {
+            // Debug: troca o companheiro à vontade (no jogo a escolha é irreversível).
+            var state = GameRoot.Instance.State;
+            var all = new[] { "aulo", "ismena", "dimas", "septimia", "calias", "lia" };
+            var index = Array.IndexOf(all, state.CompanionId);
+            state.CompanionId = index + 1 < all.Length ? all[index + 1] : null;
+            Refresh();
+        };
+        dialogueRow.AddChild(_companionButton);
+        column.AddChild(dialogueRow);
 
         column.AddChild(UiStyle.MakeLabel(T("debug.juramento")));
         _oathState = UiStyle.MakeLabel("");
@@ -257,6 +278,10 @@ public partial class DebugPanel : CanvasLayer
         RefreshProfile();
         RefreshPath();
         RefreshOaths();
+        var dialogue = GameRoot.Instance.State.Dialogue;
+        _dialogueState.Text = string.Format(T("debug.dialogo.estado"),
+            dialogue.Awakened.Count == 0 ? "-" : string.Join(", ", dialogue.Awakened), dialogue.Chosen.Count, dialogue.CommentsSeen.Count);
+        _companionButton.Text = string.Format(T("debug.dialogo.companheiro"), GameRoot.Instance.State.CompanionId ?? T("debug.dialogo.nenhum"));
     }
 
     private void AddButton(Container row, string key, Action action)
