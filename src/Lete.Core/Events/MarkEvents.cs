@@ -18,5 +18,5 @@ public sealed record HeavyMemoryChosen(string MemoryId, HeavyMemoryChoice Choice
 /// <summary>O rosto do fim foi decidido pela regra C.</summary>
 public sealed record FinalFaceSettled(FinalFace Face);
 
-/// <summary>Um fragmento de memória sobre a própria origem foi ganho.</summary>
-public sealed record OriginFragmentGained(string FragmentId);
+/// <summary>Um fragmento de memória sobre a própria origem foi ganho; <paramref name="TextKey"/> vai para o Diário.</summary>
+public sealed record OriginFragmentGained(string FragmentId, string? TextKey = null);

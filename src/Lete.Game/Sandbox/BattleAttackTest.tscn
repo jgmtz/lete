@@ -36,6 +36,7 @@ render_target_update_mode = 4
 script = ExtResource("2_stage")
 SetupPath = "res://content/battle/teste_ataque.json"
 Tuning = ExtResource("4_tuning")
+FollowWorldCompanion = true
 
 [node name="BattleBackdrop" parent="ViewportContainer/SubViewport/Stage" instance=ExtResource("9_backdrop")]
 

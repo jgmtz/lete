@@ -89,13 +89,33 @@ public sealed class BattleFlow
 
     public ShadeAttack NextShadeAttack => _attacks[NextShadeAttackIndex];
 
+    /// <summary>O golpe depois do próximo (o Canto de Cálias o anuncia).</summary>
+    public ShadeAttack ShadeAttackAfterNext => _attacks[(NextShadeAttackIndex + 1) % _attacks.Count];
+
     /// <summary>Quantas rodadas faltam para o companheiro apoiar (0 = apoia nesta rodada); nulo sem companheiro.</summary>
     public int? RoundsUntilSupport => Support is null
         ? null
         : (Support.IntervalTurns - Round % Support.IntervalTurns) % Support.IntervalTurns;
 
-    /// <summary>O apoio vale do momento em que o companheiro age até o fim do turno da sombra.</summary>
+    /// <summary>
+    /// O apoio vale do momento em que o companheiro age até o fim do turno da sombra (Postura) ou até o fim da próxima
+    /// ação do jogador (os outros apoios).
+    /// </summary>
     public bool SupportActive { get; private set; }
+
+    /// <summary>O apoio ativo saiu relutante: o jogador usou uma via que o companheiro reprova.</summary>
+    public bool SupportReluctant { get; private set; }
+
+    private bool _reluctancePending;
+
+    /// <summary>A força do apoio <paramref name="effect"/> agora (0 se não é ele que está ativo); relutante, menor.</summary>
+    public float SupportPower(Systems.SupportEffect effect) =>
+        SupportActive && Support is { } s && s.Effect == effect
+            ? s.Power * (SupportReluctant ? s.ReluctantFactor : 1f)
+            : 0f;
+
+    /// <summary>A ação deste turno foi por uma via que o companheiro reprova: o próximo apoio sai relutante.</summary>
+    public void ReproveAction() => _reluctancePending = true;
 
     /// <summary>A sombra está enfurecida (Libertar com a fixação errada): o próximo golpe dela é mais forte.</summary>
     public bool Enraged { get; private set; }
@@ -187,9 +207,21 @@ public sealed class BattleFlow
     public void EndPlayerAction()
     {
         Expect(BattlePhase.PlayerTurn);
+        if (SupportActive && Support is { LastsUntilShadeTurnEnds: false })
+        {
+            // O apoio para a ação do jogador já foi usado nela.
+            SupportActive = false;
+        }
+
         if (!Check())
         {
             Phase = RoundsUntilSupport == 0 ? BattlePhase.CompanionSupport : BattlePhase.ShadeTurn;
+            if (Phase == BattlePhase.CompanionSupport)
+            {
+                // Já na vez dele se sabe se vem relutante (ele age dizendo).
+                SupportReluctant = _reluctancePending;
+                _reluctancePending = false;
+            }
         }
     }
 
@@ -208,7 +240,11 @@ public sealed class BattleFlow
     {
         Expect(BattlePhase.ShadeTurn);
         _shadeTurns++;
-        SupportActive = false;
+        if (Support is { LastsUntilShadeTurnEnds: true })
+        {
+            SupportActive = false;
+        }
+
         Enraged = false;
         GuardFraction = 0f;
         ShadeSlowFactor = 1f;

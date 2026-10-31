@@ -11,11 +11,13 @@ namespace Lete.Core.Systems;
 public sealed class Offerings
 {
     private readonly InventoryState _inventory;
+    private readonly WorldState _state;
     private readonly EventBus _events;
     private readonly OfferingRules _rules;
 
     public Offerings(WorldState state, EventBus events, OfferingRules rules)
     {
+        _state = state;
         _inventory = state.Inventory;
         _events = events;
         _rules = rules;
@@ -39,7 +41,11 @@ public sealed class Offerings
 
     public bool Give(string shadeId, string kind) => Spend(kind, () => _events.Publish(new OfferingGiven(shadeId, kind)));
 
-    public bool Share(string shadeId, string kind) => Spend(kind, () => _events.Publish(new OfferingShared(shadeId, kind)));
+    public bool Share(string shadeId, string kind) => Spend(kind, () =>
+    {
+        _state.SharedOfferings.Add($"{shadeId}/{kind}");
+        _events.Publish(new OfferingShared(shadeId, kind));
+    });
 
     /// <summary>Gasta uma oferenda sem sombra (acender um Fogo do Lar). Falso se não tinha.</summary>
     public bool Spend(string kind) => Spend(kind, () => { });

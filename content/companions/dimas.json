@@ -1,0 +1,28 @@
+{
+  "id": "dimas",
+  "name_key": "personagem.dimas.nome",
+  "support": {
+    "id": "surrupio",
+    "effect": "ease_absorb",
+    "power": {
+      "_tbd": true,
+      "value": 0.15
+    },
+    "found_obols": {
+      "_tbd": true,
+      "value": 1
+    }
+  },
+  "approval": {
+    "fight": "tolerate",
+    "free": "tolerate",
+    "absorb": "approve",
+    "witness": "reprove",
+    "spare": "approve"
+  },
+  "reluctant_key": "companheiro.dimas.relutante",
+  "talk_keys": [
+    "companheiro.dimas.conversa.1",
+    "companheiro.dimas.conversa.2"
+  ]
+}

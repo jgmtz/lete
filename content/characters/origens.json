@@ -1,6 +1,6 @@
 {
   "id": "origens",
-  "_nota": "As 4 origens do protagonista-sombra (decisão de 26/out/2026, docs/PROTAGONISTA_SOMBRA.md), na ordem das cartas da escolha. 'companions': os 3 companheiros ligados a cada origem (cada companheiro tem um par de origens; só dá história, nunca poder). Textos de 'quem foi' em rascunho (PENDENCIAS 48).",
+  "_nota": "As 4 origens do protagonista-sombra (decisão de 26/out/2026, docs/PROTAGONISTA_SOMBRA.md), na ordem das cartas da escolha. 'companions': os 3 companheiros ligados a cada origem (cada companheiro tem um par de origens; só dá história, nunca poder). Textos de 'quem foi' em rascunho (PENDENCIAS 48). 'spirits': os 2 espíritos nomeados de cada origem (PROTAGONISTA_SOMBRA 5). 'fragments': um fragmento por pessoa ligada (decisão do João, 30/out/2026), textos de rascunho do Claude.",
   "origins": [
     {
       "id": "pescador",
@@ -9,7 +9,37 @@
       "ambition_key": "origem.pescador.ambicao",
       "who_key": "origem.pescador.quem_foi",
       "symbol": "res://art/ui/origens/simbolo_pescador.png",
-      "companions": ["ismena", "calias", "lia"]
+      "companions": [
+        "ismena",
+        "calias",
+        "lia"
+      ],
+      "spirits": [
+        "remador",
+        "ancora"
+      ],
+      "fragments": [
+        {
+          "with": "ismena",
+          "text_key": "fragmento.pescador.ismena"
+        },
+        {
+          "with": "calias",
+          "text_key": "fragmento.pescador.calias"
+        },
+        {
+          "with": "lia",
+          "text_key": "fragmento.pescador.lia"
+        },
+        {
+          "with": "remador",
+          "text_key": "fragmento.pescador.remador"
+        },
+        {
+          "with": "ancora",
+          "text_key": "fragmento.pescador.ancora"
+        }
+      ]
     },
     {
       "id": "sacerdote",
@@ -18,7 +48,37 @@
       "ambition_key": "origem.sacerdote.ambicao",
       "who_key": "origem.sacerdote.quem_foi",
       "symbol": "res://art/ui/origens/simbolo_sacerdote.png",
-      "companions": ["aulo", "ismena", "septimia"]
+      "companions": [
+        "aulo",
+        "ismena",
+        "septimia"
+      ],
+      "spirits": [
+        "sacristao",
+        "oferente"
+      ],
+      "fragments": [
+        {
+          "with": "aulo",
+          "text_key": "fragmento.sacerdote.aulo"
+        },
+        {
+          "with": "ismena",
+          "text_key": "fragmento.sacerdote.ismena"
+        },
+        {
+          "with": "septimia",
+          "text_key": "fragmento.sacerdote.septimia"
+        },
+        {
+          "with": "sacristao",
+          "text_key": "fragmento.sacerdote.sacristao"
+        },
+        {
+          "with": "oferente",
+          "text_key": "fragmento.sacerdote.oferente"
+        }
+      ]
     },
     {
       "id": "veterano",
@@ -27,7 +87,37 @@
       "ambition_key": "origem.veterano.ambicao",
       "who_key": "origem.veterano.quem_foi",
       "symbol": "res://art/ui/origens/simbolo_veterano.png",
-      "companions": ["aulo", "calias", "dimas"]
+      "companions": [
+        "aulo",
+        "calias",
+        "dimas"
+      ],
+      "spirits": [
+        "desertor",
+        "trombeteiro"
+      ],
+      "fragments": [
+        {
+          "with": "aulo",
+          "text_key": "fragmento.veterano.aulo"
+        },
+        {
+          "with": "calias",
+          "text_key": "fragmento.veterano.calias"
+        },
+        {
+          "with": "dimas",
+          "text_key": "fragmento.veterano.dimas"
+        },
+        {
+          "with": "desertor",
+          "text_key": "fragmento.veterano.desertor"
+        },
+        {
+          "with": "trombeteiro",
+          "text_key": "fragmento.veterano.trombeteiro"
+        }
+      ]
     },
     {
       "id": "artesao",
@@ -36,7 +126,37 @@
       "ambition_key": "origem.artesao.ambicao",
       "who_key": "origem.artesao.quem_foi",
       "symbol": "res://art/ui/origens/simbolo_artesao.png",
-      "companions": ["lia", "dimas", "septimia"]
+      "companions": [
+        "lia",
+        "dimas",
+        "septimia"
+      ],
+      "spirits": [
+        "tecela",
+        "padeiro"
+      ],
+      "fragments": [
+        {
+          "with": "lia",
+          "text_key": "fragmento.artesao.lia"
+        },
+        {
+          "with": "dimas",
+          "text_key": "fragmento.artesao.dimas"
+        },
+        {
+          "with": "septimia",
+          "text_key": "fragmento.artesao.septimia"
+        },
+        {
+          "with": "tecela",
+          "text_key": "fragmento.artesao.tecela"
+        },
+        {
+          "with": "padeiro",
+          "text_key": "fragmento.artesao.padeiro"
+        }
+      ]
     }
   ]
 }

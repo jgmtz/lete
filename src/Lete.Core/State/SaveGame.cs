@@ -27,6 +27,12 @@ public static class SaveGame
             ["genero"] = state.Gender == Gender.Feminine ? "f" : "m",
             ["origem"] = state.OriginId,
             ["companheiro"] = state.CompanionId,
+            ["vinculo"] = new JsonObject
+            {
+                ["valor"] = state.CompanionBond,
+                ["conversas"] = state.CompanionTalks,
+                ["conversa_degrau"] = state.CompanionTalkStep,
+            },
             ["marca"] = state.Mark,
             ["marca_etapa"] = state.MarkStage,
             ["rosto_final"] = FaceToText(state.FinalFace),
@@ -99,6 +105,21 @@ public static class SaveGame
             ["regiao"] = state.RegionId,
             ["posicao"] = state.Position is { } p ? new JsonArray(p.X, p.Y, p.Z) : null,
             ["flags"] = Array(state.Flags.OrderBy(f => f, StringComparer.Ordinal)),
+            ["dificuldade"] = state.Difficulty,
+            ["sombras"] = new JsonObject(state.Shades
+                .OrderBy(p => p.Key, StringComparer.Ordinal)
+                .Select(p => KeyValuePair.Create(p.Key, (JsonNode?)ConditionParser.SnakeCase(p.Value)))),
+            ["partilhas"] = Array(state.SharedOfferings.OrderBy(s => s, StringComparer.Ordinal)),
+            ["ecos"] = Array(state.Echoes),
+            ["espolios"] = new JsonObject(state.Hoards
+                .Where(p => !p.Value.IsEmpty)
+                .OrderBy(p => p.Key, StringComparer.Ordinal)
+                .Select(p => KeyValuePair.Create(p.Key, (JsonNode?)new JsonObject
+                {
+                    ["obolos"] = p.Value.Obols,
+                    ["oferendas"] = Ints(p.Value.Offerings),
+                }))),
+            ["regioes"] = Array(state.VisitedRegions.OrderBy(r => r, StringComparer.Ordinal)),
         };
         return json.ToJsonString(Indented);
     }
@@ -163,6 +184,13 @@ public static class SaveGame
                     var other => throw new FormatException($"Memória Pesada '{id}' com estado '{other}' desconhecido."),
                 };
             }
+        }
+
+        if (json["vinculo"] is JsonObject bond)
+        {
+            state.CompanionBond = bond["valor"]?.GetValue<int>() ?? 0;
+            state.CompanionTalks = bond["conversas"]?.GetValue<int>() ?? 0;
+            state.CompanionTalkStep = bond["conversa_degrau"]?.GetValue<int>();
         }
 
         state.TideMilestones.UnionWith(Strings(json, "mare_marcos"));
@@ -274,6 +302,29 @@ public static class SaveGame
         state.OriginFragments.AddRange(Strings(json, "fragmentos_origem"));
         state.JournalEntries.AddRange(Strings(json, "diario"));
         state.Flags.UnionWith(Strings(json, "flags"));
+        state.Difficulty = Text(json, "dificuldade") ?? state.Difficulty;
+        if (json["sombras"] is JsonObject shades)
+        {
+            foreach (var (id, value) in shades)
+            {
+                state.Shades[id] = EnumOf<ShadeState>(value?.GetValue<string>() ?? "");
+            }
+        }
+
+        state.SharedOfferings.UnionWith(Strings(json, "partilhas"));
+        state.Echoes.AddRange(Strings(json, "ecos"));
+        if (json["espolios"] is JsonObject hoards)
+        {
+            foreach (var (id, node) in hoards)
+            {
+                var entry = node as JsonObject ?? throw new FormatException($"Espólio '{id}' precisa ser um objeto.");
+                var hoard = new HoardState { Obols = entry["obolos"]?.GetValue<int>() ?? 0 };
+                ReadInts(entry, "oferendas", hoard.Offerings);
+                state.Hoards[id] = hoard;
+            }
+        }
+
+        state.VisitedRegions.UnionWith(Strings(json, "regioes"));
         return state;
     }
 

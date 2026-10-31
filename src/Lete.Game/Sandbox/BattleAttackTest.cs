@@ -8,6 +8,7 @@ using Lete.Core.Data;
 using Lete.Core.Events;
 using Lete.Core.Presentation;
 using Lete.Core.State;
+using Lete.Core.Systems;
 using Lete.Game.Combat;
 using Lete.Game.Combat.Gestures;
 
@@ -15,7 +16,8 @@ namespace Lete.Game.Sandbox;
 
 /// <summary>
 /// Batalha de teste com a máquina de turnos (GDD 4.1), na arte escolhida (pixel_160) e com o HUD em pixel art.
-/// Lia é a protagonista; Aulo é o companheiro e dá Postura a cada 2 rodadas. A sombra (o Remador,
+/// A protagonista-sombra luta com o companheiro do save (sem escolha, Aulo), que apoia a cada 2 rodadas (com vínculo alto, a
+/// cada rodada) e fica relutante depois de uma via que ele reprova. A sombra (o Remador,
 /// em rascunho) repete um ciclo de golpes: direto (aparar com o Anel) e de padrão (Esquiva).
 /// Vias: Atacar (Combater) e Aproximar → Escutar (gesto Segurar; o que se ouve depende do golpe que ela vai
 /// repetir) e Libertar (escolher a fixação e conduzir o Arrastar; custa Lucidez). Fôlego zerado: a luta recomeça.
@@ -24,13 +26,12 @@ namespace Lete.Game.Sandbox;
 /// </summary>
 public partial class BattleAttackTest : Node
 {
-    private const string DifficultyPath = "res://content/difficulty/estige.json";
+    private const string DifficultyFolder = "res://content/difficulty";
     private const string AttackPath = "res://content/gestures/anel_basico.json";
     private const string ListenPath = "res://content/gestures/escutar.json";
     private const string FreePath = "res://content/gestures/arrastar_libertar.json";
     private const string HudLayoutsPath = "res://content/battle/hud_layouts.json";
     private const string GesturesFolder = "res://content/gestures";
-    private const string CompanionsFolder = "res://content/companions";
     private const string ShadesFolder = "res://content/shades";
 
     // Ids das opções do menu (as chaves de texto ficam em MenuEntry).
@@ -102,6 +103,8 @@ public partial class BattleAttackTest : Node
     private HoldTiming _absorbHold = null!;
     private ProtagonistStats _protagonistStats = null!;
     private CompanionSupport? _support;
+    private string? _companionId;
+    private bool _reluctanceSaid;
     private HudLayoutSet _layouts = null!;
     private readonly Dictionary<string, string> _gestures = new();
 
@@ -134,14 +137,49 @@ public partial class BattleAttackTest : Node
         Witness,
     }
 
-    // Ecos duram a sessão inteira do teste (entre uma luta e outra); no jogo, vão para o WorldState (M2). A Marca
-    // já está no WorldState (GameRoot): absorver aqui aparece no inventário.
-    private static readonly EchoSlots Echoes = new();
+    // Os Ecos guardados e o espólio de cada sombra estão no WorldState (ids e quantidades); aqui ficam os objetos da luta.
+    private EchoSlots _echoes = new();
+    private Dictionary<string, EchoDefinition> _echoDefinitions = new();
 
-    // Espólio da sombra e derrotas duram a sessão do teste. A Bolsa, o Fôlego, a Lucidez e a Maré estão no WorldState.
+    // As derrotas (para a pista de Hécate) duram a sessão do teste. A Bolsa, o Fôlego, a Lucidez e a Maré estão no WorldState.
     private static BattleBag? _bag;
-    private static readonly ShadeHoard Hoard = new();
     private static int _defeats;
+
+    /// <summary>O que esta sombra guarda de uma derrota anterior (no estado, por sombra).</summary>
+    private ShadeHoard Hoard
+    {
+        get
+        {
+            var hoards = GameRoot.Instance.State.Hoards;
+            if (!hoards.TryGetValue(_shadeId, out var hoard))
+            {
+                hoard = new HoardState();
+                hoards[_shadeId] = hoard;
+            }
+
+            return new ShadeHoard(hoard);
+        }
+    }
+
+    /// <summary>O modo da partida (WorldState): as janelas, a assistência e a Maré da derrota vêm dele.</summary>
+    private static string DifficultyPath => $"{DifficultyFolder}/{GameRoot.Instance.State.Difficulty}.json";
+
+    /// <summary>Os Ecos de todas as sombras (para reconstruir os espaços a partir dos ids do save).</summary>
+    private static Dictionary<string, EchoDefinition> AllEchoes()
+    {
+        var echoes = new Dictionary<string, EchoDefinition>();
+        foreach (var file in DirAccess.GetFilesAt(ShadesFolder).Where(f => f.EndsWith(".json", System.StringComparison.Ordinal)))
+        {
+            var json = FileAccess.GetFileAsString($"{ShadesFolder}/{file}");
+            if (json.Contains("\"absorb\"") && json.Contains("\"echo\""))
+            {
+                var echo = ShadeData.AbsorbFromJson(json).Echo;
+                echoes[echo.Id] = echo;
+            }
+        }
+
+        return echoes;
+    }
     private static GestureAssist _assist = GestureAssist.Off;
 
     private static BattleBag Bag => _bag!;
@@ -197,6 +235,7 @@ public partial class BattleAttackTest : Node
     public override void _Ready()
     {
         _windows = GestureData.WindowsFromDifficulty(FileAccess.GetFileAsString(DifficultyPath));
+        _echoDefinitions = AllEchoes();
         var attack = FileAccess.GetFileAsString(AttackPath);
         _damage = CombatData.ResolveDamageFromJson(attack);
         _attackRing = GestureData.RingFromJson(attack);
@@ -216,15 +255,20 @@ public partial class BattleAttackTest : Node
 
         var battle = FileAccess.GetFileAsString(_stage.SetupPath);
         _protagonistStats = CombatData.ProtagonistFromJson(battle);
+        // O palco põe no grupo o corpo escolhido no save; os números são os do arquivo.
+        if (_stage.Party.Select(p => p.Art.Id).FirstOrDefault(id => _stage.Cast.TryGetValue(id, out var m) && m.Kind == CastKind.Protagonist) is { } body)
+        {
+            _protagonistStats = _protagonistStats with { Id = body };
+        }
+
         if (_stage.Setup.ProtagonistSlotError(_protagonistStats.Id) is { } slotError)
         {
             GD.PushError(slotError);
         }
 
-        if (CombatData.CompanionIdFromJson(battle) is { } companionId)
-        {
-            _support = CombatData.CompanionFromJson(FileAccess.GetFileAsString($"{CompanionsFolder}/{companionId}.json"));
-        }
+        // O companheiro é quem o palco pôs no grupo (o do save ou o do arquivo da batalha).
+        _companionId = _stage.Party.Select(p => p.Art.Id)
+            .FirstOrDefault(id => _stage.Cast.TryGetValue(id, out var m) && m.Kind == CastKind.Companion);
 
         _shadeId = CombatData.ShadeIdFromJson(battle)
             ?? throw new System.FormatException("A batalha precisa do campo 'shade'.");
@@ -262,6 +306,15 @@ public partial class BattleAttackTest : Node
         _witnessHold = GestureData.HoldFromJson(FileAccess.GetFileAsString(WitnessPath));
         _flee = BagData.EscapeFromJson(FileAccess.GetFileAsString(FleePath));
         var difficulty = FileAccess.GetFileAsString(DifficultyPath);
+        _echoes = new EchoSlots();
+        foreach (var id in GameRoot.Instance.State.Echoes)
+        {
+            if (_echoDefinitions.TryGetValue(id, out var stored))
+            {
+                _echoes.Add(stored);
+            }
+        }
+
         _assistSettings = BagData.AssistFromDifficulty(difficulty);
         _defeatTideSteps = BagData.DefeatTideSteps(difficulty);
         // A Bolsa é a do estado; vazia (o teste aberto direto), recebe a bolsa de teste.
@@ -316,6 +369,12 @@ public partial class BattleAttackTest : Node
 
     private BattleActor Protagonist => ActorById(_protagonistStats.Id);
     private BattleActor? Companion => _support is null ? null : ActorById(_support.CompanionId);
+
+    /// <summary>Absorver com o Surrupio de Dimas ativo aceita a sombra com mais Firmeza.</summary>
+    private AbsorbRules Absorb => _absorbRules with
+    {
+        ResolveFractionMax = _absorbRules.ResolveFractionMax + _flow.SupportPower(SupportEffect.EaseAbsorb),
+    };
     private BattleActor Shade => _stage.Enemies[0].Node;
     private Liberation Liberation => _flow.Liberation!;
 
@@ -389,6 +448,9 @@ public partial class BattleAttackTest : Node
     {
         _understanding = new ShadeUnderstanding();
         _listening = new ShadeListening(_listenEntries, _murmurKey, _understanding);
+        // O intervalo do apoio depende do vínculo, que cresce entre uma luta e outra.
+        _support = _companionId is null ? null : GameRoot.Instance.Companions.Support(_companionId);
+        _reluctanceSaid = false;
         _flow = new BattleFlow(
             Breath(),
             // A Leveza das Pesadas deixadas aumenta a Lucidez máxima (GDD 2.2).
@@ -418,7 +480,7 @@ public partial class BattleAttackTest : Node
         _hud.SetTargetMarked(true);
         _hud.ResetShadePanel();
         _mainFocus = AttackId;
-        Echoes.NewBattle();
+        _echoes.NewBattle();
         // As Memórias vêm do Mosaico (GDD 2.1): uma por Lembrança, com a força do estágio, e a Culpa de cada Pesada
         // encarada. Recomeçar a luta é descansar na Trívia: nada fica esquecido e as proteções da Leveza voltam.
         var combatMemories = GameRoot.Instance.Mosaic.CombatMemories(_allMemories);
@@ -477,7 +539,10 @@ public partial class BattleAttackTest : Node
 
         // A legenda anuncia o próximo gesto da sombra: é a principal fonte de informação (GDD 4.7),
         // e diz em que momento do ciclo o Escutar vai cair.
-        _hud.SetCaption(T(_flow.NextShadeAttack.CaptionKey));
+        // Com o Canto de Cálias, também o golpe depois do próximo.
+        _hud.SetCaption(_flow.SupportPower(SupportEffect.Foretell) > 0f
+            ? string.Format(T("combate.apoio.canto.depois"), T(_flow.NextShadeAttack.CaptionKey), T(_flow.ShadeAttackAfterNext.CaptionKey))
+            : T(_flow.NextShadeAttack.CaptionKey));
         _hud.SetGestureActive(false);
         _playerAction = new TaskCompletionSource();
         if (_flow.IsWitnessing)
@@ -541,17 +606,17 @@ public partial class BattleAttackTest : Node
         };
 
         // Absorver só aparece com a Firmeza baixa (escolha do João: no menu principal, 25/out/2026).
-        if (_absorbRules.CanAbsorb(_flow.Resolve))
+        if (Absorb.CanAbsorb(_flow.Resolve))
         {
             entries.Add(new MenuEntry(AbsorbId, "combate.acao.absorver", OathWarning(Via.Absorb, "combate.acao.absorver.descricao")));
         }
 
         var echoesBlocked = GameRoot.Instance.Oaths.Effects.EchoesBlocked;
         var echoDescription = echoesBlocked ? "combate.acao.eco.juramento"
-            : Echoes.Echoes.Count == 0 ? "combate.acao.eco.indisponivel"
-            : Echoes.HasUsable ? "combate.acao.eco.descricao"
+            : _echoes.Echoes.Count == 0 ? "combate.acao.eco.indisponivel"
+            : _echoes.HasUsable ? "combate.acao.eco.descricao"
             : "combate.acao.eco.usado";
-        entries.Add(new MenuEntry(EchoId, "combate.acao.eco", echoDescription, Available: Echoes.HasUsable && !echoesBlocked));
+        entries.Add(new MenuEntry(EchoId, "combate.acao.eco", echoDescription, Available: _echoes.HasUsable && !echoesBlocked));
         entries.Add(new MenuEntry(BagId, "combate.acao.bolsa",
             Bag.HasAnyProvision ? "combate.acao.bolsa.descricao" : "combate.bolsa.vazia", Available: Bag.HasAnyProvision));
         entries.Add(new MenuEntry(FleeId, "combate.acao.fugir", OathWarning(Via.Flee, "combate.acao.fugir.descricao"), SeparatorBefore: true));
@@ -653,12 +718,12 @@ public partial class BattleAttackTest : Node
     private void ShowEchoPage()
     {
         _page = MenuPage.Echo;
-        var entries = Echoes.Echoes
+        var entries = _echoes.Echoes
             .Select(e => new MenuEntry(
                 EchoPrefix + e.Id,
                 e.NameKey,
-                Echoes.CanUse(e.Id) ? e.DescriptionKey : "combate.acao.eco.usado",
-                Available: Echoes.CanUse(e.Id)))
+                _echoes.CanUse(e.Id) ? e.DescriptionKey : "combate.acao.eco.usado",
+                Available: _echoes.CanUse(e.Id)))
             .Append(new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true))
             .ToList();
         _menu.ShowPage(entries);
@@ -785,19 +850,24 @@ public partial class BattleAttackTest : Node
             return Shade.PlayHit(HitStrength(grade));
         });
 
+        await Judge(Via.Fight);
         _playerAction?.TrySetResult();
     }
 
-    /// <summary>Escutar: o que se ouve vem do golpe que ela vai repetir agora (o que a legenda anunciou).</summary>
+    /// <summary>
+    /// Escutar: o que se ouve vem do golpe que ela vai repetir agora (o que a legenda anunciou). O Lamento de Ismena
+    /// alarga as janelas.
+    /// </summary>
     private async void DoListen()
     {
         _menu.ShowMenu(false);
         _hud.SetGestureActive(true, T("combate.gesto.escutar"));
-        var grade = Windows.Grade(await RunHold(_listenHold));
+        var grade = Windows.Widened(_flow.SupportPower(SupportEffect.WidenListen)).Grade(await RunHold(_listenHold));
 
         var heard = _listening.Listen(_flow.NextShadeAttackIndex, grade);
         RefreshShadeKnowledge();
         await ShowLine(T(heard.TextKey), LineSeconds);
+        await Judge(Via.Free);
         _playerAction?.TrySetResult();
     }
 
@@ -819,6 +889,7 @@ public partial class BattleAttackTest : Node
             await ShowLine(T("combate.enfurecida"), RageLineSeconds);
         }
 
+        await Judge(Via.Free);
         _playerAction?.TrySetResult();
     }
 
@@ -831,8 +902,9 @@ public partial class BattleAttackTest : Node
         _menu.ShowMenu(false);
         _hud.SetGestureActive(true, T("combate.gesto.traco"));
         var skill = _memories.Skills.First(s => s.Id == id);
-        var grade = Windows.Grade(await RunStroke(skill.Stroke));
-        var use = _memories.Use(id, grade, _flow.Lucidity);
+        // O Esboço de Lia alarga o Traço; a Brasa de Septímia barateia a Lucidez.
+        var grade = Windows.Widened(_flow.SupportPower(SupportEffect.WidenStroke)).Grade(await RunStroke(skill.Stroke));
+        var use = _memories.Use(id, grade, _flow.Lucidity, 1f - _flow.SupportPower(SupportEffect.CheaperMemory));
         GameRoot.Instance.Events.Publish(new MemoryUsed(use.Skill.Id, use.Skill.Kind));
         _hud.SetLucidity(_flow.Lucidity.Fraction);
 
@@ -884,12 +956,17 @@ public partial class BattleAttackTest : Node
 
         AddMark((int)_absorbRules.MarkGain.For(grade));
         var echo = _absorbRules.Echo;
-        var line = Echoes.Echoes.Any(e => e.Id == echo.Id) ? T("combate.eco.repetido")
-            : Echoes.Add(echo) ? string.Format(T("combate.eco.obtido"), T(echo.NameKey))
+        var line = _echoes.Echoes.Any(e => e.Id == echo.Id) ? T("combate.eco.repetido")
+            : _echoes.Add(echo) ? string.Format(T("combate.eco.obtido"), T(echo.NameKey))
             : T("combate.eco.cheio");
+        if (_echoes.Echoes.Any(e => e.Id == echo.Id) && !GameRoot.Instance.State.Echoes.Contains(echo.Id))
+        {
+            GameRoot.Instance.State.Echoes.Add(echo.Id);
+        }
         _flow.AbsorbShade();
         GameRoot.Instance.Events.Publish(new ShadeAbsorbed(_shadeId));
         await ShowLine(line, LineSeconds);
+        await Judge(Via.Absorb);
         _playerAction?.TrySetResult();
     }
 
@@ -898,7 +975,7 @@ public partial class BattleAttackTest : Node
     {
         _menu.ShowMenu(false);
         _hud.SetGestureActive(true, T("combate.gesto.eco"));
-        var echo = Echoes.Use(id);
+        var echo = _echoes.Use(id);
         var gesture = _gestures[echo.Gesture];
         var timing = GestureData.RingFromJson(gesture);
         var repeats = GestureData.RingRepeats(gesture);
@@ -917,6 +994,7 @@ public partial class BattleAttackTest : Node
             return Shade.PlayHit(HitStrength(grade));
         });
 
+        await Judge(Via.Absorb);
         _playerAction?.TrySetResult();
     }
 
@@ -939,6 +1017,7 @@ public partial class BattleAttackTest : Node
             await ShowLine(T(_story.Offering?.RefuseKey ?? "combate.teste.ainda_nao"), LineSeconds);
         }
 
+        await Judge(Via.Free);
         _playerAction?.TrySetResult();
     }
 
@@ -963,6 +1042,7 @@ public partial class BattleAttackTest : Node
         _menu.ShowMenu(false);
         _flow.StartWitnessing();
         await ShowLine(T("combate.presenciar.comeca"), LineSeconds);
+        await Judge(Via.Witness);
         _playerAction?.TrySetResult();
     }
 
@@ -978,6 +1058,7 @@ public partial class BattleAttackTest : Node
             await ShowLine(T("combate.presenciar.distraiu"), LineSeconds);
         }
 
+        await Judge(Via.Witness);
         _playerAction?.TrySetResult();
     }
 
@@ -985,6 +1066,7 @@ public partial class BattleAttackTest : Node
     {
         _menu.ShowMenu(false);
         await ShowLine(T(_story.SpareKey), LineSeconds);
+        await Judge(Via.Spare);
         _flow.EndBattle(BattleOutcome.Spared);
         _playerAction?.TrySetResult();
     }
@@ -1001,6 +1083,7 @@ public partial class BattleAttackTest : Node
         }
 
         await CheckForgetting();
+        await Judge(Via.Yield);
         _flow.EndBattle(BattleOutcome.Yielded);
         _playerAction?.TrySetResult();
     }
@@ -1023,6 +1106,7 @@ public partial class BattleAttackTest : Node
             _flow.EndBattle(BattleOutcome.Fled);
         }
 
+        await Judge(Via.Flee);
         _playerAction?.TrySetResult();
     }
 
@@ -1052,8 +1136,40 @@ public partial class BattleAttackTest : Node
 
         _turnRing.MoveUnder(companion);
         _hud.SetTurn(companion, shadeTurn: false);
-        _hud.SetCaption(T($"combate.apoio.{_support.SupportId}.age"));
-        await Wait(SupportSeconds);
+        var acts = T($"combate.apoio.{_support.SupportId}.age");
+        await ShowLine(_flow.SupportReluctant ? string.Format(T("combate.apoio.relutante"), acts) : acts, SupportSeconds);
+
+        if (_support.Effect == SupportEffect.WidenListen && !_understanding.NameRevealed
+            && _listenEntries.FirstOrDefault(e => e.Reveals == ListenReveal.Name) is { } name)
+        {
+            // Ismena sopra a pista do nome: o pedaço que se ouve na escuta pela metade.
+            await ShowLine(string.Format(T("combate.apoio.lamento.sopra"), T(name.PartialKey)), LineSeconds);
+        }
+        else if (_support.Effect == SupportEffect.EaseAbsorb && !_flow.SupportReluctant
+            && GameRoot.Instance.Companions.Definitions.TryGetValue(_support.CompanionId, out var dimas) && dimas.FoundObols > 0)
+        {
+            GameRoot.Instance.State.Inventory.Obols += dimas.FoundObols;
+            await ShowLine(T("combate.apoio.surrupio.achou"), LineSeconds);
+        }
+    }
+
+    /// <summary>
+    /// A ação do turno pela via dela (HISTORIA 5.1): se o companheiro reprova, o próximo apoio sai relutante e ele comenta
+    /// (uma vez por luta).
+    /// </summary>
+    private async Task Judge(Via via)
+    {
+        if (_support is null || GameRoot.Instance.Companions.ApprovalOf(_support.CompanionId, via) != Approval.Reprove)
+        {
+            return;
+        }
+
+        _flow.ReproveAction();
+        if (!_reluctanceSaid && GameRoot.Instance.Companions.Definitions.TryGetValue(_support.CompanionId, out var companion))
+        {
+            _reluctanceSaid = true;
+            await ShowLine(T(companion.ReluctantKey), LineSeconds);
+        }
     }
 
     private async Task ShadeTurn()
@@ -1065,7 +1181,7 @@ public partial class BattleAttackTest : Node
         _hud.SetGestureActive(true);
         await Wait(ShadeTellSeconds);
 
-        var widening = (_flow.SupportActive && _support is not null ? _support.WindowWidening : 0f) + _flow.FocusWidening;
+        var widening = _flow.SupportPower(SupportEffect.WidenDefense) + _flow.FocusWidening;
         var items = GameRoot.Instance.Items.Modifiers;
         var windows = Windows.Widened(widening + (attack.Kind == ShadeAttackKind.Direct ? items.ParryWindow : 0f));
         var slow = _flow.ShadeSlowFactor;
@@ -1363,14 +1479,15 @@ public partial class BattleAttackTest : Node
             return;
         }
 
-        var status = _flow.SupportActive ? T("combate.apoio.ativo")
+        var status = _flow.SupportActive ? T(_flow.SupportReluctant ? "combate.apoio.ativo_relutante" : "combate.apoio.ativo")
             : _flow.RoundsUntilSupport switch
             {
                 0 => T("combate.apoio.agora"),
                 1 => T("combate.apoio.em_um_turno"),
                 var n => string.Format(T("combate.apoio.em_turnos"), n),
             };
-        _hud.SetSupport($"{T($"companheiro.{_support.CompanionId}.nome")} · {T($"combate.apoio.{_support.SupportId}")}", status);
+        var name = GameRoot.Instance.Companions.Definitions.TryGetValue(_support.CompanionId, out var companion) ? T(companion.NameKey) : _support.CompanionId;
+        _hud.SetSupport($"{name} · {T($"combate.apoio.{_support.SupportId}")}", status);
     }
 
     private void ApplyLayout()
@@ -1431,7 +1548,7 @@ public partial class BattleAttackTest : Node
                 var choices = _flow.IsWitnessing ? new[] { KeepWitnessingId }
                     : script.Count > 0 ? script.Dequeue()
                     : _menu.IsAvailable(AbsorbId) ? new[] { AbsorbId }
-                    : Echoes.HasUsable ? new[] { EchoId, EchoPrefix + Echoes.Echoes[0].Id }
+                    : _echoes.HasUsable ? new[] { EchoId, EchoPrefix + _echoes.Echoes[0].Id }
                     : new[] { AttackId };
                 foreach (var choice in choices)
                 {

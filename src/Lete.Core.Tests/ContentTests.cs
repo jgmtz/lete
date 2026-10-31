@@ -63,8 +63,8 @@ public class ContentTests
         Assert.Null(setup.ProtagonistSlotError(CombatData.ProtagonistFromJson(json).Id));
         if (CombatData.CompanionIdFromJson(json) is { } companion)
         {
-            var support = CombatData.CompanionFromJson(File.ReadAllText(Content("companions", companion + ".json")));
-            Assert.Contains(setup.Party, p => p.Id == support.CompanionId);
+            Assert.Equal(companion, CompanionData.FromJson(File.ReadAllText(Content("companions", companion + ".json"))).Id);
+            Assert.Contains(setup.Party, p => p.Id == companion);
         }
     }
 
@@ -211,6 +211,27 @@ public class ContentTests
     }
 
     [Fact]
+    public void Companions_LoadForEveryCompanionOfTheCast_WithAnAllyAndACriticPerVia()
+    {
+        var companions = Directory.GetFiles(Content("companions"), "*.json")
+            .Select(f => (File: Path.GetFileNameWithoutExtension(f), Companion: CompanionData.FromJson(File.ReadAllText(f))))
+            .ToList();
+        Assert.All(companions, c => Assert.Equal(c.File, c.Companion.Id));
+        Assert.Equal(
+            Cast.Values.Where(m => m.Kind == Lete.Core.Combat.CastKind.Companion).Select(m => m.Id).OrderBy(i => i),
+            companions.Select(c => c.Companion.Id).OrderBy(i => i));
+
+        // HISTORIA 5.1: cada via tem pelo menos um aliado e um crítico entre os companheiros.
+        foreach (var via in new[] { Via.Fight, Via.Free, Via.Absorb, Via.Witness, Via.Spare })
+        {
+            Assert.Contains(companions, c => c.Companion.ApprovalOf(via) == Approval.Approve);
+            Assert.Contains(companions, c => c.Companion.ApprovalOf(via) == Approval.Reprove);
+        }
+
+        Assert.Empty(CompanionData.RulesFromJson(File.ReadAllText(Content("rules", "companheiro.json"))).Validate());
+    }
+
+    [Fact]
     public void Profile_RulesLoad() => ProfileData.FromJson(File.ReadAllText(Content("rules", "perfil.json")));
 
     [Fact]
@@ -231,8 +252,8 @@ public class ContentTests
     {
         var origins = new[]
         {
-            new Origin("a", "", "", "", "", "", new[] { "x", "y" }),
-            new Origin("b", "", "", "", "", "", new[] { "x", "y", "z" }),
+            new Origin("a", "", "", "", "", "", new[] { "x", "y" }, Array.Empty<string>(), Array.Empty<OriginFragment>()),
+            new Origin("b", "", "", "", "", "", new[] { "x", "y", "z" }, Array.Empty<string>(), Array.Empty<OriginFragment>()),
         };
 
         var errors = OriginData.LinkErrors(origins, new[] { "x", "y" });

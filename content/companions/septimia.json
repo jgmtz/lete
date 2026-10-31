@@ -1,0 +1,24 @@
+{
+  "id": "septimia",
+  "name_key": "personagem.septimia.nome",
+  "support": {
+    "id": "brasa",
+    "effect": "cheaper_memory",
+    "power": {
+      "_tbd": true,
+      "value": 0.5
+    }
+  },
+  "approval": {
+    "fight": "tolerate",
+    "free": "reprove",
+    "absorb": "tolerate",
+    "witness": "approve",
+    "spare": "approve"
+  },
+  "reluctant_key": "companheiro.septimia.relutante",
+  "talk_keys": [
+    "companheiro.septimia.conversa.1",
+    "companheiro.septimia.conversa.2"
+  ]
+}

@@ -110,10 +110,18 @@ public sealed class BattleBag
 /// </summary>
 public sealed class ShadeHoard
 {
-    private readonly Dictionary<string, int> _offerings = new();
+    private readonly HoardState _state;
 
-    public int Obols { get; private set; }
-    public bool IsEmpty => Obols == 0 && _offerings.Values.All(c => c == 0);
+    /// <param name="state">O espólio guardado no estado (por sombra); sem ele, um só da luta.</param>
+    public ShadeHoard(HoardState? state = null) => _state = state ?? new HoardState();
+
+    public int Obols
+    {
+        get => _state.Obols;
+        private set => _state.Obols = value;
+    }
+
+    public bool IsEmpty => _state.IsEmpty;
 
     /// <summary>Derrota: tudo o que se perde vai para a sombra. Devolve quantos óbolos foram.</summary>
     public int TakeFrom(BattleBag bag)
@@ -122,7 +130,7 @@ public sealed class ShadeHoard
         Obols += obols;
         foreach (var (kind, count) in offerings)
         {
-            _offerings[kind] = _offerings.GetValueOrDefault(kind) + count;
+            _state.Offerings[kind] = _state.Offerings.GetValueOrDefault(kind) + count;
         }
 
         return obols;
@@ -136,9 +144,9 @@ public sealed class ShadeHoard
             return false;
         }
 
-        bag.Receive(Obols, _offerings);
+        bag.Receive(Obols, _state.Offerings);
         Obols = 0;
-        _offerings.Clear();
+        _state.Offerings.Clear();
         return true;
     }
 }

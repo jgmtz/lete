@@ -1,0 +1,46 @@
+{
+  "id": "companheiro",
+  "_comentario": "Vínculo do companheiro (GDD 4.10; decisões do João, 30/out/2026): só cresce; a partir de fast_bond o apoio vem a cada fast_interval_turns.",
+  "bond_max": {
+    "_tbd": true,
+    "value": 10
+  },
+  "fast_bond": {
+    "_tbd": true,
+    "value": 6
+  },
+  "interval_turns": {
+    "_tbd": true,
+    "value": 2
+  },
+  "fast_interval_turns": {
+    "_tbd": true,
+    "value": 1
+  },
+  "reluctant_factor": {
+    "_tbd": true,
+    "value": 0.5
+  },
+  "bond_gain": {
+    "offering_shared": {
+      "_tbd": true,
+      "value": 1
+    },
+    "battle": {
+      "_tbd": true,
+      "value": 1
+    },
+    "trivia_talk": {
+      "_tbd": true,
+      "value": 1
+    },
+    "comment_agreed": {
+      "_tbd": true,
+      "value": 1
+    },
+    "comment_disagreed": {
+      "_tbd": true,
+      "value": 2
+    }
+  }
+}

@@ -139,6 +139,9 @@ public sealed record OriginChosen(string OriginId);
 
 public sealed record CompanionBondChanged(string CompanionId, int Bond);
 
+/// <summary>Uma conversa com o companheiro na Trívia.</summary>
+public sealed record CompanionTalked(string CompanionId);
+
 /// <summary>Opção escolhida num diálogo (postura: escutar, perguntar, pressionar, consolar, calar).</summary>
 public sealed record DialogueChoiceMade(string DialogueId, string NodeId, string Posture);
 

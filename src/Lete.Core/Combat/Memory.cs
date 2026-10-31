@@ -93,7 +93,8 @@ public sealed class MemoryBook
     public bool CanUse(string id, Gauge lucidity) =>
         Skills.FirstOrDefault(s => s.Id == id) is { } skill && !IsForgotten(id) && lucidity.Current >= skill.LucidityCost;
 
-    public MemoryUse Use(string id, GestureGrade grade, Gauge lucidity)
+    /// <param name="costFactor">Fração do custo de Lucidez (a Brasa de Septímia barateia a próxima Memória).</param>
+    public MemoryUse Use(string id, GestureGrade grade, Gauge lucidity, float costFactor = 1f)
     {
         var skill = Skills.FirstOrDefault(s => s.Id == id) ?? throw new ArgumentException($"Memória '{id}' não existe.", nameof(id));
         if (IsForgotten(id))
@@ -101,7 +102,7 @@ public sealed class MemoryBook
             throw new InvalidOperationException($"Memória '{id}' está esquecida.");
         }
 
-        var cost = Math.Min(lucidity.Current, skill.CostFor(grade));
+        var cost = Math.Min(lucidity.Current, skill.CostFor(grade) * Math.Clamp(costFactor, 0f, 1f));
         lucidity.Reduce(cost);
         _uses[id] = _uses.GetValueOrDefault(id) + 1;
         _useOrder.Remove(id);

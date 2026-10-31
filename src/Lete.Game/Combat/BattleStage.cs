@@ -27,12 +27,55 @@ public partial class BattleStage : Node3D
 
     [Export] public BattleAnimTuning Tuning { get; set; } = null!;
 
+    /// <summary>
+    /// O grupo segue o save: o corpo do protagonista-sombra escolhido e o companheiro (ou o de <c>-- --companheiro=id</c>);
+    /// sem escolha, fica quem está no arquivo da batalha.
+    /// </summary>
+    [Export] public bool FollowWorldCompanion { get; set; }
+
     public BattleSetup Setup { get; private set; } = null!;
     public IReadOnlyDictionary<string, CastMember> Cast { get; private set; } = null!;
     public List<(BattleActor Node, BattleActorArt Art)> Party { get; } = new();
     public List<(BattleActor Node, BattleActorArt Art)> Enemies { get; } = new();
     public Camera3D Camera { get; private set; } = null!;
     public int Style { get; private set; }
+
+    private BattleSetup WithWorldCompanion(BattleSetup setup)
+    {
+        var state = GameRoot.Instance.State;
+        if (System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--companheiro=")) is { } arg)
+        {
+            // Teste: troca direto no estado (no jogo a escolha é uma vez só, por Companions.Choose).
+            state.CompanionId = arg["--companheiro=".Length..];
+        }
+
+        if (System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--corpo=")) is { } bodyArg)
+        {
+            // Teste: -- --corpo=sombra_m luta com o outro corpo (e o gênero dos textos acompanha).
+            state.ProtagonistId = bodyArg["--corpo=".Length..];
+            state.Gender = Cast.TryGetValue(state.ProtagonistId, out var body) && body.Gender == "f"
+                ? Lete.Core.State.Gender.Feminine
+                : Lete.Core.State.Gender.Masculine;
+        }
+
+        BattleActorArt? Replacement(string? id, CastKind kind) =>
+            id is not null && Cast.TryGetValue(id, out var member) && member.Kind == kind
+                // Sem arte de costas (Dimas, por enquanto), usa a de frente.
+                ? member.AsActor(back: member.BackArt is not null)
+                : null;
+
+        var companion = Replacement(state.CompanionId, CastKind.Companion);
+        var protagonist = Replacement(state.ProtagonistId, CastKind.Protagonist);
+        return setup with
+        {
+            Party = setup.Party.Select(a => Cast.TryGetValue(a.Id, out var m) ? m.Kind switch
+            {
+                CastKind.Companion => companion ?? a,
+                CastKind.Protagonist => protagonist ?? a,
+                _ => a,
+            } : a).ToList(),
+        };
+    }
 
     public override void _Ready()
     {
@@ -45,6 +88,10 @@ public partial class BattleStage : Node3D
 
         Cast = CastData.FromJson(FileAccess.GetFileAsString(CastPath));
         Setup = BattleData.FromJson(FileAccess.GetFileAsString(SetupPath), Cast);
+        if (FollowWorldCompanion)
+        {
+            Setup = WithWorldCompanion(Setup);
+        }
 
         var rig = GetNode<CameraRig>("CameraRig");
         Camera = rig.Camera;

@@ -1,10 +1,24 @@
 {
   "id": "aulo",
-  "name_key": "companheiro.aulo.nome",
+  "name_key": "personagem.aulo.nome",
   "support": {
     "id": "postura",
-    "effect": "widen_dodge_parry",
-    "interval_turns": { "_tbd": true, "value": 2 },
-    "window_widening": { "_tbd": true, "value": 0.15 }
-  }
+    "effect": "widen_defense",
+    "power": {
+      "_tbd": true,
+      "value": 0.15
+    }
+  },
+  "approval": {
+    "fight": "approve",
+    "free": "tolerate",
+    "absorb": "reprove",
+    "witness": "approve",
+    "spare": "tolerate"
+  },
+  "reluctant_key": "companheiro.aulo.relutante",
+  "talk_keys": [
+    "companheiro.aulo.conversa.1",
+    "companheiro.aulo.conversa.2"
+  ]
 }

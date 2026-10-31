@@ -2,6 +2,7 @@ using System.Numerics;
 using Lete.Core.Combat;
 using Lete.Core.Combat.Gestures;
 using Lete.Core.Data;
+using Lete.Core.Systems;
 
 namespace Lete.Core.Tests;
 
@@ -35,7 +36,7 @@ public class BattleFlowTests
     [Fact]
     public void Companion_SupportsEverySecondRound_UntilEndOfShadeTurn()
     {
-        var flow = NewFlow(new CompanionSupport("aulo", "postura", 2, 0.15f));
+        var flow = NewFlow(new CompanionSupport("aulo", "postura", SupportEffect.WidenDefense, 2, 0.15f));
         Assert.Equal(1, flow.RoundsUntilSupport);
 
         flow.EndPlayerAction();
@@ -182,8 +183,8 @@ public class BattleFlowTests
         var attacks = CombatData.ShadeAttacksFromJson(File.ReadAllText(Path.Combine(root, "shades", "sombra_de_teste.json")));
         Assert.Contains(attacks, a => a.Kind == ShadeAttackKind.Pattern);
 
-        var aulo = CombatData.CompanionFromJson(File.ReadAllText(Path.Combine(root, "companions", "aulo.json")));
-        Assert.Equal("postura", aulo.SupportId);
+        var aulo = CompanionData.FromJson(File.ReadAllText(Path.Combine(root, "companions", "aulo.json")));
+        Assert.Equal(("postura", SupportEffect.WidenDefense), (aulo.SupportId, aulo.Effect));
 
         var protagonist = CombatData.ProtagonistFromJson(File.ReadAllText(Path.Combine(root, "battle", "teste_ataque.json")));
         Assert.Equal("sombra_f", protagonist.Id);

@@ -41,6 +41,8 @@ public partial class GameRoot : Node
     private const string TribunalRulesPath = "res://content/rules/tribunal.json";
     private const string OriginsPath = "res://content/characters/origens.json";
     private const string OathRulesPath = "res://content/rules/juramentos.json";
+    private const string CompanionsFolder = "res://content/companions";
+    private const string CompanionRulesPath = "res://content/rules/companheiro.json";
     private const string MosaicRulesPath = "res://content/rules/mosaico.json";
     private const string RecollectionsFolder = "res://content/recollections";
     private const string ContentRoot = "res://content";
@@ -76,6 +78,9 @@ public partial class GameRoot : Node
     public Trivias Trivias { get; private set; } = null!;
     public Tribunal Tribunal { get; private set; } = null!;
     public Healing Healing { get; private set; } = null!;
+    public Companions Companions { get; private set; } = null!;
+    public ShadeRecord Shades { get; private set; } = null!;
+    public Regions Regions { get; private set; } = null!;
 
     /// <summary>As provisões do jogo (definições; as quantidades estão na Bolsa do estado).</summary>
     public System.Collections.Generic.IReadOnlyList<Lete.Core.Combat.ProvisionDefinition> Provisions { get; private set; } = null!;
@@ -137,7 +142,13 @@ public partial class GameRoot : Node
     private System.Collections.Generic.Dictionary<string, Trial> _trials = null!;
     private MerchantRules _merchantRules = null!;
     private TribunalRules _tribunalRules = null!;
+    private System.Collections.Generic.Dictionary<string, Companion> _companions = null!;
+    private CompanionRules _companionRules = null!;
     private System.Collections.Generic.Dictionary<string, string> _originNames = null!;
+    private System.Collections.Generic.IReadOnlyList<Origin> _origins = null!;
+
+    /// <summary>As origens (com as pessoas ligadas e os fragmentos).</summary>
+    public System.Collections.Generic.IReadOnlyList<Origin> Origins => _origins;
 
     public override void _EnterTree()
     {
@@ -178,8 +189,10 @@ public partial class GameRoot : Node
         _trials = LoadFolder(TrialsFolder, WorldData.TrialFromJson, t => t.Id);
         _merchantRules = WorldData.MerchantRulesFromJson(FileAccess.GetFileAsString(MerchantRulesPath));
         _tribunalRules = WorldData.TribunalRulesFromJson(FileAccess.GetFileAsString(TribunalRulesPath));
-        _originNames = OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath))
-            .ToDictionary(o => o.Id, o => o.NameKey, StringComparer.Ordinal);
+        _companions = LoadFolder(CompanionsFolder, CompanionData.FromJson, c => c.Id);
+        _companionRules = CompanionData.RulesFromJson(FileAccess.GetFileAsString(CompanionRulesPath));
+        _origins = OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath));
+        _originNames = _origins.ToDictionary(o => o.Id, o => o.NameKey, StringComparer.Ordinal);
 
         BuildSystems();
     }
@@ -225,6 +238,22 @@ public partial class GameRoot : Node
         return Error.Ok;
     }
 
+    /// <summary>
+    /// Troca de região (a cena chama ao passar para outra): é um dos dois momentos de salvar (o outro é a Trívia).
+    /// Falso se já estava nela (nada a salvar).
+    /// </summary>
+    public bool ChangeRegion(string regionId)
+    {
+        if (!Regions.Enter(regionId))
+        {
+            return false;
+        }
+
+        var error = Save();
+        GD.Print($"[save] troca de região para {regionId}: {error}");
+        return true;
+    }
+
     public Error Load()
     {
         if (!HasSave)
@@ -249,12 +278,19 @@ public partial class GameRoot : Node
         Oaths?.Dispose();
         Dialogues?.Dispose();
         Items?.Dispose();
+        Companions?.Dispose();
+        OriginFragments?.Dispose();
+        Shades?.Dispose();
         Journal = new Journal(State, Events);
         Mark = new MarkTracker(State, Events, _markRules);
         Tide = new TideTracker(State, Events, _tideRules);
+        Companions = new Companions(State, Events, _companions, _companionRules, Tide);
+        Shades = new ShadeRecord(State, Events);
+        Regions = new Regions(State, Events);
         Mosaic = new Mosaic(State, Events, _recollections, _mosaicRules);
         HeavyMemories = new HeavyMemories(State, Events, _recollections.Values);
-        OriginFragments = new OriginFragments(State, Events);
+        OriginFragments = new OriginFragments(State, Events, _origins,
+            id => _dialogues.TryGetValue(id, out var graph) ? graph.ShadeId ?? id : id);
         Profile = new Profile(State, Events, _profileRules);
         Facts = new WorldFacts(State, _markRules, Mosaic, Profile);
         Oaths = new Oaths(State, Events, _oaths, _oathRules, () => Facts);
@@ -279,6 +315,11 @@ public partial class GameRoot : Node
     {
         var files = new System.Collections.Generic.Dictionary<string, string>(StringComparer.Ordinal);
         CollectJson(ContentRoot, files);
+        foreach (var problem in LocaleValidator.Validate(Localizer.Strings))
+        {
+            GD.PushError($"Idioma: {problem}");
+        }
+
         var report = ContentValidator.Validate(files, new System.Collections.Generic.HashSet<string>(Localizer.Keys), release: !OS.IsDebugBuild());
         foreach (var error in report.Errors)
         {

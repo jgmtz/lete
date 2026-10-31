@@ -224,7 +224,7 @@ Pescador: os afogados do Aqueronte pedem um rito de sepultamento que só ele sab
 | Dimas, o Saqueador | tolera | tolera | aprova | **reprova** | aprova |
 | Septímia, a Vestal | tolera | **reprova** | tolera | aprova | aprova |
 | Cálias, o Aedo | tolera | tolera | aprova | aprova | **reprova** |
-| Lia, a Retratista | *pendente* | *pendente* | *pendente* | *pendente* | *pendente* |
+| Lia, a Retratista *(proposta do Claude, 30/out/2026)* | tolera | aprova | **reprova** | aprova | tolera |
 
 ### 5.2 Ficha de cada um
 
@@ -234,7 +234,7 @@ Pescador: os afogados do Aqueronte pedem um rito de sepultamento que só ele sab
 | Ismena | Campos do Luto | **Lamento:** alarga Escutar e pode soprar uma pista de nome | Quer libertar, mas libertar apaga quem ela chorou, e ela teme ser esquecida | Guarda um fragmento do nome que ele vendeu | Tomar o lugar da pessoa sem nome para que alguém a chore |
 | Dimas | Rua dos Ofícios | **Surrupio:** baixa a Firmeza necessária para absorver; pode achar um item | Ganancioso, mas nunca toma de quem deu de graça | Vendeu o mapa de um túmulo e alguém morreu. Cobrou e dormiu bem | Assumir a dívida do protagonista como "negócio justo" |
 | Septímia | Tribunal | **Brasa:** a próxima Memória custa menos Lucidez | Defende a lei, mas quebrou um voto de propósito | "Quebrei o voto de propósito. Foi liberdade ou ambição? Nunca soube." | Jurar guardar o fogo do portão em nome dele |
-| Lia | *pendente* | *pendente* | *pendente* | *pendente* | *pendente* |
+| Lia | *pendente* | **Esboço** *(proposta do Claude, 30/out/2026)*: o próximo Traço (Memória) tem janelas mais largas | *pendente* | *pendente* | *pendente* |
 | Cálias | Altar das Oferendas | **Canto:** a legenda mostra o próximo gesto da sombra | Quer a história inteira, mas trocou a verdade por um verso melhor | Cantou uma mentira bonita que mandou alguém à morte | Ficar para contar a história dele, como memória do portão |
 
 **Silhuetas e cores:** Aulo — armadura de legionário velha, elmo sob o braço, postura ereta; vermelho e ferro. Ismena — véu escuro, ombros caídos, mãos abertas; preto e azul-gelo. Dimas — saco às costas, lanterna e gancho, roupa remendada; marrom e dourado sujo. Septímia — túnica longa e véu claros, lamparina acesa; branco e laranja de chama. Cálias — lira nas costas, único manto colorido (desbotado), coroa de louros murchos; oliva e roxo.

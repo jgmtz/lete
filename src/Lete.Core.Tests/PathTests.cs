@@ -28,7 +28,7 @@ public class PathTests
                 new PathWay("obolo", new FlagSet("pagou_caronte")),
                 new PathWay("origem_pescador", new OriginIs("pescador")),
             }),
-            new PathKey("cerbero", "diario.cerbero", new[] { new PathWay("regiao", new RegionVisited("palacio")) }),
+            new PathKey("cerbero", "diario.cerbero", new[] { new PathWay("missao", new QuestStageMin("palacio", 1)) }),
         }.ToDictionary(k => k.Id);
         _path = new PathKeys(_state, _bus, keys, () => facts);
     }
@@ -74,7 +74,7 @@ public class PathTests
         _path.Refresh();
 
         Assert.False(_path.Has("cerbero"));
-        Assert.Contains("cerbero.regiao", _path.WaysWaitingForSystems);
+        Assert.Contains("cerbero.missao", _path.WaysWaitingForSystems);
     }
 
     [Fact]

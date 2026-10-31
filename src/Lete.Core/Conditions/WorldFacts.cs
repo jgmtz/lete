@@ -6,7 +6,7 @@ using Lete.Core.Systems;
 namespace Lete.Core.Conditions;
 
 /// <summary>
-/// Responde às condições pelo <see cref="WorldState"/>. Os predicados de sistemas que ainda não existem (oferendas, sombras, vínculo, regiões, missões, dificuldade)
+/// Responde às condições pelo <see cref="WorldState"/>. Os predicados de sistemas que ainda não existem (missões)
 /// lançam <see cref="NotSupportedException"/> dizendo qual sistema falta, em vez de responder errado em silêncio.
 /// </summary>
 public sealed class WorldFacts : IConditionFacts
@@ -42,19 +42,22 @@ public sealed class WorldFacts : IConditionFacts
         ? choice == HeavyMemoryChoice.Face ? HeavyMemoryState.Face : HeavyMemoryState.Leave
         : HeavyMemoryState.Pending;
 
-    public string? Difficulty => Missing<string?>("difficulty", "modo de dificuldade no estado");
-    public int Bond => Missing<int>("bond_min", "vínculo do companheiro");
+    public string? Difficulty => _state.Difficulty;
+    public int Bond => _state.CompanionBond;
     public Via? TopVia => _profile.TopVia;
     public RecollectionKind? TopKind => _profile.TopKind;
     public bool HasPathKey(string key) => _state.PathKeys.ContainsKey(key);
     public bool IsOathActive(string oath) => _state.Oaths.TryGetValue(oath, out var status) && status == OathStatus.Active;
     public bool IsOathBroken(string oath) => _state.Oaths.TryGetValue(oath, out var status) && status == OathStatus.Broken;
-    public bool WasOfferingShared(string shade, string? kind) => Missing<bool>("offering_shared", "oferendas");
-    public bool ShadeIs(string shade, ShadeState state) => Missing<bool>("shade_state", "estado das sombras");
+    public bool WasOfferingShared(string shade, string? kind) => kind is not null
+        ? _state.SharedOfferings.Contains($"{shade}/{kind}")
+        : _state.SharedOfferings.Any(s => s.StartsWith($"{shade}/", StringComparison.Ordinal));
+
+    public bool ShadeIs(string shade, ShadeState state) => _state.Shades.TryGetValue(shade, out var s) && s == state;
     public bool OwnsItem(string item) => _state.Items.Owned.ContainsKey(item);
     public bool IsRecollectionKindFull(RecollectionKind kind) => _mosaic.IsKindFull(kind);
     public bool IsTriviaLit(string trivia) => _state.LitTrivias.Contains(trivia);
-    public bool WasRegionVisited(string region) => Missing<bool>("region_visited", "regiões visitadas");
+    public bool WasRegionVisited(string region) => _state.VisitedRegions.Contains(region);
     public int? QuestStage(string quest) => Missing<int?>("quest_stage", "missões");
 
     private static T Missing<T>(string predicate, string system) =>

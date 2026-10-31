@@ -78,25 +78,6 @@ public static class CombatData
             : null;
     }
 
-    /// <summary>Apoio de um companheiro (<c>content/companions/&lt;id&gt;.json</c>, campo <c>support</c>).</summary>
-    public static CompanionSupport CompanionFromJson(string json)
-    {
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
-        if (!root.TryGetProperty("support", out var s))
-        {
-            throw new FormatException("Campo 'support' ausente.");
-        }
-
-        var support = new CompanionSupport(
-            String(root, "id"),
-            String(s, "id"),
-            (int)TbdNumber.Read(s, "interval_turns"),
-            s.TryGetProperty("window_widening", out _) ? TbdNumber.Read(s, "window_widening") : 0f);
-        var errors = support.Validate().ToList();
-        return errors.Count == 0 ? support : throw new FormatException(string.Join(" ", errors));
-    }
-
     private static GradeValues ReadGradeValues(JsonElement element, string property)
     {
         if (!element.TryGetProperty(property, out var values))

@@ -15,6 +15,7 @@ public sealed class Journal : IDisposable
     private readonly IDisposable _pathKeys;
     private readonly IDisposable _itemEvolved;
     private readonly IDisposable _setCompleted;
+    private readonly IDisposable _fragments;
 
     public Journal(WorldState state, EventBus events)
     {
@@ -29,6 +30,13 @@ public sealed class Journal : IDisposable
             }
         });
         _setCompleted = events.Subscribe<ItemSetCompleted>(e => Add(e.StoryKey));
+        _fragments = events.Subscribe<OriginFragmentGained>(e =>
+        {
+            if (e.TextKey is { } key)
+            {
+                Add(key);
+            }
+        });
     }
 
     public void Dispose()
@@ -36,6 +44,7 @@ public sealed class Journal : IDisposable
         _pathKeys.Dispose();
         _itemEvolved.Dispose();
         _setCompleted.Dispose();
+        _fragments.Dispose();
     }
 
     public IReadOnlyList<string> Entries => _state.JournalEntries;

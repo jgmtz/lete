@@ -21,15 +21,22 @@ public static class OriginData
             String(o, "ambition_key"),
             String(o, "who_key"),
             String(o, "symbol"),
-            o.TryGetProperty("companions", out var companions)
-                ? companions.EnumerateArray().Select(c => c.GetString() ?? "").ToList()
-                : new List<string>())).ToList();
+            Strings(o, "companions"),
+            Strings(o, "spirits"),
+            o.TryGetProperty("fragments", out var fragments)
+                ? fragments.EnumerateArray()
+                    .Select(f => new OriginFragment($"{String(o, "id")}_{String(f, "with")}", String(f, "with"), String(f, "text_key")))
+                    .ToList()
+                : new List<OriginFragment>())).ToList();
 
         var repeated = origins.GroupBy(o => o.Id).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
         return repeated.Count == 0
             ? origins
             : throw new FormatException($"Origem repetida: {string.Join(", ", repeated)}.");
     }
+
+    private static List<string> Strings(JsonElement element, string property) =>
+        element.TryGetProperty(property, out var list) ? list.EnumerateArray().Select(c => c.GetString() ?? "").ToList() : new List<string>();
 
     /// <summary>
     /// Confere a regra das ligações (HISTORIA 5): cada companheiro ligado a exatamente duas origens, um par diferente

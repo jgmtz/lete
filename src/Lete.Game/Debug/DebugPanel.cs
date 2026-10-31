@@ -32,7 +32,9 @@ public partial class DebugPanel : CanvasLayer
     private Label _bagState = null!;
     private Label _itemState = null!;
     private Label _worldState = null!;
+    private Label _recordState = null!;
     private Button _companionButton = null!;
+    private Button _bondButton = null!;
     private Label _mosaicState = null!;
     private OptionButton _sourcePicker = null!;
     private readonly List<(string Recollection, string Source)> _sources = new();
@@ -190,6 +192,30 @@ public partial class DebugPanel : CanvasLayer
         });
         column.AddChild(worldRow);
 
+        column.AddChild(UiStyle.MakeLabel(T("debug.registro")));
+        _recordState = UiStyle.MakeLabel("");
+        _recordState.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        column.AddChild(_recordState);
+        var recordRow = new HFlowContainer();
+        AddButton(recordRow, "debug.registro.regiao", () =>
+        {
+            // Troca de região de mentira (salva, como no jogo); a seguinte volta para a sala.
+            var root = GameRoot.Instance;
+            root.ChangeRegion(root.State.RegionId == _main.RegionId ? DebugRegion : _main.RegionId);
+        });
+        AddButton(recordRow, "debug.registro.fragmento", () =>
+        {
+            var root = GameRoot.Instance;
+            var next = root.Origins.FirstOrDefault(o => o.Id == root.State.OriginId)?.Fragments
+                .FirstOrDefault(f => !root.State.OriginFragments.Contains(f.Id));
+            if (next is not null)
+            {
+                root.OriginFragments.Gain(next.Id);
+            }
+        });
+        AddButton(recordRow, "debug.registro.esquecer_ecos", () => GameRoot.Instance.State.Echoes.Clear());
+        column.AddChild(recordRow);
+
         column.AddChild(UiStyle.MakeLabel(T("debug.dialogo")));
         _dialogueState = UiStyle.MakeLabel("");
         _dialogueState.AutowrapMode = TextServer.AutowrapMode.WordSmart;
@@ -207,6 +233,20 @@ public partial class DebugPanel : CanvasLayer
             Refresh();
         };
         dialogueRow.AddChild(_companionButton);
+        _bondButton = new Button();
+        _bondButton.Pressed += () =>
+        {
+            // Debug: vínculo +1 direto no estado (no jogo vem de partilhar, lutar, conversar e responder).
+            var root = GameRoot.Instance;
+            if (root.State.CompanionId is { } id)
+            {
+                root.State.CompanionBond = Math.Min(root.Companions.Rules.BondMax, root.State.CompanionBond + 1);
+                root.Events.Publish(new CompanionBondChanged(id, root.State.CompanionBond));
+            }
+
+            Refresh();
+        };
+        dialogueRow.AddChild(_bondButton);
         column.AddChild(dialogueRow);
 
         column.AddChild(UiStyle.MakeLabel(T("debug.juramento")));
@@ -343,10 +383,32 @@ public partial class DebugPanel : CanvasLayer
             world.LitTrivias.Count == 0 ? "-" : string.Join(", ", world.LitTrivias),
             world.Trials.Count == 0 ? "-" : string.Join(", ", world.Trials.Select(p => $"{p.Key}={p.Value}")),
             world.Perjuries, GameRoot.Instance.Profile.Judge?.ToString() ?? "-");
+        RefreshRecord();
         var dialogue = GameRoot.Instance.State.Dialogue;
         _dialogueState.Text = string.Format(T("debug.dialogo.estado"),
             dialogue.Awakened.Count == 0 ? "-" : string.Join(", ", dialogue.Awakened), dialogue.Chosen.Count, dialogue.CommentsSeen.Count);
         _companionButton.Text = string.Format(T("debug.dialogo.companheiro"), GameRoot.Instance.State.CompanionId ?? T("debug.dialogo.nenhum"));
+        _bondButton.Text = string.Format(T("debug.companheiro.vinculo"), GameRoot.Instance.State.CompanionBond, GameRoot.Instance.Companions.IntervalTurns);
+    }
+
+    /// <summary>Região de mentira para conferir o save ao trocar de região.</summary>
+    private const string DebugRegion = "regiao_debug";
+
+    /// <summary>Região, modo, desfecho de cada sombra, partilhas, Ecos, espólios e fragmentos de origem.</summary>
+    private void RefreshRecord()
+    {
+        var state = GameRoot.Instance.State;
+        static string List(System.Collections.Generic.IEnumerable<string> items) =>
+            items.Any() ? string.Join(", ", items) : "-";
+        _recordState.Text = string.Format(T("debug.registro.estado"),
+            state.RegionId ?? "-",
+            List(state.VisitedRegions.OrderBy(r => r, StringComparer.Ordinal)),
+            state.Difficulty,
+            List(state.Shades.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => $"{p.Key}={ConditionParser.SnakeCase(p.Value)}")),
+            List(state.SharedOfferings.OrderBy(s => s, StringComparer.Ordinal)),
+            List(state.Echoes),
+            List(state.Hoards.Where(p => !p.Value.IsEmpty).Select(p => string.Format(T("debug.registro.espolio"), p.Key, p.Value.Obols))),
+            List(state.OriginFragments));
     }
 
     private void AddButton(Container row, string key, Action action)

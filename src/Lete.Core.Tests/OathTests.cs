@@ -29,7 +29,7 @@ public class OathTests
             Make("do_lar", Array.Empty<Via>(), kept: new FlagSet("voltou"), expires: new FlagSet("tartaro")),
             Make("do_silencio", Array.Empty<Via>()),
             Make("da_noite", new[] { Via.Flee }),
-            Make("do_campo", Array.Empty<Via>(), kept: new RegionVisited("lete")),
+            Make("do_campo", Array.Empty<Via>(), kept: new QuestStageMin("lete", 1)),
         }.ToDictionary(o => o.Id);
         _oaths = new Oaths(_state, _bus, oaths, new OathRules(MaxActive: 3), () => facts);
     }

@@ -99,7 +99,7 @@ public class MarkTests
     [Fact]
     public void OriginFragment_CountsOnce()
     {
-        var fragments = new OriginFragments(_state, _bus);
+        var fragments = new OriginFragments(_state, _bus, Array.Empty<Origin>(), _ => null);
         Assert.True(fragments.Gain("pescador_rede"));
         Assert.False(fragments.Gain("pescador_rede"));
         Assert.Equal(new[] { "pescador_rede" }, fragments.Gained);

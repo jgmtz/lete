@@ -1,0 +1,25 @@
+{
+  "id": "lia",
+  "name_key": "personagem.lia.nome",
+  "support": {
+    "id": "esboco",
+    "effect": "widen_stroke",
+    "power": {
+      "_tbd": true,
+      "value": 0.15
+    }
+  },
+  "approval": {
+    "_proposta": "Claude, 30/out/2026 (PENDÊNCIA 41)",
+    "fight": "tolerate",
+    "free": "approve",
+    "absorb": "reprove",
+    "witness": "approve",
+    "spare": "tolerate"
+  },
+  "reluctant_key": "companheiro.lia.relutante",
+  "talk_keys": [
+    "companheiro.lia.conversa.1",
+    "companheiro.lia.conversa.2"
+  ]
+}

@@ -213,7 +213,7 @@ public class ConditionTests
         Assert.True(ConditionEvaluator.Evaluate(condition, facts).Passed);
 
         var error = Assert.Throws<NotSupportedException>(() =>
-            ConditionEvaluator.Evaluate(ConditionParser.Parse("""{ "bond_min": 1 }"""), facts));
-        Assert.Contains("vínculo", error.Message);
+            ConditionEvaluator.Evaluate(ConditionParser.Parse("""{ "quest_stage": { "id": "q", "min": 1 } }"""), facts));
+        Assert.Contains("missões", error.Message);
     }
 }

@@ -33,7 +33,7 @@ Com 4 origens há exatamente 6 pares possíveis. Cada companheiro liga-se a um p
 
 ### 4. Fragmentos de origem (a mecânica nova)
 
-Quando o jogador encontra, conversa, liberta ou viaja com **um espírito nomeado ou companheiro ligado à sua origem**, ganha **um fragmento extra de memória sobre si mesmo** (um pedaço da vida passada: o ofício, a ambição, um rosto, um lugar). É conteúdo narrativo, **não é poder**, e entra no Mosaico/Diário. Como cada origem tem a mesma quantidade de ligações (3 companheiros e 2 espíritos nomeados), o total é igual para todas. Integra-se à cadeia de 4 capítulos (o capítulo 1 "Eco" já é "uma sombra o reconhece pela origem"). Número de fragmentos por origem: **a definir** (pendência).
+Quando o jogador encontra, conversa, liberta ou viaja com **um espírito nomeado ou companheiro ligado à sua origem**, ganha **um fragmento extra de memória sobre si mesmo** (um pedaço da vida passada: o ofício, a ambição, um rosto, um lugar). É conteúdo narrativo, **não é poder**, e entra no Mosaico/Diário. Como cada origem tem a mesma quantidade de ligações (3 companheiros e 2 espíritos nomeados), o total é igual para todas. Integra-se à cadeia de 4 capítulos (o capítulo 1 "Eco" já é "uma sombra o reconhece pela origem"). **Decidido (João, 30/out/2026):** **um fragmento por pessoa ligada** (5 por origem), na primeira vez de qualquer gatilho: conversar, libertar ou viajar junto; o texto vai para o Diário (`content/characters/origens.json`, campos `spirits` e `fragments`; `Lete.Core/Systems/OriginFragments.cs`).
 
 ### 5. Espíritos nomeados: mínimo de 2 por origem
 

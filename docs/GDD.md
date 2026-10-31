@@ -338,6 +338,7 @@ A derrota tem custo real, nunca é um "game over" seco:
 - Segunda leitura da luta: comenta a sombra à sua maneira (um diz "ele só quer descansar", outro "ele tem nome"). Ambos podem estar certos ou errados.
 - **Apoios:** Postura (Aulo), Lamento (Ismena), Surrupio (Dimas), Brasa (Septímia), Canto (Cálias); o da **Lia** (sexta companheira, 26/out/2026) está pendente. Ver `HISTORIA.md`.
 - O vínculo cresce ao partilhar oferendas com ele, lutar juntos e conversar nas Trívias.
+- **Regras fechadas (João, 30/out/2026):** o vínculo é um número que **só cresce** (0 a 10, `_tbd`); **por faixas**: abaixo da faixa alta o apoio vem a cada 2 turnos, na faixa alta a cada turno. A **ação do turno** conta pela via dela (Atacar = Combater; Escutar, Libertar e Oferenda = Libertar; Absorver e Eco = Absorver; Presenciar; Poupar; Fugir; Deixar-se vencer; Memória e Bolsa não são via): se ele a reprova, o próximo apoio sai **relutante** (metade, `_tbd`) e ele comenta **uma vez por luta**. Os **cinco apoios** funcionam, e o da Lia é proposta do Claude (Esboço, ver `HISTORIA.md` 5.2). Implementado em `Lete.Core/Systems/Companions.cs`; números em `content/rules/companheiro.json`.
 
 ### 4.11 Chefes
 

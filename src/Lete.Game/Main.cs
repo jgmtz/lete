@@ -92,6 +92,8 @@ public partial class Main : Node
         TribunalSeat.Opened += OpenTrial;
         GameRoot.Instance.StateReplaced += OnStateReplaced;
         GameRoot.Instance.Saving += OnSaving;
+        // Começar numa região não é troca: só marca como visitada (sem salvar).
+        GameRoot.Instance.Regions.Enter(RegionId);
         _player.CharacterChanged += ApplyMarkLook;
         _markSubscription = GameRoot.Instance.Events.Subscribe<MarkIncreased>(_ => ApplyMarkLook());
         ApplyMarkLook();
@@ -190,6 +192,8 @@ public partial class Main : Node
             _cameraRig.SnapToTarget();
         }
 
+        GameRoot.Instance.Regions.Enter(RegionId);
+
         ApplyMarkLook();
     }
 
@@ -248,7 +252,7 @@ public partial class Main : Node
     /// --render=low|direct  --gender=m|f  --teleport=Nome  --examine
     /// --carregar  --ui=journal|mosaic|inventory|debug  --shot=caminho.png  --frames=N
     /// --pesada=encarar,deixar (decide as próximas Pesadas da fila pela cena; a última fica na tela, sem --ui)
-    /// --companheiro=aulo  --despertar=padeiro (oferenda certa)  --conversar=padeiro --escolher=0,1 (botões, em ordem)
+    /// --companheiro=aulo  --origem=artesao  --despertar=padeiro (oferenda certa)  --conversar=padeiro --escolher=0,1 (botões, em ordem)
     /// --loja=coveiro  --trivia=trivia_sala  --julgamento=julgamento_padeiro  --obolos=N  --apertar=0,1 (botões da tela aberta)
     /// </summary>
     private async Task RunCommandLineAsync()
@@ -275,6 +279,12 @@ public partial class Main : Node
         if (args.TryGetValue("gender", out var gender))
         {
             GameRoot.Instance.State.Gender = gender == "f" ? Gender.Feminine : Gender.Masculine;
+        }
+
+        if (args.TryGetValue("origem", out var origin))
+        {
+            // Teste: troca a origem direto no estado (no jogo é escolhida uma vez, na abertura).
+            GameRoot.Instance.State.OriginId = origin;
         }
 
         ApplyPixelSettings();

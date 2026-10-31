@@ -20,6 +20,14 @@ public sealed class WorldState
     /// <summary>O companheiro da partida (um dos 6; irreversível). Nulo antes da escolha.</summary>
     public string? CompanionId { get; set; }
 
+    /// <summary>Vínculo com o companheiro (só cresce; ver <c>Systems.Companions</c>).</summary>
+    public int CompanionBond { get; set; }
+
+    /// <summary>Quantas conversas de Trívia já teve com ele, e em que degrau da Maré foi a última.</summary>
+    public int CompanionTalks { get; set; }
+
+    public int? CompanionTalkStep { get; set; }
+
     /// <summary>Marca dos Mortos: contador interno, nunca exibido como número (só sobe; ver <c>Systems.MarkTracker</c>).</summary>
     public int Mark { get; set; }
 
@@ -83,6 +91,24 @@ public sealed class WorldState
     public System.Numerics.Vector3? Position { get; set; }
 
     public HashSet<string> Flags { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>Modo de dificuldade (id de <c>content/difficulty</c>), travado no começo da partida.</summary>
+    public string Difficulty { get; set; } = "estige";
+
+    /// <summary>Como terminou o último encontro com cada sombra (ver <c>Systems.ShadeRecord</c>).</summary>
+    public Dictionary<string, Lete.Core.Conditions.ShadeState> Shades { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>Oferendas partilhadas, como <c>sombra/tipo</c> (condição <c>offering_shared</c>).</summary>
+    public HashSet<string> SharedOfferings { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>Ecos guardados nos espaços (ids, na ordem em que foram absorvidos).</summary>
+    public List<string> Echoes { get; } = new();
+
+    /// <summary>O que cada sombra guarda de uma derrota do protagonista (volta se ela for vencida).</summary>
+    public Dictionary<string, HoardState> Hoards { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>Regiões já visitadas (condição <c>region_visited</c>).</summary>
+    public HashSet<string> VisitedRegions { get; } = new(StringComparer.Ordinal);
 
     /// <summary>Entradas do Diário, como chaves de localização, na ordem em que foram escritas.</summary>
     public List<string> JournalEntries { get; } = new();

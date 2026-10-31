@@ -1,0 +1,24 @@
+{
+  "id": "calias",
+  "name_key": "personagem.calias.nome",
+  "support": {
+    "id": "canto",
+    "effect": "foretell",
+    "power": {
+      "_tbd": true,
+      "value": 1.0
+    }
+  },
+  "approval": {
+    "fight": "tolerate",
+    "free": "tolerate",
+    "absorb": "approve",
+    "witness": "approve",
+    "spare": "reprove"
+  },
+  "reluctant_key": "companheiro.calias.relutante",
+  "talk_keys": [
+    "companheiro.calias.conversa.1",
+    "companheiro.calias.conversa.2"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "ismena",
+  "name_key": "personagem.ismena.nome",
+  "support": {
+    "id": "lamento",
+    "effect": "widen_listen",
+    "power": {
+      "_tbd": true,
+      "value": 0.15
+    }
+  },
+  "approval": {
+    "fight": "reprove",
+    "free": "approve",
+    "absorb": "tolerate",
+    "witness": "approve",
+    "spare": "tolerate"
+  },
+  "reluctant_key": "companheiro.ismena.relutante",
+  "talk_keys": [
+    "companheiro.ismena.conversa.1",
+    "companheiro.ismena.conversa.2"
+  ]
+}
