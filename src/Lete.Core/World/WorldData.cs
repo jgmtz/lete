@@ -102,6 +102,17 @@ public static class WorldData
         return new TribunalRules((int)TbdNumber.Read(doc.RootElement, "defend_bonus"), (int)TbdNumber.Read(doc.RootElement, "accuse_bonus"));
     }
 
+    /// <summary>Região: <c>id</c>, <c>name_key</c>, <c>scene</c> (caminho <c>res://</c> da cena) e <c>entry</c> (marcador de chegada padrão).</summary>
+    public static RegionDefinition RegionFromJson(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        var region = new RegionDefinition(String(root, "id"), String(root, "name_key"), String(root, "scene"), String(root, "entry"));
+        return region.Scene.StartsWith("res://", StringComparison.Ordinal) && region.Scene.EndsWith(".tscn", StringComparison.Ordinal)
+            ? region
+            : throw new FormatException($"Região '{region.Id}': 'scene' precisa ser um caminho res://...tscn.");
+    }
+
     private static string String(JsonElement element, string property) =>
         element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()!

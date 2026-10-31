@@ -42,6 +42,7 @@ public partial class GameRoot : Node
     private const string OriginsPath = "res://content/characters/origens.json";
     private const string OathRulesPath = "res://content/rules/juramentos.json";
     private const string CompanionsFolder = "res://content/companions";
+    private const string RegionsFolder = "res://content/regions";
     private const string CompanionRulesPath = "res://content/rules/companheiro.json";
     private const string MosaicRulesPath = "res://content/rules/mosaico.json";
     private const string RecollectionsFolder = "res://content/recollections";
@@ -147,6 +148,9 @@ public partial class GameRoot : Node
     private System.Collections.Generic.Dictionary<string, string> _originNames = null!;
     private System.Collections.Generic.IReadOnlyList<Origin> _origins = null!;
 
+    /// <summary>As regiões do Além (id → cena e chegada padrão).</summary>
+    public System.Collections.Generic.IReadOnlyDictionary<string, RegionDefinition> RegionDefinitions { get; private set; } = null!;
+
     /// <summary>As origens (com as pessoas ligadas e os fragmentos).</summary>
     public System.Collections.Generic.IReadOnlyList<Origin> Origins => _origins;
 
@@ -190,6 +194,7 @@ public partial class GameRoot : Node
         _merchantRules = WorldData.MerchantRulesFromJson(FileAccess.GetFileAsString(MerchantRulesPath));
         _tribunalRules = WorldData.TribunalRulesFromJson(FileAccess.GetFileAsString(TribunalRulesPath));
         _companions = LoadFolder(CompanionsFolder, CompanionData.FromJson, c => c.Id);
+        RegionDefinitions = LoadFolder(RegionsFolder, WorldData.RegionFromJson, r => r.Id);
         _companionRules = CompanionData.RulesFromJson(FileAccess.GetFileAsString(CompanionRulesPath));
         _origins = OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath));
         _originNames = _origins.ToDictionary(o => o.Id, o => o.NameKey, StringComparer.Ordinal);

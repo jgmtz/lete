@@ -13,8 +13,9 @@ using Lete.Game.World;
 namespace Lete.Game;
 
 /// <summary>
-/// Cena principal do M0: o mundo 3D dentro de um SubViewport (para o teste de baixa resolução),
-/// a densidade de pixel única, o HUD e o painel de debug.
+/// Cena principal da exploração: a região atual (uma cena de <c>content/regions</c>, carregada pelo id) dentro de um
+/// SubViewport (para o render em baixa resolução), a densidade de pixel única, o HUD, as telas e o painel de debug.
+/// Passar por uma <see cref="RegionExit"/> recarrega esta cena com a região de destino e salva o jogo ao chegar.
 /// </summary>
 public partial class Main : Node
 {
@@ -27,8 +28,22 @@ public partial class Main : Node
 
     [Export] public bool LowResRender { get; set; } = true;
 
-    /// <summary>Id desta região no save (por enquanto só existe a sala de teste).</summary>
-    [Export] public string RegionId { get; set; } = "sala_teste";
+    /// <summary>Id da região carregada (definido ao abrir a cena).</summary>
+    public string RegionId { get; private set; } = "";
+
+    /// <summary>Onde o jogo começa sem save: o fim da abertura (decisão do João, 30/out/2026: a boca da gruta de Tênaro).</summary>
+    [Export] public string StartRegion { get; set; } = "tenaro";
+
+    /// <summary>Região das conferências pela linha de comando (os pontos de teleporte de teste ficam nela).</summary>
+    public const string TestRegion = "sala_teste";
+
+    /// <summary>Uma chegada pendente: a cena é recarregada e, ao abrir, vai para esta região (e salva, se for troca).</summary>
+    private sealed record Arrival(string Region, string? Entry, bool Save);
+
+    private static Arrival? _arrival;
+
+    /// <summary>Os argumentos de conferência rodam uma vez por execução (a cena recarrega ao trocar de região).</summary>
+    private static bool _commandLineRan;
 
     /// <summary>Onde o jogador aparece ao chegar numa Trívia pela tocha (ao lado dela, não dentro).</summary>
     private static readonly Vector3 TriviaArrivalOffset = new(0f, 0f, 1.5f);
@@ -53,7 +68,7 @@ public partial class Main : Node
     public override void _Ready()
     {
         _container = GetNode<SubViewportContainer>("ViewportContainer");
-        _world = _container.GetNode<Node3D>("SubViewport/TestRoom");
+        var region = LoadRegion();
         _player = _world.GetNode<Player>("Player");
         if (GameRoot.Instance.State.ProtagonistId is { } chosen)
         {
@@ -92,8 +107,8 @@ public partial class Main : Node
         TribunalSeat.Opened += OpenTrial;
         GameRoot.Instance.StateReplaced += OnStateReplaced;
         GameRoot.Instance.Saving += OnSaving;
-        // Começar numa região não é troca: só marca como visitada (sem salvar).
-        GameRoot.Instance.Regions.Enter(RegionId);
+        RegionExit.Crossed += GoToRegion;
+        PlaceOnArrival(region);
         _player.CharacterChanged += ApplyMarkLook;
         _markSubscription = GameRoot.Instance.Events.Subscribe<MarkIncreased>(_ => ApplyMarkLook());
         ApplyMarkLook();
@@ -124,7 +139,84 @@ public partial class Main : Node
         MerchantStall.Opened -= OpenShop;
         TriviaRest.Reached -= OpenTrivia;
         TribunalSeat.Opened -= OpenTrial;
+        RegionExit.Crossed -= GoToRegion;
         _markSubscription?.Dispose();
+    }
+
+    /// <summary>
+    /// Escolhe e instancia a região: a da chegada pendente, a de <c>-- --regiao=id</c>, a do estado (save carregado ou
+    /// região anterior), a de teste quando há argumentos de conferência, ou a do começo do jogo.
+    /// </summary>
+    private Lete.Core.World.RegionDefinition LoadRegion()
+    {
+        var regions = GameRoot.Instance.RegionDefinitions;
+        var args = OS.GetCmdlineUserArgs();
+        var id = _arrival?.Region
+            ?? Array.Find(args, a => a.StartsWith("--regiao="))?["--regiao=".Length..]
+            ?? GameRoot.Instance.State.RegionId
+            ?? (args.Any(a => a != "--sem-abertura") ? TestRegion : StartRegion);
+        if (!regions.TryGetValue(id, out var region))
+        {
+            GD.PushError($"Região '{id}' não existe em content/regions; abrindo '{StartRegion}'.");
+            region = regions[StartRegion];
+        }
+
+        RegionId = region.Id;
+        _world = GD.Load<PackedScene>(region.Scene).Instantiate<Node3D>();
+        _container.GetNode("SubViewport").AddChild(_world);
+        return region;
+    }
+
+    /// <summary>
+    /// Põe o jogador no lugar: no marcador por onde chegou, onde salvou (save desta região) ou na chegada padrão. Chegar
+    /// por uma passagem é trocar de região: salva. Começar numa região só a marca como visitada.
+    /// </summary>
+    private void PlaceOnArrival(Lete.Core.World.RegionDefinition region)
+    {
+        var arrival = _arrival;
+        _arrival = null;
+        var state = GameRoot.Instance.State;
+        if (arrival is { Entry: { } entry })
+        {
+            TeleportToMarker(entry);
+        }
+        else if (state.RegionId == RegionId && state.Position is { } position)
+        {
+            _player.TeleportTo(new Vector3(position.X, position.Y, position.Z));
+            _cameraRig.SnapToTarget();
+        }
+        else
+        {
+            TeleportToMarker(region.Entry);
+        }
+
+        if (arrival is { Save: true })
+        {
+            GameRoot.Instance.ChangeRegion(RegionId);
+        }
+        else
+        {
+            GameRoot.Instance.Regions.Enter(RegionId);
+        }
+    }
+
+    private void TeleportToMarker(string name)
+    {
+        if (TeleportPoints.FirstOrDefault(p => p.Name == name) is { } marker)
+        {
+            TeleportPlayer(marker);
+        }
+        else
+        {
+            GD.PushError($"Região '{RegionId}' não tem o marcador de chegada '{name}'.");
+        }
+    }
+
+    /// <summary>Passou por uma passagem: recarrega a cena na região de destino (e salva ao chegar).</summary>
+    private void GoToRegion(string regionId, string entry)
+    {
+        _arrival = new Arrival(regionId, entry, Save: true);
+        GetTree().CallDeferred(SceneTree.MethodName.ReloadCurrentScene);
     }
 
     /// <summary>Uma Memória Pesada aflora: o aviso aparece (o jogador ainda pode adiar).</summary>
@@ -181,6 +273,14 @@ public partial class Main : Node
     private void OnStateReplaced()
     {
         var state = GameRoot.Instance.State;
+        if (state.RegionId is { } saved && saved != RegionId && GameRoot.Instance.RegionDefinitions.ContainsKey(saved))
+        {
+            // O save é de outra região: abre a cena dela, no lugar onde salvou (carregar não é trocar: não salva).
+            _arrival = new Arrival(saved, null, Save: false);
+            GetTree().CallDeferred(SceneTree.MethodName.ReloadCurrentScene);
+            return;
+        }
+
         if (state.ProtagonistId is { } chosen)
         {
             _player.SelectCharacter(chosen);
@@ -252,6 +352,7 @@ public partial class Main : Node
     /// --render=low|direct  --gender=m|f  --teleport=Nome  --examine
     /// --carregar  --ui=journal|mosaic|inventory|debug  --shot=caminho.png  --frames=N
     /// --pesada=encarar,deixar (decide as próximas Pesadas da fila pela cena; a última fica na tela, sem --ui)
+    /// --regiao=tenaro|aqueronte|sala_teste (sem ela, as conferências abrem a sala de teste)
     /// --companheiro=aulo  --origem=artesao  --despertar=padeiro (oferenda certa)  --conversar=padeiro --escolher=0,1 (botões, em ordem)
     /// --loja=coveiro  --trivia=trivia_sala  --julgamento=julgamento_padeiro  --obolos=N  --apertar=0,1 (botões da tela aberta)
     /// </summary>
@@ -265,6 +366,15 @@ public partial class Main : Node
         {
             return;
         }
+
+        if (_commandLineRan)
+        {
+            // Já rodou antes de uma troca de região: aqui só falta a foto (a instância anterior saiu da árvore).
+            await Shot(args);
+            return;
+        }
+
+        _commandLineRan = true;
 
         if (args.TryGetValue("render", out var render))
         {
@@ -364,13 +474,28 @@ public partial class Main : Node
             }
         }
 
-        if (args.TryGetValue("shot", out var shotPath))
+        await Shot(args);
+    }
+
+    /// <summary>
+    /// <c>--shot</c>: espera e salva a tela. Se a cena recarregou no meio (troca de região), a instância nova tira a foto.
+    /// </summary>
+    private async Task Shot(Dictionary<string, string> args)
+    {
+        if (!args.TryGetValue("shot", out var shotPath))
         {
-            await WaitFrames(args.TryGetValue("frames", out var frames) ? int.Parse(frames) : 30);
-            var error = GetViewport().GetTexture().GetImage().SavePng(shotPath);
-            GD.Print($"screenshot: {shotPath} ({error})");
-            GetTree().Quit();
+            return;
         }
+
+        await WaitFrames(args.TryGetValue("frames", out var frames) ? int.Parse(frames) : 30);
+        if (!IsInsideTree())
+        {
+            return;
+        }
+
+        var error = GetViewport().GetTexture().GetImage().SavePng(shotPath);
+        GD.Print($"screenshot: {shotPath} ({error})");
+        GetTree().Quit();
     }
 
     private static ChoiceScreen Open(ChoiceScreen screen, Action open)
@@ -381,7 +506,7 @@ public partial class Main : Node
 
     private async Task WaitFrames(int count)
     {
-        for (var i = 0; i < count; i++)
+        for (var i = 0; i < count && IsInsideTree(); i++)
         {
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }

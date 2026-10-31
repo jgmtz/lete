@@ -1,0 +1,7 @@
+{
+  "id": "aqueronte",
+  "_nota": "Ato I (HISTORIA 7.1): a margem do Aqueronte, Caronte e os insepultos. Blockout.",
+  "name_key": "regiao.aqueronte.nome",
+  "scene": "res://src/Lete.Game/Regions/Aqueronte.tscn",
+  "entry": "ChegadaTenaro"
+}

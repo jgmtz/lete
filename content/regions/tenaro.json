@@ -1,0 +1,7 @@
+{
+  "id": "tenaro",
+  "_nota": "Prólogo/Ato I (HISTORIA 2 e 7.1): a boca da gruta, a descida e a câmara do rio com a primeira Trívia. Blockout (decisão do João, 30/out/2026: blocos agora, arte depois).",
+  "name_key": "regiao.tenaro.nome",
+  "scene": "res://src/Lete.Game/Regions/Tenaro.tscn",
+  "entry": "Entrada"
+}

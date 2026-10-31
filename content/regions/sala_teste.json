@@ -1,0 +1,7 @@
+{
+  "id": "sala_teste",
+  "_nota": "Sala de teste do M0/M2 (todos os sistemas para conferir). Fora do caminho do jogo; abre pelas conferências da linha de comando ou com --regiao=sala_teste.",
+  "name_key": "regiao.sala_teste.nome",
+  "scene": "res://src/Lete.Game/World/TestRoom.tscn",
+  "entry": "Inicio"
+}

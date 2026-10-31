@@ -112,6 +112,10 @@ Incluir desde o início um **painel de debug** (tecla dedicada) para editar Marc
 
 ---
 
+## 6.1 Regiões (30/out/2026)
+
+Cada região é um arquivo `content/regions/<id>.json` (`id`, `name_key`, `scene`, `entry`) e uma cena do Godot (`src/Lete.Game/Regions/`; a sala de teste continua em `World/TestRoom.tscn`). A cena de região traz o cenário, o `Player`, o `CameraRig` e os marcadores (`Marker3D` no grupo `teleport_points`). O `Main` instancia a região pelo id: a da chegada pendente, a de `-- --regiao=`, a do estado ou a de começo (`StartRegion` = `tenaro`; as conferências da linha de comando abrem a sala de teste). Uma `RegionExit` (Area3D com `TargetRegion` e `TargetEntry`) recarrega a cena na região de destino; ao chegar, `GameRoot.ChangeRegion` salva (salvar só em Trívias e ao trocar de região). Carregar um save de outra região reabre a cena nela, sem salvar. Blockouts gerados por `tools/blockout_regioes.py`.
+
 ## 7. Localização e gênero
 
 - **Nenhum texto fixo no código.** Toda fala e rótulo usa **chave de localização** (`dlg.padeiro.vago.escutar`). Português do Brasil primeiro; inglês opcional depois.

@@ -22,6 +22,9 @@ namespace Lete.Game.Opening;
 public partial class OpeningDirector : Node3D
 {
     private const string MainScenePath = "res://src/Lete.Game/Main.tscn";
+
+    /// <summary>O objeto-guia que o protagonista leva no cinto desde o começo.</summary>
+    private const string TabletItem = "tabuinha_rasurada";
     public const string OriginsPath = "res://content/characters/origens.json";
     private const string BustArtFolder = "res://art/sprites/batalha/pixel_160";
     private static string OptionsPath => GameRoot.UserPath("opcoes.cfg");
@@ -423,6 +426,8 @@ public partial class OpeningDirector : Node3D
         var state = GameRoot.Instance.State;
         state.OriginId = origin.Id;
         GameRoot.Instance.Events.Publish(new OriginChosen(origin.Id));
+        // Todos descem com a Tabuinha Rasurada no cinto (HISTORIA 1).
+        GameRoot.Instance.Items.Acquire(TabletItem);
         GD.Print($"Abertura: escolhido {state.ProtagonistId}, origem {origin.Id}");
         GoToMain();
     }
@@ -468,7 +473,8 @@ public partial class OpeningDirector : Node3D
 
     private void BuildWorld()
     {
-        // TODO decisão: rio ou poça? Que rio? Antes de Tênaro ou dentro dele? Provisório: um rio sem nome, antes de Tênaro.
+        // Decidido (João, 30/out/2026): o rio fica na boca da gruta de Tênaro, antes de entrar; depois da escolha, o jogo
+        // começa jogável na entrada da gruta (Main.StartRegion).
         AddChild(new WorldEnvironment
         {
             Environment = new Environment

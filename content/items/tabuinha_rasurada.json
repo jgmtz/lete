@@ -1,0 +1,13 @@
+{
+  "id": "tabuinha_rasurada",
+  "_nota": "O objeto-guia (HISTORIA 1): começa no cinto, com um nome raspado. Por enquanto só existe (relíquia sem efeito); reagir perto do que é ligado ao nome vem com o Poço das Sem-Nome.",
+  "category": "relic",
+  "name_key": "item.tabuinha.nome",
+  "story_key": "item.tabuinha.historia",
+  "affinity": "family",
+  "stages": [
+    {
+      "id": "worn"
+    }
+  ]
+}

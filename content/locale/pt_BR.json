@@ -513,5 +513,18 @@
   "debug.registro.regiao": "Trocar de região (salva)",
   "debug.registro.fragmento": "Próximo fragmento da origem",
   "debug.registro.esquecer_ecos": "Esquecer os Ecos",
-  "debug.registro.espolio": "{0} ({1} óbolos)"
+  "debug.registro.espolio": "{0} ({1} óbolos)",
+  "regiao.sala_teste.nome": "Sala de teste",
+  "regiao.tenaro.nome": "Cabo Tênaro",
+  "regiao.aqueronte.nome": "Margem do Aqueronte",
+  "trivia.tenaro.nome": "Trívia de Tênaro",
+  "item.tabuinha.nome": "Tabuinha rasurada",
+  "item.tabuinha.historia": "Uma tabuinha de barro presa ao cinto. Havia um nome escrito nela. Alguém o raspou com a unha, letra por letra.",
+  "obj.tenaro.mar": "O mar bate lá embaixo, longe. Daqui o barulho parece de outra vida.",
+  "obj.tenaro.boca": "A boca da gruta respira frio. Dizem que por aqui se desce aos mortos. Você já sabia o caminho.",
+  "obj.tenaro.poca": "Uma poça na pedra. A água não reflete nada, nem a tocha.",
+  "obj.tenaro.marcas": "Riscos na parede, à altura da mão. Alguém contou dias aqui. Ou pessoas.",
+  "obj.aqueronte.margem": "A água do Aqueronte não corre: ela se arrasta, cinzenta, e não faz barulho.",
+  "obj.aqueronte.barca": "A barca de Caronte está amarrada. Ninguém a guarda. Ninguém precisa.",
+  "obj.aqueronte.insepultos": "Sombras sentadas na lama, olhando a outra margem. Sem moeda, sem rito, sem pressa."
 }

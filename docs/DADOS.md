@@ -229,6 +229,8 @@ Posturas: `escutar`, `perguntar`, `pressionar`, `consolar`, `calar` (`calar` sem
 }
 ```
 
+**Implementado até agora (30/out/2026):** só `content/regions/<id>.json`: `id` (igual ao nome do arquivo), `name_key`, `scene` (`res://...tscn`) e `entry` (nome do marcador de chegada padrão na cena). O teste `RegionContentTests` confere que a cena e o marcador existem e que toda passagem (`RegionExit`: `TargetRegion`, `TargetEntry`) aponta para uma região e um marcador que existem. A Trívia diz a região em `region`. Os outros campos acima (`act`, `areas`, `connections`, `combat_rule`, `tide_table`, névoa, Trívia, mercador, clima) entram com o conteúdo de cada região.
+
 ---
 
 ## 7. Modo de dificuldade (`content/difficulty/<modo>.json`)
