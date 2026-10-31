@@ -5,5 +5,8 @@
   "battle": "remador_tenaro",
   "after": "remador_marcas",
   "hecate_key": "encontro.remador_camara.hecate",
-  "free_defeat": true
+  "free_defeat": true,
+  "requires": {
+    "flag": "hecate_avisou_roma"
+  }
 }

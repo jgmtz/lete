@@ -296,7 +296,7 @@ public partial class GameRoot : Node
         Companions = new Companions(State, Events, _companions, _companionRules, Tide);
         Shades = new ShadeRecord(State, Events);
         Regions = new Regions(State, Events);
-        Encounters = new Encounters(State, Events, _encounters);
+        Encounters = new Encounters(State, Events, _encounters, () => Facts);
         Mosaic = new Mosaic(State, Events, _recollections, _mosaicRules);
         HeavyMemories = new HeavyMemories(State, Events, _recollections.Values);
         OriginFragments = new OriginFragments(State, Events, _origins,

@@ -1,0 +1,79 @@
+{
+  "id": "hecate_tenaro",
+  "_rascunho": "Hécate na primeira Trívia, com o aviso da romã antes do primeiro Eco (GDD 2.3, HISTORIA Ato I). Forma decidida pelo João (31/out/2026): conversa com perguntas, o aviso obrigatório no caminho, só a chama e a voz. Falas do Claude (PENDENCIAS 74).",
+  "mode": "fixed",
+  "speaker_key": "personagem.hecate.nome",
+  "start": [
+    "inicio"
+  ],
+  "nodes": [
+    {
+      "id": "inicio",
+      "line_key": "dlg.hecate_tenaro.inicio",
+      "next": "roma_eco"
+    },
+    {
+      "id": "roma_eco",
+      "line_key": "dlg.hecate_tenaro.roma_eco",
+      "next": "roma_marca"
+    },
+    {
+      "id": "roma_marca",
+      "line_key": "dlg.hecate_tenaro.roma_marca",
+      "next": "perguntas",
+      "effects": [
+        {
+          "flag": "hecate_avisou_roma"
+        },
+        {
+          "journal_key": "diario.hecate.roma"
+        }
+      ]
+    },
+    {
+      "id": "perguntas",
+      "line_key": "dlg.hecate_tenaro.perguntas",
+      "options": [
+        {
+          "posture": "perguntar",
+          "text_key": "dlg.hecate_tenaro.quem",
+          "next": "quem"
+        },
+        {
+          "posture": "perguntar",
+          "text_key": "dlg.hecate_tenaro.lembrar",
+          "next": "lembrar"
+        },
+        {
+          "posture": "escutar",
+          "text_key": "dlg.hecate_tenaro.afogado",
+          "next": "afogado"
+        },
+        {
+          "posture": "calar",
+          "text_key": "dlg.hecate_tenaro.calar",
+          "next": "despedida"
+        }
+      ]
+    },
+    {
+      "id": "quem",
+      "line_key": "dlg.hecate_tenaro.quem.resposta",
+      "next": "perguntas"
+    },
+    {
+      "id": "lembrar",
+      "line_key": "dlg.hecate_tenaro.lembrar.resposta",
+      "next": "perguntas"
+    },
+    {
+      "id": "afogado",
+      "line_key": "dlg.hecate_tenaro.afogado.resposta",
+      "next": "perguntas"
+    },
+    {
+      "id": "despedida",
+      "line_key": "dlg.hecate_tenaro.fim"
+    }
+  ]
+}

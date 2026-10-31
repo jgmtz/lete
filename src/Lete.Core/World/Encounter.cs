@@ -13,6 +13,7 @@ namespace Lete.Core.World;
 /// <param name="After">O encontro que precisa ter terminado antes (até lá, a sombra não está neste lugar).</param>
 /// <param name="NeedsOffering">Tipo de oferenda que precisa estar na Bolsa para a luta começar; sem ela, só a fala <paramref name="WaitKey"/>.</param>
 /// <param name="FreeDefeat">Derrota sem custo: Hécate diz uma linha e o encontro recomeça descansado.</param>
+/// <param name="Requires">Condição para a sombra estar no lugar, além de <paramref name="After"/> (ex.: Hécate já avisou da romã).</param>
 public sealed record Encounter(
     string Id,
     string ShadeId,
@@ -25,7 +26,8 @@ public sealed record Encounter(
     string? After,
     string? NeedsOffering,
     string? WaitKey,
-    bool FreeDefeat)
+    bool FreeDefeat,
+    Conditions.Condition? Requires = null)
 {
     public bool IsLesson => Lesson.Count > 0;
 

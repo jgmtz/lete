@@ -8,7 +8,13 @@ namespace Lete.Core.World;
 /// Uma Trívia de Hécate (<c>content/trivias/&lt;id&gt;.json</c>, GDD 3.6 e 3.7): em que região fica e as até três
 /// tochas (as Trívias a que ela liga). A de Asfódelos é <see cref="Hub"/>: liga a todas as já acesas.
 /// </summary>
-public sealed record Trivia(string Id, string RegionId, string NameKey, IReadOnlyList<string> Torches, bool Hub);
+public sealed record Trivia(string Id, string RegionId, string NameKey, IReadOnlyList<string> Torches, bool Hub, TriviaIntro? Intro = null);
+
+/// <summary>
+/// Uma conversa antes da tela da Trívia (<c>intro</c>: <c>dialogue</c> e <c>when</c>): Hécate na primeira Trívia, com o
+/// aviso da romã (GDD 2.3). Abre enquanto a condição vale (a própria conversa a desliga, com uma flag).
+/// </summary>
+public sealed record TriviaIntro(string DialogueId, Conditions.Condition? When);
 
 /// <summary>
 /// A rede de viagem das Trívias (GDD 3.6): acender uma (chegando a pé) a liga à rede; dela se viaja só para as das
@@ -32,6 +38,13 @@ public sealed class Trivias
     public IReadOnlyDictionary<string, Trivia> Definitions { get; }
 
     public bool IsLit(string triviaId) => _state.LitTrivias.Contains(triviaId);
+
+    /// <summary>A conversa que abre antes da tela desta Trívia agora; nula se não há (ou a condição não vale mais).</summary>
+    public string? IntroDialogue(string triviaId, Conditions.IConditionFacts facts) =>
+        Definitions.TryGetValue(triviaId, out var trivia) && trivia.Intro is { } intro
+        && Conditions.ConditionEvaluator.Passes(intro.When, facts)
+            ? intro.DialogueId
+            : null;
 
     /// <summary>Acende a Trívia (a pé). Falso se já estava acesa.</summary>
     public bool Light(string triviaId)

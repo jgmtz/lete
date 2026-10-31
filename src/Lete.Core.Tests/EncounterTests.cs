@@ -1,18 +1,21 @@
 using Lete.Core.Combat;
+using Lete.Core.Conditions;
 using Lete.Core.Events;
+using Lete.Core.Recollections;
 using Lete.Core.State;
 using Lete.Core.Systems;
 using Lete.Core.World;
 
 namespace Lete.Core.Tests;
 
-/// <summary>Os encontros do mapa (o Remador-tutorial): lição, ordem, oferenda pedida e o arquivo.</summary>
+/// <summary>Os encontros do mapa (o Remador-tutorial): lição, ordem, condição, oferenda pedida e o arquivo; e a conversa de Hécate antes da primeira Trívia.</summary>
 public class EncounterTests
 {
     private readonly WorldState _state = new();
     private readonly EventBus _bus = new();
     private readonly List<object> _events = new();
     private readonly Encounters _encounters;
+    private readonly WorldFacts _facts;
 
     private static Encounter Make(string id, string? after = null, string? needs = null) => new(
         id, "remador", "tenaro", "remador_tenaro", new[] { "atacar" }, new[] { "atacar", "aparar" }, "h", "recua", after,
@@ -21,12 +24,16 @@ public class EncounterTests
     public EncounterTests()
     {
         _bus.AnyPublished += e => _events.Add(e);
+        var markRules = new MarkRules(4, 8, 4);
+        _facts = new WorldFacts(_state, markRules,
+            new Mosaic(_state, _bus, new Dictionary<string, Recollection>(), MosaicTests.Rules), new Profile(_state, _bus, ProfileTests.Rules));
         _encounters = new Encounters(_state, _bus, new Dictionary<string, Encounter>
         {
             ["boca"] = Make("boca"),
             ["poca"] = Make("poca", after: "boca"),
             ["marcas"] = Make("marcas", after: "poca", needs: "agua"),
-        });
+            ["camara"] = Make("camara") with { Requires = new FlagSet("hecate_avisou_roma") },
+        }, () => _facts);
     }
 
     [Fact]
@@ -57,6 +64,33 @@ public class EncounterTests
     }
 
     [Fact]
+    public void AnEncounterWithACondition_WaitsForIt()
+    {
+        Assert.False(_encounters.IsAvailable("camara"));
+        _state.Flags.Add("hecate_avisou_roma");
+        Assert.True(_encounters.IsAvailable("camara"));
+    }
+
+    [Fact]
+    public void TheTriviaIntro_OpensWhileItsConditionHolds()
+    {
+        var trivia = WorldData.TriviaFromJson("""
+            {
+              "id": "trivia_tenaro", "region": "tenaro", "name_key": "n",
+              "intro": { "dialogue": "hecate_tenaro", "when": { "not": { "flag": "hecate_avisou_roma" } } }
+            }
+            """);
+        var plain = WorldData.TriviaFromJson("""{ "id": "trivia_sala", "region": "sala_teste", "name_key": "n" }""");
+        var trivias = new Trivias(_state, _bus, new Dictionary<string, Trivia> { [trivia.Id] = trivia, [plain.Id] = plain },
+            new TideTracker(_state, _bus, new TideRules(1m, 0.1m)));
+
+        Assert.Equal("hecate_tenaro", trivias.IntroDialogue("trivia_tenaro", _facts));
+        Assert.Null(trivias.IntroDialogue("trivia_sala", _facts));
+        _state.Flags.Add("hecate_avisou_roma");
+        Assert.Null(trivias.IntroDialogue("trivia_tenaro", _facts));
+    }
+
+    [Fact]
     public void AnEncounterThatNeedsAnOffering_StartsOnlyWithItInTheBag()
     {
         _encounters.Finish("boca");
@@ -84,7 +118,8 @@ public class EncounterTests
           "after": "remador_poca",
           "actions": ["atacar", "aproximar", "escutar", "oferenda", "presenciar"],
           "lesson": ["oferenda", "presenciar", "aparar"],
-          "hecate_key": "h", "withdraw_key": "r", "needs_offering": "agua", "wait_key": "w", "free_defeat": true
+          "hecate_key": "h", "withdraw_key": "r", "needs_offering": "agua", "wait_key": "w", "free_defeat": true,
+          "requires": { "flag": "hecate_avisou_roma" }
         }
         """;
 
@@ -97,6 +132,7 @@ public class EncounterTests
         Assert.True(encounter.FreeDefeat);
         Assert.Equal(new[] { "oferenda", "presenciar", "aparar" }, encounter.Lesson);
         Assert.False(encounter.Allows(BattleActions.Flee));
+        Assert.Equal(new FlagSet("hecate_avisou_roma"), encounter.Requires);
 
         var full = WorldData.EncounterFromJson("""
             { "id": "c", "shade": "remador", "region": "tenaro", "battle": "b", "hecate_key": "h" }

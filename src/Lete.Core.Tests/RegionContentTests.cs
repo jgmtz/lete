@@ -99,6 +99,16 @@ public class RegionContentTests
         Assert.Equal(4, chain.Count);
         Assert.All(chain.SkipLast(1), e => Assert.True(e.IsLesson && e.FreeDefeat));
         Assert.False(chain[^1].IsLesson);
+
+        // A regra da romã (GDD 2.3): a luta inteira (onde Absorver aparece) só depois da conversa de Hécate na Trívia de
+        // Tênaro, que liga a flag que o encontro pede.
+        var flag = Assert.IsType<Conditions.FlagSet>(chain[^1].Requires).Flag;
+        var intro = Directory.GetFiles(Path.Combine(Root, "content", "trivias"), "*.json")
+            .Select(f => WorldData.TriviaFromJson(File.ReadAllText(f)))
+            .Single(t => t.RegionId == "tenaro").Intro;
+        Assert.NotNull(intro);
+        var dialogue = Dialogue.DialogueData.FromJson(File.ReadAllText(Path.Combine(Root, "content", "dialogue", intro.DialogueId + ".json")));
+        Assert.Contains(new Dialogue.SetFlag(flag), dialogue.Nodes.Values.SelectMany(n => n.Effects));
     }
 
     private static string FindRoot()

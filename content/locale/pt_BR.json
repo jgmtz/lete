@@ -537,5 +537,19 @@
   "combate.derrota.tutorial": "Hécate segura você antes da queda. \"De novo. Devagar.\"",
   "obj.tenaro.poca.recolheu": "Você junta um pouco da água nas mãos. Ela não escorre entre os dedos.",
   "debug.registro.encontro": "Terminar um encontro que espera",
-  "debug.registro.encontros_zerar": "Recomeçar os encontros"
+  "debug.registro.encontros_zerar": "Recomeçar os encontros",
+  "personagem.hecate.nome": "Hécate",
+  "dlg.hecate_tenaro.inicio": "A chama sobe sem vento. Uma voz vem dos três caminhos ao mesmo tempo: \"Você desceu pela gruta. Sente perto do fogo. Aqui nada te alcança.\"",
+  "dlg.hecate_tenaro.roma_eco": "\"Antes de seguir, escute. As sombras que você enfrentar podem ser guardadas em você. O golpe delas passa a ser seu, para quando precisar: um Eco.\"",
+  "dlg.hecate_tenaro.roma_marca": "\"Mas cada sombra guardada abre em você uma romã, e ela não fecha mais. Ninguém precisa fazer isso para chegar ao fim do caminho. Há outros jeitos de deixar uma sombra ir.\"",
+  "dlg.hecate_tenaro.perguntas": "\"Pergunte, se quiser. O fogo espera.\"",
+  "dlg.hecate_tenaro.quem": "Quem é você?",
+  "dlg.hecate_tenaro.quem.resposta": "\"A que fica nas encruzilhadas. Guardo o fogo, os caminhos e quem anda neles sem saber por quê.\"",
+  "dlg.hecate_tenaro.lembrar": "Por que eu não lembro de nada?",
+  "dlg.hecate_tenaro.lembrar.resposta": "\"Porque um dia você quis esquecer. O que deixou está espalhado por aqui embaixo. Andando, você recolhe.\"",
+  "dlg.hecate_tenaro.afogado": "E o afogado que desceu na minha frente?",
+  "dlg.hecate_tenaro.afogado.resposta": "\"Ele espera junto ao rio. Agora você sabe o que pode fazer com ele. A escolha é sua.\"",
+  "dlg.hecate_tenaro.calar": "(Ficar em silêncio perto do fogo)",
+  "dlg.hecate_tenaro.fim": "A chama baixa devagar, mas não se apaga.",
+  "diario.hecate.roma": "Hécate falou de uma romã que se abre em quem guarda as sombras. Ela não fecha mais. Ninguém precisa guardar nenhuma."
 }

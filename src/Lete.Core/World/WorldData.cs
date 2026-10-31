@@ -61,8 +61,12 @@ public static class WorldData
             throw new FormatException($"Trívia '{id}': até três tochas, nenhuma para ela mesma.");
         }
 
+        var intro = root.TryGetProperty("intro", out var i)
+            ? new TriviaIntro(String(i, "dialogue"),
+                i.TryGetProperty("when", out var when) ? Conditions.ConditionParser.Parse(when, $"{id}.intro.when") : null)
+            : null;
         return new Trivia(id, String(root, "region"), String(root, "name_key"), torches,
-            root.TryGetProperty("hub", out var hub) && hub.GetBoolean());
+            root.TryGetProperty("hub", out var hub) && hub.GetBoolean(), intro);
     }
 
     /// <summary>
@@ -117,7 +121,7 @@ public static class WorldData
     /// Encontro do mapa: <c>id</c>, <c>shade</c>, <c>region</c>, <c>battle</c>, <c>hecate_key</c> e, opcionais,
     /// <c>actions</c> (opções do menu que aparecem; sem o campo, todas), <c>lesson</c> (o que fazer para a sombra recuar),
     /// <c>withdraw_key</c> (obrigatório com lição), <c>after</c>, <c>needs_offering</c> com <c>wait_key</c> e
-    /// <c>free_defeat</c>.
+    /// <c>free_defeat</c> e <c>requires</c> (condição).
     /// </summary>
     public static Encounter EncounterFromJson(string json)
     {
@@ -142,7 +146,8 @@ public static class WorldData
             Optional("after"),
             Optional("needs_offering"),
             Optional("wait_key"),
-            root.TryGetProperty("free_defeat", out var free) && free.GetBoolean());
+            root.TryGetProperty("free_defeat", out var free) && free.GetBoolean(),
+            root.TryGetProperty("requires", out var requires) ? Conditions.ConditionParser.Parse(requires, $"{id}.requires") : null);
 
         if (encounter.Actions?.FirstOrDefault(a => !Combat.BattleActions.Menu.Contains(a)) is { } unknown)
         {

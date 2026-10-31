@@ -14,6 +14,10 @@ public partial class TriviaRest : Interactable
 
     [Export] public string TriviaId { get; set; } = "";
 
+    /// <summary>Quanto a chama cresce enquanto Hécate fala (sem arte dela, ela é a chama e a voz) e em quanto tempo.</summary>
+    [Export] public float PresenceEnergyFactor { get; set; } = 2.2f;
+    [Export] public float PresenceSeconds { get; set; } = 0.8f;
+
     public static event Action<string>? Reached;
 
     public override string PromptKey => "ui.prompt.descansar";
@@ -25,4 +29,18 @@ public partial class TriviaRest : Interactable
     }
 
     public override void Examine() => Reached?.Invoke(TriviaId);
+
+    private float? _baseEnergy;
+
+    /// <summary>A chama da Trívia (o nó irmão "&lt;nome&gt;Chama", se houver) cresce enquanto Hécate está presente.</summary>
+    public void SetPresence(bool present)
+    {
+        if (GetParent()?.GetNodeOrNull<OmniLight3D>($"{Name}Chama") is not { } flame)
+        {
+            return;
+        }
+
+        _baseEnergy ??= flame.LightEnergy;
+        CreateTween().TweenProperty(flame, "light_energy", _baseEnergy.Value * (present ? PresenceEnergyFactor : 1f), PresenceSeconds);
+    }
 }

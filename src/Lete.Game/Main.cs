@@ -66,6 +66,9 @@ public partial class Main : Node
     private DebugPanel _debug = null!;
     private IDisposable? _markSubscription;
 
+    /// <summary>A Trívia cuja tela abre quando a conversa de Hécate (a introdução dela) terminar.</summary>
+    private string? _triviaAfterIntro;
+
     public IReadOnlyList<Marker3D> TeleportPoints =>
         GetTree().GetNodesInGroup("teleport_points").OfType<Marker3D>().ToList();
 
@@ -95,6 +98,7 @@ public partial class Main : Node
         _dialogueScreen = new DialogueScreen();
         AddChild(_dialogueScreen);
         _dialogueScreen.OpenChanged += RefreshPlayerInput;
+        _dialogueScreen.OpenChanged += OnDialogueOpenChanged;
         Talkable.Talked += OpenDialogue;
         _shop = new ShopScreen();
         _trivia = new TriviaScreen();
@@ -257,7 +261,34 @@ public partial class Main : Node
     public void OpenTrivia(string triviaId)
     {
         _menu.SetOpen(false);
+        // Na primeira vez, Hécate fala antes (o aviso da romã); a tela da Trívia abre quando a conversa termina.
+        if (GameRoot.Instance.Trivias.IntroDialogue(triviaId, GameRoot.Instance.Facts) is { } intro)
+        {
+            _triviaAfterIntro = triviaId;
+            SetTriviaPresence(triviaId, true);
+            _dialogueScreen.Open(intro);
+            return;
+        }
+
         _trivia.Open(triviaId);
+    }
+
+    private void OnDialogueOpenChanged()
+    {
+        if (!_dialogueScreen.IsOpen && _triviaAfterIntro is { } triviaId)
+        {
+            _triviaAfterIntro = null;
+            SetTriviaPresence(triviaId, false);
+            _trivia.Open(triviaId);
+        }
+    }
+
+    private void SetTriviaPresence(string triviaId, bool present)
+    {
+        foreach (var trivia in GetTree().GetNodesInGroup(TriviaRest.Group).OfType<TriviaRest>().Where(t => t.TriviaId == triviaId))
+        {
+            trivia.SetPresence(present);
+        }
     }
 
     public void OpenTrial(string trialId)
@@ -447,6 +478,14 @@ public partial class Main : Node
         if (args.ContainsKey("examine"))
         {
             _player.CurrentInteractable?.Examine();
+            // A primeira Trívia de Tênaro abre a conversa de Hécate: --escolher aperta os botões dela.
+            if (_dialogueScreen.IsOpen && !args.ContainsKey("conversar") && args.TryGetValue("escolher", out var talk))
+            {
+                foreach (var step in talk.Split(','))
+                {
+                    _dialogueScreen.Press(int.Parse(step));
+                }
+            }
         }
 
         if (args.TryGetValue("companheiro", out var companion))

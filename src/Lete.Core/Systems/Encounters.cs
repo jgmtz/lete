@@ -1,3 +1,4 @@
+using Lete.Core.Conditions;
 using Lete.Core.Events;
 using Lete.Core.State;
 using Lete.Core.World;
@@ -6,27 +7,32 @@ namespace Lete.Core.Systems;
 
 /// <summary>
 /// Os encontros do mapa já terminados (no estado) e quais estão esperando o jogador: cada um aparece depois do anterior
-/// (<see cref="Encounter.After"/>) e termina uma vez só (<see cref="EncounterFinished"/>).
+/// (<see cref="Encounter.After"/>) e quando a condição dele vale (<see cref="Encounter.Requires"/>), e termina uma vez só
+/// (<see cref="EncounterFinished"/>).
 /// </summary>
 public sealed class Encounters
 {
     private readonly WorldState _state;
     private readonly EventBus _events;
+    private readonly Func<IConditionFacts> _facts;
 
-    public Encounters(WorldState state, EventBus events, IReadOnlyDictionary<string, Encounter> definitions)
+    public Encounters(WorldState state, EventBus events, IReadOnlyDictionary<string, Encounter> definitions, Func<IConditionFacts> facts)
     {
         _state = state;
         _events = events;
         Definitions = definitions;
+        _facts = facts;
     }
 
     public IReadOnlyDictionary<string, Encounter> Definitions { get; }
 
     public bool IsFinished(string id) => _state.Encounters.Contains(id);
 
-    /// <summary>A sombra está no lugar: o encontro ainda não terminou e o anterior (se houver) já.</summary>
+    /// <summary>A sombra está no lugar: o encontro ainda não terminou, o anterior (se houver) já, e a condição vale.</summary>
     public bool IsAvailable(string id) =>
-        Definitions.TryGetValue(id, out var encounter) && !IsFinished(id) && (encounter.After is null || IsFinished(encounter.After));
+        Definitions.TryGetValue(id, out var encounter) && !IsFinished(id)
+        && (encounter.After is null || IsFinished(encounter.After))
+        && ConditionEvaluator.Passes(encounter.Requires, _facts());
 
     /// <summary>Disponível e com o que ele pede na Bolsa (a oferenda): a luta pode começar.</summary>
     public bool CanStart(string id) =>
