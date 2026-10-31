@@ -214,6 +214,16 @@ public partial class DebugPanel : CanvasLayer
             }
         });
         AddButton(recordRow, "debug.registro.esquecer_ecos", () => GameRoot.Instance.State.Echoes.Clear());
+        AddButton(recordRow, "debug.registro.encontro", () =>
+        {
+            // Termina o primeiro encontro que está esperando (a sombra dele some e a do seguinte aparece).
+            var encounters = GameRoot.Instance.Encounters;
+            if (encounters.Definitions.Keys.OrderBy(k => k, StringComparer.Ordinal).FirstOrDefault(encounters.IsAvailable) is { } id)
+            {
+                encounters.Finish(id);
+            }
+        });
+        AddButton(recordRow, "debug.registro.encontros_zerar", () => GameRoot.Instance.State.Encounters.Clear());
         column.AddChild(recordRow);
 
         column.AddChild(UiStyle.MakeLabel(T("debug.dialogo")));
@@ -408,7 +418,8 @@ public partial class DebugPanel : CanvasLayer
             List(state.SharedOfferings.OrderBy(s => s, StringComparer.Ordinal)),
             List(state.Echoes),
             List(state.Hoards.Where(p => !p.Value.IsEmpty).Select(p => string.Format(T("debug.registro.espolio"), p.Key, p.Value.Obols))),
-            List(state.OriginFragments));
+            List(state.OriginFragments),
+            List(state.Encounters.OrderBy(e => e, StringComparer.Ordinal)));
     }
 
     private void AddButton(Container row, string key, Action action)

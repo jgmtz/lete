@@ -1,0 +1,23 @@
+{
+  "id": "remador_marcas",
+  "shade": "remador",
+  "region": "tenaro",
+  "battle": "remador_tenaro",
+  "after": "remador_poca",
+  "actions": [
+    "atacar",
+    "aproximar",
+    "escutar",
+    "oferenda",
+    "presenciar"
+  ],
+  "lesson": [
+    "oferenda",
+    "presenciar"
+  ],
+  "hecate_key": "encontro.remador_marcas.hecate",
+  "withdraw_key": "encontro.remador.recua",
+  "needs_offering": "agua",
+  "wait_key": "encontro.remador_marcas.espera",
+  "free_defeat": true
+}

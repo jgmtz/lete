@@ -509,7 +509,7 @@
   "fragmento.artesao.tecela": "Um fragmento: o barulho de um tear na casa vizinha, o dia inteiro, como um coração.",
   "fragmento.artesao.padeiro": "Um fragmento: pão quente trocado por uma tigela. A tigela era melhor. Você aceitou mesmo assim.",
   "debug.registro": "Registro do mundo",
-  "debug.registro.estado": "Região: {0} (visitadas: {1}) · modo: {2}\nSombras: {3}\nPartilhas: {4}\nEcos: {5}\nEspólios: {6}\nFragmentos de origem: {7}",
+  "debug.registro.estado": "Região: {0} (visitadas: {1}) · modo: {2}\nSombras: {3}\nPartilhas: {4}\nEcos: {5}\nEspólios: {6}\nFragmentos de origem: {7}\nEncontros terminados: {8}",
   "debug.registro.regiao": "Trocar de região (salva)",
   "debug.registro.fragmento": "Próximo fragmento da origem",
   "debug.registro.esquecer_ecos": "Esquecer os Ecos",
@@ -526,5 +526,16 @@
   "obj.tenaro.marcas": "Riscos na parede, à altura da mão. Alguém contou dias aqui. Ou pessoas.",
   "obj.aqueronte.margem": "A água do Aqueronte não corre: ela se arrasta, cinzenta, e não faz barulho.",
   "obj.aqueronte.barca": "A barca de Caronte está amarrada. Ninguém a guarda. Ninguém precisa.",
-  "obj.aqueronte.insepultos": "Sombras sentadas na lama, olhando a outra margem. Sem moeda, sem rito, sem pressa."
+  "obj.aqueronte.insepultos": "Sombras sentadas na lama, olhando a outra margem. Sem moeda, sem rito, sem pressa.",
+  "encontro.remador_boca.hecate": "Hécate: \"Quando o remo descer, aperte quando o anel fechar. Depois, responda.\"",
+  "encontro.remador_poca.hecate": "Hécate: \"Bater não diz quem ele é. Chegue perto e escute.\"",
+  "encontro.remador_marcas.hecate": "Hécate: \"Os mortos têm sede do que perderam. Dê a água a ele. Depois fique, sem lutar, só olhando.\"",
+  "encontro.remador_marcas.espera": "O afogado olha para trás, para a poça, e não se mexe. Hécate: \"Ele tem sede.\"",
+  "encontro.remador_camara.hecate": "Hécate: \"Aqui ele não recua mais. Você já sabe o bastante para escolher.\"",
+  "encontro.remador.recua": "O Remador recua para o escuro, mais fundo na gruta.",
+  "encontro.licao.incompleta": "A sombra se desfaz em névoa e volta a se juntar no escuro. Hécate: \"Ainda não. Faça o que eu disse.\"",
+  "combate.derrota.tutorial": "Hécate segura você antes da queda. \"De novo. Devagar.\"",
+  "obj.tenaro.poca.recolheu": "Você junta um pouco da água nas mãos. Ela não escorre entre os dedos.",
+  "debug.registro.encontro": "Terminar um encontro que espera",
+  "debug.registro.encontros_zerar": "Recomeçar os encontros"
 }

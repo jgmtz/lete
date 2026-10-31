@@ -233,6 +233,27 @@ Posturas: `escutar`, `perguntar`, `pressionar`, `consolar`, `calar` (`calar` sem
 
 ---
 
+## 6.1 Encontro (`content/encounters/<id>.json`) (31/out/2026)
+
+```json
+{
+  "id": "remador_marcas",
+  "shade": "remador",
+  "region": "tenaro",
+  "battle": "remador_tenaro",
+  "after": "remador_poca",
+  "actions": ["atacar", "aproximar", "escutar", "oferenda", "presenciar"],
+  "lesson": ["oferenda", "presenciar"],
+  "hecate_key": "encontro.remador_marcas.hecate",
+  "withdraw_key": "encontro.remador.recua",
+  "needs_offering": "agua",
+  "wait_key": "encontro.remador_marcas.espera",
+  "free_defeat": true
+}
+```
+
+`battle` é a configuração do palco (`content/battle`); `actions` lista as opções do menu que aparecem (sem o campo, todas; as de dentro de Aproximar pedem `aproximar`); `lesson` é o que o jogador precisa fazer, uma vez cada, para a sombra recuar (opções do menu, `aparar` ou `esquivar`; sem o campo, é a luta inteira); `withdraw_key` é obrigatório com lição; `needs_offering` pede `wait_key` (a fala no mapa sem a oferenda). O encontro aparece depois de `after`. O nó `ShadeEncounter` da cena da região diz o `EncounterId`; o teste `RegionContentTests` confere que cada encontro está uma vez na cena da sua região e que a batalha é com a sombra dele.
+
 ## 7. Modo de dificuldade (`content/difficulty/<modo>.json`)
 
 ```json

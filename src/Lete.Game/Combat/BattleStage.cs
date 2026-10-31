@@ -79,6 +79,12 @@ public partial class BattleStage : Node3D
 
     public override void _Ready()
     {
+        // Vindo de um encontro do mapa, a configuração é a dele.
+        if (EncounterTransit.Pending is { } encounter)
+        {
+            SetupPath = $"{SetupPath.GetBaseDir()}/{encounter.Battle}.json";
+        }
+
         // -- --setup=<id> troca a configuração (ex.: teste_ataque), sem mexer na cena.
         var setupArg = System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--setup="));
         if (setupArg is not null)

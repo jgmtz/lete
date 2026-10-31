@@ -110,6 +110,9 @@ public sealed class WorldState
     /// <summary>Regiões já visitadas (condição <c>region_visited</c>).</summary>
     public HashSet<string> VisitedRegions { get; } = new(StringComparer.Ordinal);
 
+    /// <summary>Encontros do mapa já terminados (<c>content/encounters</c>; o Remador na descida de Tênaro).</summary>
+    public HashSet<string> Encounters { get; } = new(StringComparer.Ordinal);
+
     /// <summary>Entradas do Diário, como chaves de localização, na ordem em que foram escritas.</summary>
     public List<string> JournalEntries { get; } = new();
 }

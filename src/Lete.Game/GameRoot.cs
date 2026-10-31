@@ -43,6 +43,7 @@ public partial class GameRoot : Node
     private const string OathRulesPath = "res://content/rules/juramentos.json";
     private const string CompanionsFolder = "res://content/companions";
     private const string RegionsFolder = "res://content/regions";
+    private const string EncountersFolder = "res://content/encounters";
     private const string CompanionRulesPath = "res://content/rules/companheiro.json";
     private const string MosaicRulesPath = "res://content/rules/mosaico.json";
     private const string RecollectionsFolder = "res://content/recollections";
@@ -82,6 +83,7 @@ public partial class GameRoot : Node
     public Companions Companions { get; private set; } = null!;
     public ShadeRecord Shades { get; private set; } = null!;
     public Regions Regions { get; private set; } = null!;
+    public Encounters Encounters { get; private set; } = null!;
 
     /// <summary>As provisões do jogo (definições; as quantidades estão na Bolsa do estado).</summary>
     public System.Collections.Generic.IReadOnlyList<Lete.Core.Combat.ProvisionDefinition> Provisions { get; private set; } = null!;
@@ -147,6 +149,7 @@ public partial class GameRoot : Node
     private CompanionRules _companionRules = null!;
     private System.Collections.Generic.Dictionary<string, string> _originNames = null!;
     private System.Collections.Generic.IReadOnlyList<Origin> _origins = null!;
+    private System.Collections.Generic.Dictionary<string, Encounter> _encounters = null!;
 
     /// <summary>As regiões do Além (id → cena e chegada padrão).</summary>
     public System.Collections.Generic.IReadOnlyDictionary<string, RegionDefinition> RegionDefinitions { get; private set; } = null!;
@@ -195,6 +198,7 @@ public partial class GameRoot : Node
         _tribunalRules = WorldData.TribunalRulesFromJson(FileAccess.GetFileAsString(TribunalRulesPath));
         _companions = LoadFolder(CompanionsFolder, CompanionData.FromJson, c => c.Id);
         RegionDefinitions = LoadFolder(RegionsFolder, WorldData.RegionFromJson, r => r.Id);
+        _encounters = LoadFolder(EncountersFolder, WorldData.EncounterFromJson, e => e.Id);
         _companionRules = CompanionData.RulesFromJson(FileAccess.GetFileAsString(CompanionRulesPath));
         _origins = OriginData.FromJson(FileAccess.GetFileAsString(OriginsPath));
         _originNames = _origins.ToDictionary(o => o.Id, o => o.NameKey, StringComparer.Ordinal);
@@ -292,6 +296,7 @@ public partial class GameRoot : Node
         Companions = new Companions(State, Events, _companions, _companionRules, Tide);
         Shades = new ShadeRecord(State, Events);
         Regions = new Regions(State, Events);
+        Encounters = new Encounters(State, Events, _encounters);
         Mosaic = new Mosaic(State, Events, _recollections, _mosaicRules);
         HeavyMemories = new HeavyMemories(State, Events, _recollections.Values);
         OriginFragments = new OriginFragments(State, Events, _origins,

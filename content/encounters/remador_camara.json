@@ -1,0 +1,9 @@
+{
+  "id": "remador_camara",
+  "shade": "remador",
+  "region": "tenaro",
+  "battle": "remador_tenaro",
+  "after": "remador_marcas",
+  "hecate_key": "encontro.remador_camara.hecate",
+  "free_defeat": true
+}

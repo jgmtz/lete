@@ -20,6 +20,10 @@ HEADER_EXT = [
     ('Texture2D', 'res://art/tiles/agua_lete.png', '7_agua'),
     ('Script', 'res://src/Lete.Game/World/RegionExit.cs', '8_saida'),
     ('Script', 'res://src/Lete.Game/World/TriviaRest.cs', '9_trivia'),
+    ('Script', 'res://src/Lete.Game/World/ShadeEncounter.cs', '10_encontro'),
+    ('Script', 'res://src/Lete.Game/World/MapSprite.cs', '11_sprite'),
+    ('Texture2D', 'res://art/sprites/sombras/remador/parado/remador_parado_frente.png', '12_remador'),
+    ('Script', 'res://src/Lete.Game/World/OfferingAltar.cs', '13_altar'),
 ]
 
 
@@ -94,6 +98,35 @@ JournalKey = "{key}"
 
 [node name="Reach" type="CollisionShape3D" parent="{name}"]
 shape = SubResource("Shape_alcance")
+''')
+
+    def spring(self, name, pos, kind, amount, key, taken_key):
+        """Fonte de oferenda (OfferingAltar): recolher dá o tipo, a frase vai para o Diário."""
+        self.node(f'''[node name="{name}" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {fmt(pos[0])}, {fmt(pos[1])}, {fmt(pos[2])})
+script = ExtResource("13_altar")
+JournalKey = "{key}"
+Kind = "{kind}"
+Amount = {amount}
+TakenKey = "{taken_key}"
+
+[node name="Reach" type="CollisionShape3D" parent="{name}"]
+shape = SubResource("Shape_alcance")
+''')
+
+    def encounter(self, name, pos, encounter_id, texture='12_remador'):
+        """Sombra de encontro (ShadeEncounter): chegar perto abre a luta (content/encounters)."""
+        self.node(f'''[node name="{name}" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {fmt(pos[0])}, {fmt(pos[1])}, {fmt(pos[2])})
+script = ExtResource("10_encontro")
+EncounterId = "{encounter_id}"
+
+[node name="Reach" type="CollisionShape3D" parent="{name}"]
+shape = SubResource("Shape_alcance")
+
+[node name="Sprite" type="Sprite3D" parent="{name}"]
+texture = ExtResource("{texture}")
+script = ExtResource("11_sprite")
 ''')
 
     def exit(self, name, pos, size, region, entry):
@@ -222,7 +255,8 @@ t.box('CorredorOeste', (1, 4, 24), (-3.5, 2, -14.5))
 t.box('CorredorLeste', (1, 0.5, 24), (3.5, 0.25, -14.5))
 t.box('PedraCaida', (1.6, 0.8, 1.2), (-1.8, 0.4, -9))
 t.box('Estreito', (2, 1, 1), (2, 0.5, -19))
-t.examinable('Poca', (1.6, 0, -12.5), 'obj.tenaro.poca')
+# A poça dá a água que o Remador aceita (o encontro das marcas pede a oferenda).
+t.spring('Poca', (1.6, 0, -12.5), 'agua', 3, 'obj.tenaro.poca', 'obj.tenaro.poca.recolheu')
 t.water('PocaAgua', (1.6, 0.04, 1.6), (1.6, 0.02, -12.5))
 t.examinable('Marcas', (-2.5, 0, -22), 'obj.tenaro.marcas')
 t.light('LuzBoca', (0, 2.5, -5), '0.55, 0.65, 0.8, 1', 0.8, 8)
@@ -238,6 +272,11 @@ t.water('RioSubterraneo', (12, 0.04, 3), (-3, 0.02, -38.5))
 t.blocker('RioBarreira', (12, 2, 3), (-3, 1, -38.5))
 t.trivia('Trivia', (-5, 0, -30.5), 'trivia_tenaro')
 t.light('LuzCamara', (2, 3, -35), '0.35, 0.55, 0.6, 1', 1.0, 12)
+# O Remador-tutorial, uma coisa por luta (decisão do João, 30-31/out/2026): cada encontro aparece depois do anterior.
+t.encounter('RemadorBoca', (0, 0, -3), 'remador_boca')
+t.encounter('RemadorPoca', (-0.8, 0, -16), 'remador_poca')
+t.encounter('RemadorMarcas', (0.5, 0, -24), 'remador_marcas')
+t.encounter('RemadorCamara', (3, 0, -36), 'remador_camara')
 t.exit('ParaAqueronte', (6.5, 1, -43.6), (3, 2, 1.2), 'aqueronte', 'ChegadaTenaro')
 t.markers({
     'Entrada': (0, 0, 6),
@@ -248,6 +287,11 @@ t.markers({
     'SaidaAqueronte': (6.5, 0, -40.5),
     # Dentro da passagem: teleportar para ele atravessa (conferência e debug).
     'AtravessarAqueronte': (6.5, 0, -43.6),
+    # Em cima dos encontros: teleportar para eles começa a luta (se o encontro estiver disponível).
+    'RemadorBoca': (0, 0, -3),
+    'RemadorPoca': (-0.8, 0, -16),
+    'RemadorMarcas': (0.5, 0, -24),
+    'RemadorCamara': (3, 0, -36),
 }, player=(0, 0, 6))
 t.write('Tenaro.tscn')
 

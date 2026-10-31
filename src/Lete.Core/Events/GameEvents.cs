@@ -108,6 +108,9 @@ public sealed record FastTravelUsed(string FromTriviaId, string ToTriviaId);
 
 public sealed record RegionEntered(string RegionId);
 
+/// <summary>Um encontro do mapa terminou (a lição do tutorial cumprida ou a luta acabada).</summary>
+public sealed record EncounterFinished(string EncounterId);
+
 /// <summary>Chegou aos Portões (os finais compostos começam).</summary>
 public sealed record GateReached;
 

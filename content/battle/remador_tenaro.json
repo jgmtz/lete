@@ -1,0 +1,53 @@
+{
+  "id": "remador_tenaro",
+  "_nota": "Prólogo: ainda sem companheiro (a escolha vem na Maré 2); só a protagonista contra o Remador.",
+  "layout": {
+    "party": [
+      {
+        "x": -0.9,
+        "y": -1.08
+      }
+    ],
+    "enemy": [
+      {
+        "x": 0.85,
+        "y": -0.5
+      }
+    ],
+    "depth_scale": {
+      "_tbd": true,
+      "value": 0.0
+    }
+  },
+  "protagonist": {
+    "id": "sombra_f",
+    "breath": {
+      "_tbd": true,
+      "value": 100
+    },
+    "lucidity": {
+      "_tbd": true,
+      "value": 60
+    }
+  },
+  "shade": "remador",
+  "party": [
+    {
+      "id": "sombra_f",
+      "pose": "back"
+    }
+  ],
+  "enemy": [
+    {
+      "id": "remador",
+      "pose": "front"
+    }
+  ],
+  "styles": [
+    {
+      "id": "pixel_160",
+      "folder": "pixel_160",
+      "filter": "nearest"
+    }
+  ]
+}

@@ -9,6 +9,10 @@
 [ext_resource type="Texture2D" path="res://art/tiles/agua_lete.png" id="7_agua"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/RegionExit.cs" id="8_saida"]
 [ext_resource type="Script" path="res://src/Lete.Game/World/TriviaRest.cs" id="9_trivia"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/ShadeEncounter.cs" id="10_encontro"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/MapSprite.cs" id="11_sprite"]
+[ext_resource type="Texture2D" path="res://art/sprites/sombras/remador/parado/remador_parado_frente.png" id="12_remador"]
+[ext_resource type="Script" path="res://src/Lete.Game/World/OfferingAltar.cs" id="13_altar"]
 
 [sub_resource type="Environment" id="Environment_regiao"]
 background_mode = 1
@@ -163,8 +167,11 @@ material = SubResource("Mat_parede")
 
 [node name="Poca" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 0, -12.5)
-script = ExtResource("3_inter")
+script = ExtResource("13_altar")
 JournalKey = "obj.tenaro.poca"
+Kind = "agua"
+Amount = 3
+TakenKey = "obj.tenaro.poca.recolheu"
 
 [node name="Reach" type="CollisionShape3D" parent="Poca"]
 shape = SubResource("Shape_alcance")
@@ -272,6 +279,54 @@ light_color = Color(0.35, 0.55, 0.6, 1)
 light_energy = 1
 omni_range = 12
 
+[node name="RemadorBoca" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
+script = ExtResource("10_encontro")
+EncounterId = "remador_boca"
+
+[node name="Reach" type="CollisionShape3D" parent="RemadorBoca"]
+shape = SubResource("Shape_alcance")
+
+[node name="Sprite" type="Sprite3D" parent="RemadorBoca"]
+texture = ExtResource("12_remador")
+script = ExtResource("11_sprite")
+
+[node name="RemadorPoca" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0, -16)
+script = ExtResource("10_encontro")
+EncounterId = "remador_poca"
+
+[node name="Reach" type="CollisionShape3D" parent="RemadorPoca"]
+shape = SubResource("Shape_alcance")
+
+[node name="Sprite" type="Sprite3D" parent="RemadorPoca"]
+texture = ExtResource("12_remador")
+script = ExtResource("11_sprite")
+
+[node name="RemadorMarcas" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, -24)
+script = ExtResource("10_encontro")
+EncounterId = "remador_marcas"
+
+[node name="Reach" type="CollisionShape3D" parent="RemadorMarcas"]
+shape = SubResource("Shape_alcance")
+
+[node name="Sprite" type="Sprite3D" parent="RemadorMarcas"]
+texture = ExtResource("12_remador")
+script = ExtResource("11_sprite")
+
+[node name="RemadorCamara" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -36)
+script = ExtResource("10_encontro")
+EncounterId = "remador_camara"
+
+[node name="Reach" type="CollisionShape3D" parent="RemadorCamara"]
+shape = SubResource("Shape_alcance")
+
+[node name="Sprite" type="Sprite3D" parent="RemadorCamara"]
+texture = ExtResource("12_remador")
+script = ExtResource("11_sprite")
+
 [node name="ParaAqueronte" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 1, -43.6)
 script = ExtResource("8_saida")
@@ -318,3 +373,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 0, -40.5)
 
 [node name="AtravessarAqueronte" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 0, -43.6)
+
+[node name="RemadorBoca" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
+
+[node name="RemadorPoca" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0, -16)
+
+[node name="RemadorMarcas" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, -24)
+
+[node name="RemadorCamara" type="Marker3D" parent="TeleportPoints" groups=["teleport_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -36)

@@ -148,6 +148,7 @@ public class WorldStateTests
         s.Hoards["remador"] = new HoardState { Obols = 3 };
         s.Hoards["remador"].Offerings["vinho"] = 1;
         s.VisitedRegions.Add("sala_teste");
+        s.Encounters.Add("remador_boca");
         return s;
     }
 

@@ -113,6 +113,63 @@ public static class WorldData
             : throw new FormatException($"Região '{region.Id}': 'scene' precisa ser um caminho res://...tscn.");
     }
 
+    /// <summary>
+    /// Encontro do mapa: <c>id</c>, <c>shade</c>, <c>region</c>, <c>battle</c>, <c>hecate_key</c> e, opcionais,
+    /// <c>actions</c> (opções do menu que aparecem; sem o campo, todas), <c>lesson</c> (o que fazer para a sombra recuar),
+    /// <c>withdraw_key</c> (obrigatório com lição), <c>after</c>, <c>needs_offering</c> com <c>wait_key</c> e
+    /// <c>free_defeat</c>.
+    /// </summary>
+    public static Encounter EncounterFromJson(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        var id = String(root, "id");
+        List<string>? Ids(string property) => root.TryGetProperty(property, out var list)
+            ? list.EnumerateArray().Select(x => x.GetString()!).ToList()
+            : null;
+        string? Optional(string property) =>
+            root.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+
+        var encounter = new Encounter(
+            id,
+            String(root, "shade"),
+            String(root, "region"),
+            String(root, "battle"),
+            Ids("actions"),
+            Ids("lesson") ?? new List<string>(),
+            String(root, "hecate_key"),
+            Optional("withdraw_key"),
+            Optional("after"),
+            Optional("needs_offering"),
+            Optional("wait_key"),
+            root.TryGetProperty("free_defeat", out var free) && free.GetBoolean());
+
+        if (encounter.Actions?.FirstOrDefault(a => !Combat.BattleActions.Menu.Contains(a)) is { } unknown)
+        {
+            throw new FormatException($"Encontro '{id}': a ação '{unknown}' não existe no menu da batalha.");
+        }
+
+        if (encounter.Actions is { } actions && actions.Any(Combat.BattleActions.ApproachGroup.Contains)
+            && !actions.Contains(Combat.BattleActions.Approach))
+        {
+            throw new FormatException($"Encontro '{id}': ações de dentro de Aproximar precisam de 'aproximar' na lista.");
+        }
+
+        if (encounter.Lesson.FirstOrDefault(a => !Combat.BattleActions.Learnable.Contains(a)
+            || Combat.BattleActions.Menu.Contains(a) && !encounter.Allows(a)) is { } missing)
+        {
+            throw new FormatException($"Encontro '{id}': a lição pede '{missing}', que não existe ou não está em 'actions'.");
+        }
+
+        if (encounter.IsLesson && encounter.WithdrawKey is null || encounter.NeedsOffering is not null && encounter.WaitKey is null
+            || encounter.After == id)
+        {
+            throw new FormatException($"Encontro '{id}': lição sem 'withdraw_key', 'needs_offering' sem 'wait_key' ou 'after' igual ao próprio id.");
+        }
+
+        return encounter;
+    }
+
     private static string String(JsonElement element, string property) =>
         element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()!

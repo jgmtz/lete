@@ -1,0 +1,18 @@
+{
+  "id": "remador_poca",
+  "shade": "remador",
+  "region": "tenaro",
+  "battle": "remador_tenaro",
+  "after": "remador_boca",
+  "actions": [
+    "atacar",
+    "aproximar",
+    "escutar"
+  ],
+  "lesson": [
+    "escutar"
+  ],
+  "hecate_key": "encontro.remador_poca.hecate",
+  "withdraw_key": "encontro.remador.recua",
+  "free_defeat": true
+}

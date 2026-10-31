@@ -6,6 +6,7 @@ using Godot;
 using Lete.Core.Events;
 using Lete.Core.Presentation;
 using Lete.Core.State;
+using Lete.Game.Combat;
 using Lete.Game.Debug;
 using Lete.Game.UI;
 using Lete.Game.World;
@@ -37,8 +38,11 @@ public partial class Main : Node
     /// <summary>Região das conferências pela linha de comando (os pontos de teleporte de teste ficam nela).</summary>
     public const string TestRegion = "sala_teste";
 
-    /// <summary>Uma chegada pendente: a cena é recarregada e, ao abrir, vai para esta região (e salva, se for troca).</summary>
-    private sealed record Arrival(string Region, string? Entry, bool Save);
+    /// <summary>
+    /// Uma chegada pendente: a cena é recarregada e, ao abrir, vai para esta região (e salva, se for troca), no marcador
+    /// <c>Entry</c> ou, voltando de uma luta, em <c>Position</c>.
+    /// </summary>
+    private sealed record Arrival(string Region, string? Entry, bool Save, Vector3? Position = null);
 
     private static Arrival? _arrival;
 
@@ -108,6 +112,7 @@ public partial class Main : Node
         GameRoot.Instance.StateReplaced += OnStateReplaced;
         GameRoot.Instance.Saving += OnSaving;
         RegionExit.Crossed += GoToRegion;
+        ShadeEncounter.Started += GoToBattle;
         PlaceOnArrival(region);
         _player.CharacterChanged += ApplyMarkLook;
         _markSubscription = GameRoot.Instance.Events.Subscribe<MarkIncreased>(_ => ApplyMarkLook());
@@ -140,6 +145,7 @@ public partial class Main : Node
         TriviaRest.Reached -= OpenTrivia;
         TribunalSeat.Opened -= OpenTrial;
         RegionExit.Crossed -= GoToRegion;
+        ShadeEncounter.Started -= GoToBattle;
         _markSubscription?.Dispose();
     }
 
@@ -176,7 +182,13 @@ public partial class Main : Node
         var arrival = _arrival;
         _arrival = null;
         var state = GameRoot.Instance.State;
-        if (arrival is { Entry: { } entry })
+        if (arrival is { Position: { } back })
+        {
+            // Volta de uma luta: onde estava, um pouco afastado da sombra.
+            _player.TeleportTo(back);
+            _cameraRig.SnapToTarget();
+        }
+        else if (arrival is { Entry: { } entry })
         {
             TeleportToMarker(entry);
         }
@@ -217,6 +229,13 @@ public partial class Main : Node
     {
         _arrival = new Arrival(regionId, entry, Save: true);
         GetTree().CallDeferred(SceneTree.MethodName.ReloadCurrentScene);
+    }
+
+    /// <summary>Chegou perto de uma sombra de encontro: vai para a luta e, no fim, volta a este lugar (sem salvar).</summary>
+    private void GoToBattle(string encounterId, Vector3 returnPosition)
+    {
+        _arrival = new Arrival(RegionId, null, Save: false, returnPosition);
+        EncounterTransit.Begin(GetTree(), GameRoot.Instance.Encounters.Definitions[encounterId]);
     }
 
     /// <summary>Uma Memória Pesada aflora: o aviso aparece (o jogador ainda pode adiar).</summary>
@@ -398,6 +417,23 @@ public partial class Main : Node
         }
 
         ApplyPixelSettings();
+
+        if (args.TryGetValue("encontros", out var finished))
+        {
+            // Teste: dá por terminados os encontros da lista, em ordem (ex.: os do Remador antes da câmara).
+            foreach (var id in finished.Split(','))
+            {
+                GD.Print($"encontro {id}: {GameRoot.Instance.Encounters.Finish(id)}");
+            }
+
+            await WaitFrames(2);
+        }
+
+        if (args.TryGetValue("oferenda", out var offering))
+        {
+            // Teste: uma oferenda na Bolsa (ex.: a água que o Remador aceita, sem passar pela poça).
+            GameRoot.Instance.Offerings.Pick(offering, 1);
+        }
 
         if (args.TryGetValue("teleport", out var pointName) &&
             TeleportPoints.FirstOrDefault(p => p.Name == pointName) is { } point)

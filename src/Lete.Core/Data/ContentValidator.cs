@@ -41,6 +41,10 @@ public static class ContentValidator
         new ReferenceRule("items", "set", "item_sets"),
         new ReferenceRule("items", "unlocks_path", "path"),
         new ReferenceRule("merchants", "item", "items"),
+        new ReferenceRule("encounters", "shade", "shades"),
+        new ReferenceRule("encounters", "region", "regions"),
+        new ReferenceRule("encounters", "battle", "battle"),
+        new ReferenceRule("encounters", "after", "encounters"),
     };
 
     private const string LocaleFolder = "locale";

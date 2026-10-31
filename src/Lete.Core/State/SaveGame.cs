@@ -120,6 +120,7 @@ public static class SaveGame
                     ["oferendas"] = Ints(p.Value.Offerings),
                 }))),
             ["regioes"] = Array(state.VisitedRegions.OrderBy(r => r, StringComparer.Ordinal)),
+            ["encontros"] = Array(state.Encounters.OrderBy(e => e, StringComparer.Ordinal)),
         };
         return json.ToJsonString(Indented);
     }
@@ -325,6 +326,7 @@ public static class SaveGame
         }
 
         state.VisitedRegions.UnionWith(Strings(json, "regioes"));
+        state.Encounters.UnionWith(Strings(json, "encontros"));
         return state;
     }
 

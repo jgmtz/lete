@@ -9,6 +9,7 @@ using Lete.Core.Events;
 using Lete.Core.Presentation;
 using Lete.Core.State;
 using Lete.Core.Systems;
+using Lete.Core.World;
 using Lete.Game.Combat;
 using Lete.Game.Combat.Gestures;
 
@@ -21,6 +22,9 @@ namespace Lete.Game.Sandbox;
 /// em rascunho) repete um ciclo de golpes: direto (aparar com o Anel) e de padrão (Esquiva).
 /// Vias: Atacar (Combater) e Aproximar → Escutar (gesto Segurar; o que se ouve depende do golpe que ela vai
 /// repetir) e Libertar (escolher a fixação e conduzir o Arrastar; custa Lucidez). Fôlego zerado: a luta recomeça.
+/// Vinda de um encontro do mapa (<see cref="EncounterTransit"/>), é a luta de verdade: Hécate diz a linha do encontro,
+/// o menu só mostra as ações já ensinadas, a lição cumprida faz a sombra recuar e o jogo volta ao mapa
+/// (<c>-- --licao</c> joga a lição sozinho).
 /// Teclas de debug: <c>debug_turn</c> (T) passa a vez do jogador, <c>debug_reveal</c> (N) revela nome e depois
 /// fixação, <c>debug_gesture_area</c> (G) mostra a área dos gestos.
 /// </summary>
@@ -34,30 +38,30 @@ public partial class BattleAttackTest : Node
     private const string GesturesFolder = "res://content/gestures";
     private const string ShadesFolder = "res://content/shades";
 
-    // Ids das opções do menu (as chaves de texto ficam em MenuEntry).
-    private const string AttackId = "atacar";
-    private const string ApproachId = "aproximar";
-    private const string ListenId = "escutar";
-    private const string FreeId = "libertar";
+    // Ids das opções do menu (os de Lete.Core, que o conteúdo cita; as chaves de texto ficam em MenuEntry).
+    private const string AttackId = BattleActions.Attack;
+    private const string ApproachId = BattleActions.Approach;
+    private const string ListenId = BattleActions.Listen;
+    private const string FreeId = BattleActions.Free;
     private const string BackId = "voltar";
-    private const string AbsorbId = "absorver";
-    private const string EchoId = "eco";
+    private const string AbsorbId = BattleActions.Absorb;
+    private const string EchoId = BattleActions.Echo;
     private const string FixationPrefix = "fixacao:";
     private const string EchoPrefix = "eco:";
-    private const string MemoryId = "memoria";
+    private const string MemoryId = BattleActions.Memory;
     private const string MemoryPrefix = "memoria:";
     private const string MemoriesDir = "res://content/memories";
     private const string AbsorbPath = "res://content/gestures/absorver.json";
     private const string WitnessPath = "res://content/gestures/presenciar.json";
     private const string FleePath = "res://content/gestures/fuga.json";
-    private const string WitnessId = "presenciar";
+    private const string WitnessId = BattleActions.Witness;
     private const string KeepWitnessingId = "presenciar_continuar";
     private const string StopWitnessingId = "presenciar_parar";
-    private const string SpareId = "poupar";
-    private const string YieldId = "ceder";
-    private const string OfferingId = "oferenda";
-    private const string BagId = "bolsa";
-    private const string FleeId = "fugir";
+    private const string SpareId = BattleActions.Spare;
+    private const string YieldId = BattleActions.Yield;
+    private const string OfferingId = BattleActions.Offering;
+    private const string BagId = BattleActions.Bag;
+    private const string FleeId = BattleActions.Flee;
     private const string OfferingPrefix = "oferenda:";
     private const string ProvisionPrefix = "provisao:";
 
@@ -73,6 +77,7 @@ public partial class BattleAttackTest : Node
     [Export] public float ShadeTellSeconds { get; set; } = 1.2f;
     [Export] public float SupportSeconds { get; set; } = 1.4f;
     [Export] public float LineSeconds { get; set; } = 2.8f;
+    [Export] public float HecateLineSeconds { get; set; } = 4.5f;
     [Export] public float RageLineSeconds { get; set; } = 1.6f;
     [Export] public float DefeatFadeSeconds { get; set; } = 1.2f;
     [Export] public float DefeatHoldSeconds { get; set; } = 1.5f;
@@ -107,6 +112,12 @@ public partial class BattleAttackTest : Node
     private bool _reluctanceSaid;
     private HudLayoutSet _layouts = null!;
     private readonly Dictionary<string, string> _gestures = new();
+
+    // Vindo do mapa: o encontro, a lição dele e as oferendas do começo (a derrota sem custo as devolve).
+    private Encounter? _encounter;
+    private EncounterLesson? _lesson;
+    private Dictionary<string, int> _offeringsAtStart = new();
+    private bool _leaving;
 
     private BattleFlow _flow = null!;
     private ShadeUnderstanding _understanding = null!;
@@ -234,6 +245,7 @@ public partial class BattleAttackTest : Node
 
     public override void _Ready()
     {
+        _encounter = EncounterTransit.Pending;
         _windows = GestureData.WindowsFromDifficulty(FileAccess.GetFileAsString(DifficultyPath));
         _echoDefinitions = AllEchoes();
         var attack = FileAccess.GetFileAsString(AttackPath);
@@ -288,7 +300,11 @@ public partial class BattleAttackTest : Node
             .Where(f => f.EndsWith(".json", System.StringComparison.Ordinal))
             .SelectMany(f => MemoryData.FromJson(FileAccess.GetFileAsString($"{MemoriesDir}/{f}")))
             .ToList();
-        if (OS.GetCmdlineUserArgs().Contains("--carregar"))
+        if (_encounter is not null)
+        {
+            // A luta de verdade usa o estado como está (os argumentos de conferência são do mapa).
+        }
+        else if (OS.GetCmdlineUserArgs().Contains("--carregar"))
         {
             GD.Print($"carregar: {GameRoot.Instance.Load()}");
         }
@@ -298,7 +314,7 @@ public partial class BattleAttackTest : Node
         }
 
         // Teste: -- --jurar=mao_aberta começa com o juramento ativo (a opção avisa; absorver é perjúrio).
-        if (System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--jurar=")) is { } oathArg)
+        if (_encounter is null && System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--jurar=")) is { } oathArg)
         {
             GD.Print($"jurar: {GameRoot.Instance.Oaths.Swear(oathArg["--jurar=".Length..])}");
         }
@@ -319,12 +335,13 @@ public partial class BattleAttackTest : Node
         _defeatTideSteps = BagData.DefeatTideSteps(difficulty);
         // A Bolsa é a do estado; vazia (o teste aberto direto), recebe a bolsa de teste.
         var inventory = GameRoot.Instance.State.Inventory;
-        if (inventory.Obols == 0 && inventory.Offerings.Values.All(c => c == 0) && inventory.Provisions.Values.All(c => c == 0))
+        if (_encounter is null && inventory.Obols == 0 && inventory.Offerings.Values.All(c => c == 0) && inventory.Provisions.Values.All(c => c == 0))
         {
             BagData.FillFromJson(FileAccess.GetFileAsString(GameRoot.TestBagPath), inventory);
         }
 
         _bag = new BattleBag(inventory, GameRoot.Instance.Provisions);
+        _offeringsAtStart = new Dictionary<string, int>(inventory.Offerings);
         _gestures[_absorbRules.Echo.Gesture] = FileAccess.GetFileAsString($"{GesturesFolder}/{_absorbRules.Echo.Gesture}.json");
         foreach (var gesture in _shadeAttacks.Select(a => a.Gesture).Distinct())
         {
@@ -360,11 +377,29 @@ public partial class BattleAttackTest : Node
         ApplyMarkLook();
         RunBattle();
 
-        if (System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--demo")) is { } demo)
+        if (_encounter is not null)
         {
-            RunDemo(demo["--demo".Length..].TrimStart('='));
+            // --licao joga a lição; --licao=falhar não apara nem esquiva (para ver a derrota sem custo).
+            if (System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--licao")) is { } lesson)
+            {
+                RunDemo(lesson.EndsWith("=falhar") ? "licao_falhar" : "licao");
+            }
+
+            // O --shot do mapa sai quando ele voltar; aqui, só com --shot-at.
+            if (System.Array.Exists(OS.GetCmdlineUserArgs(), a => a.StartsWith("--shot-at=")))
+            {
+                Debug.ScreenshotArgs.Run(this);
+            }
         }
-        Debug.ScreenshotArgs.Run(this);
+        else
+        {
+            if (System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--demo")) is { } demo)
+            {
+                RunDemo(demo["--demo".Length..].TrimStart('='));
+            }
+
+            Debug.ScreenshotArgs.Run(this);
+        }
     }
 
     private BattleActor Protagonist => ActorById(_protagonistStats.Id);
@@ -447,6 +482,7 @@ public partial class BattleAttackTest : Node
     private void NewBattle()
     {
         _understanding = new ShadeUnderstanding();
+        _lesson = _encounter is { IsLesson: true } ? new EncounterLesson(_encounter.Lesson) : null;
         _listening = new ShadeListening(_listenEntries, _murmurKey, _understanding);
         // O intervalo do apoio depende do vínculo, que cresce entre uma luta e outra.
         _support = _companionId is null ? null : GameRoot.Instance.Companions.Support(_companionId);
@@ -497,8 +533,16 @@ public partial class BattleAttackTest : Node
     /// <summary>Conduz a luta passo a passo, como a máquina de turnos manda.</summary>
     private async void RunBattle()
     {
-        while (IsInsideTree())
+        await IntroduceEncounter();
+        while (IsInsideTree() && !_leaving)
         {
+            // Caiu no mesmo golpe que completou a lição: vale a derrota.
+            if (_lesson is { IsComplete: true } && _flow.Phase != BattlePhase.Defeat)
+            {
+                await EndLesson(learned: true);
+                break;
+            }
+
             switch (_flow.Phase)
             {
                 case BattlePhase.PlayerTurn:
@@ -513,8 +557,14 @@ public partial class BattleAttackTest : Node
                     await ShadeTurn();
                     _flow.EndShadeTurn();
                     break;
+                case BattlePhase.Victory when _lesson is not null:
+                    await EndLesson(learned: false);
+                    break;
                 case BattlePhase.Victory:
                     await Victory();
+                    break;
+                case BattlePhase.Defeat when _encounter is { FreeDefeat: true }:
+                    await TutorialDefeat();
                     break;
                 case BattlePhase.Defeat:
                     await Defeat();
@@ -594,6 +644,11 @@ public partial class BattleAttackTest : Node
         }
     }
 
+    /// <summary>Num encontro do tutorial, só as opções já ensinadas aparecem (escolha do João, 31/out/2026).</summary>
+    private List<MenuEntry> Taught(IEnumerable<MenuEntry> entries) => _encounter is null
+        ? entries.ToList()
+        : entries.Where(e => !BattleActions.Menu.Contains(e.Id) || _encounter.Allows(e.Id)).ToList();
+
     private void ShowMainPage()
     {
         _page = MenuPage.Main;
@@ -620,7 +675,7 @@ public partial class BattleAttackTest : Node
         entries.Add(new MenuEntry(BagId, "combate.acao.bolsa",
             Bag.HasAnyProvision ? "combate.acao.bolsa.descricao" : "combate.bolsa.vazia", Available: Bag.HasAnyProvision));
         entries.Add(new MenuEntry(FleeId, "combate.acao.fugir", OathWarning(Via.Flee, "combate.acao.fugir.descricao"), SeparatorBefore: true));
-        _menu.ShowPage(entries, _mainFocus);
+        _menu.ShowPage(Taught(entries), _mainFocus);
     }
 
     /// <summary>
@@ -637,7 +692,7 @@ public partial class BattleAttackTest : Node
         var freeDescription = !_understanding.IsComplete ? "combate.acao.libertar.indisponivel"
             : !Liberation.CanAttempt(_understanding, _flow.Lucidity) ? "combate.acao.libertar.sem_lucidez"
             : OathWarning(Via.Free, "combate.acao.libertar.descricao");
-        _menu.ShowPage(new[]
+        _menu.ShowPage(Taught(new[]
         {
             new MenuEntry(ListenId, "combate.acao.escutar", "combate.acao.escutar.descricao"),
             new MenuEntry(FreeId, "combate.acao.libertar", freeDescription, Available: Liberation.CanAttempt(_understanding, _flow.Lucidity)),
@@ -649,7 +704,7 @@ public partial class BattleAttackTest : Node
                 _flow.Lucidity.Current >= _story.YieldLucidityCost ? OathWarning(Via.Yield, "combate.acao.ceder.descricao") : "combate.acao.ceder.sem_lucidez",
                 Available: _flow.Lucidity.Current >= _story.YieldLucidityCost),
             new MenuEntry(BackId, "combate.acao.voltar", "combate.acao.voltar.descricao", SeparatorBefore: true),
-        }, focus);
+        }), focus);
     }
 
     /// <summary>Escolha da fixação: as opções que a sombra ainda não corrigiu.</summary>
@@ -762,6 +817,8 @@ public partial class BattleAttackTest : Node
             _mainFocus = id;
         }
 
+        Learn(id);
+
         switch (id)
         {
             case AttackId:
@@ -831,6 +888,25 @@ public partial class BattleAttackTest : Node
             default:
                 _hud.SetDescription(T("combate.teste.ainda_nao"));
                 break;
+        }
+    }
+
+    /// <summary>A lição conta a ação escolhida (as que só abrem uma página, como Aproximar, não contam).</summary>
+    private void Learn(string choice)
+    {
+        var action = choice switch
+        {
+            ApproachId or OfferingId or MemoryId or FreeId or EchoId or BagId or BackId or KeepWitnessingId or StopWitnessingId => null,
+            _ when choice.StartsWith(OfferingPrefix) => BattleActions.Offering,
+            _ when choice.StartsWith(ProvisionPrefix) => BattleActions.Bag,
+            _ when choice.StartsWith(MemoryPrefix) => BattleActions.Memory,
+            _ when choice.StartsWith(FixationPrefix) => BattleActions.Free,
+            _ when choice.StartsWith(EchoPrefix) => BattleActions.Echo,
+            _ => choice,
+        };
+        if (action is not null)
+        {
+            _lesson?.Record(action);
         }
     }
 
@@ -1204,6 +1280,8 @@ public partial class BattleAttackTest : Node
                 settings with { BoxWidth = settings.BoxWidth * box, BoxHeight = settings.BoxHeight * box }, pattern.Slowed(slow)));
             await TakeHit(attack, grade);
         }
+
+        _lesson?.Record(attack.Kind == ShadeAttackKind.Direct ? BattleActions.Parry : BattleActions.Dodge);
     }
 
     /// <summary>Dano no Fôlego conforme a defesa (mais forte com a sombra enfurecida); o aparo perfeito não deixa o golpe chegar.</summary>
@@ -1272,6 +1350,13 @@ public partial class BattleAttackTest : Node
         }
 
         await Wait(DefeatHoldSeconds);
+        if (_encounter is not null)
+        {
+            GameRoot.Instance.Encounters.Finish(_encounter.Id);
+            await LeaveBattle();
+            return;
+        }
+
         await Restart();
     }
 
@@ -1319,7 +1404,74 @@ public partial class BattleAttackTest : Node
         }
 
         await ShowLine(T(ShadeNarration.DefeatClue(_story, _defeats)), LineSeconds);
+        if (_encounter is not null)
+        {
+            // Encontro com derrota de verdade: volta ao mapa (acordar na Trívia vem com a cena da derrota, PENDÊNCIA 73).
+            await LeaveBattle();
+            return;
+        }
+
         await Restart();
+    }
+
+    /// <summary>
+    /// Derrota num encontro do tutorial (escolha do João, 31/out/2026): sem custo. Hécate diz uma linha e a luta
+    /// recomeça descansada, com as oferendas que havia no começo.
+    /// </summary>
+    private async Task TutorialDefeat()
+    {
+        _hud.SetTurn(null, shadeTurn: false);
+        await Protagonist.PlayDefeat();
+        await _hud.Fade(toBlack: true, DefeatFadeSeconds);
+        GameRoot.Instance.Healing.Rest();
+        var offerings = GameRoot.Instance.State.Inventory.Offerings;
+        offerings.Clear();
+        foreach (var (kind, count) in _offeringsAtStart)
+        {
+            offerings[kind] = count;
+        }
+
+        await ShowLine(T("combate.derrota.tutorial"), LineSeconds);
+        await Restart();
+        await IntroduceEncounter();
+    }
+
+    /// <summary>A linha de Hécate do encontro, na legenda, antes da primeira vez do jogador.</summary>
+    private async Task IntroduceEncounter()
+    {
+        if (_encounter is not null)
+        {
+            await ShowLine(T(_encounter.HecateKey), HecateLineSeconds);
+        }
+    }
+
+    /// <summary>
+    /// Fim de um encontro do tutorial. Cumprida a lição, a sombra recua mais para dentro: o encontro termina e ela espera
+    /// no próximo ponto. Se a Firmeza dela quebrou antes, ela se desfaz e volta a se juntar no mesmo lugar (o encontro
+    /// continua esperando).
+    /// </summary>
+    private async Task EndLesson(bool learned)
+    {
+        _hud.SetTurn(null, shadeTurn: false);
+        _hud.SetTargetMarked(false);
+        _hud.SetCaption(T(learned ? _encounter!.WithdrawKey! : "encontro.licao.incompleta"));
+        await Shade.PlayDepart();
+        await Wait(LineSeconds);
+        KeepVitals();
+        if (learned)
+        {
+            GameRoot.Instance.Encounters.Finish(_encounter!.Id);
+        }
+
+        await LeaveBattle();
+    }
+
+    /// <summary>Volta ao mapa, no lugar de onde veio (o Main recoloca o jogador).</summary>
+    private async Task LeaveBattle()
+    {
+        _leaving = true;
+        await _hud.Fade(toBlack: true, DefeatFadeSeconds);
+        EncounterTransit.Return(GetTree());
     }
 
     /// <summary>
@@ -1522,8 +1674,10 @@ public partial class BattleAttackTest : Node
     private async void RunDemo(string mode)
     {
         var vias = mode == "vias";
+        var missDefense = mode == "licao_falhar";
         // --demo=absorver: sem roteiro (absorve assim que der; use com --firmeza=25).
-        var script = vias ? ViasScript() : mode == "absorver" ? new Queue<string[]>() : new Queue<string[]>(new[]
+        var script = vias ? ViasScript() : mode == "absorver" ? new Queue<string[]>()
+            : _lesson is not null ? LessonScript() : new Queue<string[]>(new[]
         {
             new[] { ApproachId, ListenId },
             new[] { ApproachId, ListenId },
@@ -1555,7 +1709,7 @@ public partial class BattleAttackTest : Node
                     await Choose(choice);
                 }
             }
-            else if (_ring.IsRunning)
+            else if (_ring.IsRunning && !(missDefense && _flow.Phase == BattlePhase.ShadeTurn))
             {
                 await PressRingAt(0.02f, _ring.Timing);
             }
@@ -1589,6 +1743,16 @@ public partial class BattleAttackTest : Node
             }
         }
     }
+
+    /// <summary><c>-- --licao</c>: o que a lição do encontro pede (as defesas acontecem na vez da sombra).</summary>
+    private Queue<string[]> LessonScript() => new(_lesson!.Left.Select(step => step switch
+    {
+        BattleActions.Attack => new[] { AttackId },
+        BattleActions.Listen => new[] { ApproachId, ListenId },
+        BattleActions.Offering => new[] { ApproachId, OfferingId, OfferingPrefix + _encounter!.NeedsOffering },
+        BattleActions.Witness => new[] { ApproachId, WitnessId },
+        _ => null,
+    }).OfType<string[]>());
 
     /// <summary>Uma luta por via nova, nesta ordem.</summary>
     private static Queue<string[]> ViasScript() => new(new[]

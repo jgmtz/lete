@@ -116,6 +116,10 @@ Incluir desde o início um **painel de debug** (tecla dedicada) para editar Marc
 
 Cada região é um arquivo `content/regions/<id>.json` (`id`, `name_key`, `scene`, `entry`) e uma cena do Godot (`src/Lete.Game/Regions/`; a sala de teste continua em `World/TestRoom.tscn`). A cena de região traz o cenário, o `Player`, o `CameraRig` e os marcadores (`Marker3D` no grupo `teleport_points`). O `Main` instancia a região pelo id: a da chegada pendente, a de `-- --regiao=`, a do estado ou a de começo (`StartRegion` = `tenaro`; as conferências da linha de comando abrem a sala de teste). Uma `RegionExit` (Area3D com `TargetRegion` e `TargetEntry`) recarrega a cena na região de destino; ao chegar, `GameRoot.ChangeRegion` salva (salvar só em Trívias e ao trocar de região). Carregar um save de outra região reabre a cena nela, sem salvar. Blockouts gerados por `tools/blockout_regioes.py`.
 
+## 6.2 Encontros: do mapa para a luta (31/out/2026)
+
+Uma sombra de encontro no mapa é um `ShadeEncounter` (Area3D com `EncounterId`, de `content/encounters`), visível só enquanto o encontro está disponível (`Systems/Encounters`: o anterior terminou e ele não). Chegar perto (com a oferenda pedida, se houver) faz o `Main` guardar a volta (região e posição, um pouco afastada da sombra) e trocar para a cena da batalha pelo `EncounterTransit`. A batalha lê o encontro: a configuração do palco (`battle`), a linha de Hécate, o menu filtrado (`actions`) e a lição (`Combat/EncounterLesson`, que conta as opções escolhidas e as defesas). Lição cumprida, luta acabada ou derrota de verdade: `EncounterTransit.Return` volta ao `Main`, que recoloca o jogador. Ir para a luta não salva. Os ids das opções do menu ficam em `Combat/BattleActions` (Core), os mesmos que o conteúdo cita.
+
 ## 7. Localização e gênero
 
 - **Nenhum texto fixo no código.** Toda fala e rótulo usa **chave de localização** (`dlg.padeiro.vago.escutar`). Português do Brasil primeiro; inglês opcional depois.
